@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/master-layout}"> <head>
+    <title>Đăng Ký - Logistic</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>Đăng Ký</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/auth/register}" method="post">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Họ và tên</label>
+                                <input type="text" name="fullName" class="form-control" placeholder="Nhập họ tên..." required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mật khẩu</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Đăng Ký Ngay</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <small>Đã có tài khoản? <a th:href="@{/auth/login}">Đăng nhập</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

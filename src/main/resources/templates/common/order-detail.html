@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/master-layout}">
+<head>
+    <title>Chi Tiết Đơn Hàng</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container py-4">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 mb-0">Chi tiết đơn hàng #ORD-9981</h2>
+            <div>
+                <a href="#" class="btn btn-outline-secondary me-2"><i class="fas fa-print me-1"></i> In vận đơn</a>
+                <a href="#" class="btn btn-primary"><i class="fas fa-edit me-1"></i> Chỉnh sửa</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light fw-bold">Thông tin vận chuyển</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <h6 class="text-primary fw-bold"><i class="fas fa-user-circle me-2"></i>Người Gửi</h6>
+                                <p class="mb-1 fw-bold">Nguyễn Văn A</p>
+                                <p class="mb-1 small">0912.345.678</p>
+                                <p class="mb-0 small text-muted">Số 1, Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+                            </div>
+                            <div class="col-md-6 ps-md-4">
+                                <h6 class="text-success fw-bold"><i class="fas fa-map-marker-alt me-2"></i>Người Nhận</h6>
+                                <p class="mb-1 fw-bold">Trần Thị B</p>
+                                <p class="mb-1 small">0988.765.432</p>
+                                <p class="mb-0 small text-muted">Số 10, Đường Lê Lợi, Quận Hải Châu, Đà Nẵng</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light fw-bold">Danh sách hàng hóa</div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Loại hàng</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Khối lượng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tủ lạnh Samsung Inverter</td>
+                                    <td>Điện tử / Dễ vỡ</td>
+                                    <td class="text-center">1</td>
+                                    <td class="text-end">80 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Máy giặt LG</td>
+                                    <td>Điện tử</td>
+                                    <td class="text-center">1</td>
+                                    <td class="text-end">65 kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light fw-bold">Trạng thái vận chuyển chi tiết</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã kiện</th>
+                                        <th>Trạng thái</th>
+                                        <th>Vị trí hiện tại</th>
+                                        <th>Xe / Tài xế</th>
+                                        <th>Cập nhật lúc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>PKG-001</td>
+                                        <td><span class="badge bg-warning text-dark">Đang di chuyển</span></td>
+                                        <td>QL1A - Thanh Hóa</td>
+                                        <td>29C-123.45 (Tài xế Lái)</td>
+                                        <td>10:30 AM</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light fw-bold">Thanh toán</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí vận chuyển:</span>
+                            <span class="fw-bold">500.000 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí thu hộ (COD):</span>
+                            <span class="fw-bold text-danger">2.000.000 đ</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Tổng thanh toán:</h6>
+                            <h5 class="fw-bold text-primary mb-0">2.500.000 đ</h5>
+                        </div>
+                        <div class="alert alert-success text-center py-2 mb-0">
+                            <i class="fas fa-check-circle me-1"></i> Đã thanh toán phí vận chuyển
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light fw-bold">Lịch sử thanh toán</div>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><i class="fas fa-credit-card me-2"></i>Momo (Cọc)</span>
+                            <span class="fw-bold">500.000 đ</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

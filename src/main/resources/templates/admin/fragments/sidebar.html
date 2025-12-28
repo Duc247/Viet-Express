@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse py-3 border-end" style="min-height: 100vh;">
+        <div class="position-sticky pt-3">
+            <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase">
+                <span>Quản lý chính</span>
+            </h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" 
+                       th:classappend="${requestURI == '/admin/dashboard' ? 'active fw-bold text-primary' : ''}"
+                       href="/admin/dashboard">
+                        <i class="fas fa-home me-2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" 
+                       th:classappend="${requestURI == '/admin/users' ? 'active fw-bold text-primary' : ''}"
+                       href="/admin/users">
+                        <i class="fas fa-users me-2"></i> Quản lý Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" 
+                       th:classappend="${requestURI == '/admin/vehicles' ? 'active fw-bold text-primary' : ''}"
+                       href="/admin/vehicles">
+                        <i class="fas fa-truck-moving me-2"></i> Quản lý Phương tiện
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                       th:classappend="${requestURI == '/admin/orders' ? 'active fw-bold text-primary' : ''}"
+                       href="/admin/orders">
+                        <i class="fas fa-box me-2"></i> Đơn hàng
+                    </a>
+                </li>
+                
+                <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase">
+                    <span>Hệ thống</span>
+                </h6>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" 
+                       th:classappend="${requestURI == '/admin/system-config' ? 'active fw-bold text-primary' : ''}"
+                       href="/admin/system-config">
+                        <i class="fas fa-cogs me-2"></i> Cấu hình
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" 
+                       href="/admin/audit-log"
+                       th:classappend="${requestURI == '/admin/audit-log' ? 'active fw-bold text-primary' : ''}">
+                        <i class="fas fa-history me-2"></i> Nhật ký hoạt động
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</body>
+</html>

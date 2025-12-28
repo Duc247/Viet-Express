@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/master-layout}">
+<head>
+    <title>Tra Cứu Vận Đơn</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container py-5">
+        
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8 text-center">
+                <h2 class="fw-bold mb-4">Tra Cứu Trạng Thái Đơn Hàng</h2>
+                <form action="/tracking" method="get" class="card shadow-sm p-2 border-0">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="code" class="form-control border-0" placeholder="Nhập mã vận đơn (VD: ORD-12345)..." required>
+                        <button class="btn btn-primary px-4 fw-bold rounded" type="submit">TRA CỨU</button>
+                    </div>
+                </form>
+                <div class="mt-2 text-muted small">
+                    Tra cứu nhanh nhiều đơn hàng? <a href="#">Đăng nhập ngay</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow border-0 mb-4">
+            <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-box me-2"></i>Vận đơn: #ORD-9981</h5>
+                <span class="badge bg-warning text-dark">Đang vận chuyển</span>
+            </div>
+            <div class="card-body p-4">
+                
+                <div class="row g-4 mb-4 border-bottom pb-4">
+                    <div class="col-md-4">
+                        <small class="text-muted text-uppercase fw-bold">Người gửi</small>
+                        <h6 class="mb-0 mt-1">Nguyễn Văn A</h6>
+                        <small class="text-muted">Hà Nội</small>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted text-uppercase fw-bold">Người nhận</small>
+                        <h6 class="mb-0 mt-1">Trần Thị B</h6>
+                        <small class="text-muted">Đà Nẵng</small>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted text-uppercase fw-bold">Dự kiến giao</small>
+                        <h6 class="mb-0 mt-1 text-success">29/12/2025</h6>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3">Hành trình đơn hàng</h6>
+                <div class="position-relative ps-4 border-start border-2 ms-2">
+                    <div class="mb-4 position-relative">
+                        <div class="position-absolute top-0 start-0 translate-middle ms-0 bg-primary rounded-circle border border-white" style="width: 16px; height: 16px; left: -17px !important;"></div>
+                        <p class="mb-0 fw-bold text-dark">Đã rời kho trung chuyển Hà Nội</p>
+                        <small class="text-muted">28/12/2025 - 08:30</small>
+                    </div>
+                    <div class="mb-4 position-relative">
+                        <div class="position-absolute top-0 start-0 translate-middle ms-0 bg-secondary rounded-circle border border-white" style="width: 16px; height: 16px; left: -17px !important;"></div>
+                        <p class="mb-0 fw-bold text-muted">Đã lấy hàng thành công</p>
+                        <small class="text-muted">27/12/2025 - 14:00</small>
+                    </div>
+                    <div class="position-relative">
+                        <div class="position-absolute top-0 start-0 translate-middle ms-0 bg-secondary rounded-circle border border-white" style="width: 16px; height: 16px; left: -17px !important;"></div>
+                        <p class="mb-0 fw-bold text-muted">Đơn hàng được khởi tạo</p>
+                        <small class="text-muted">27/12/2025 - 10:00</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

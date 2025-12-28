@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin}"> <head>
+    <title>Quản Lý Phương Tiện</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Danh sách phương tiện</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button type="button" class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#vehicleModal">
+                <i class="fas fa-plus me-1"></i> Thêm xe mới
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-2">
+            <form class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <select class="form-select form-select-sm">
+                        <option selected>Tất cả loại xe</option>
+                        <option value="TRUCK">Xe Tải</option>
+                        <option value="VAN">Xe Van</option>
+                        <option value="CONTAINER">Container</option>
+                        <option value="BIKE">Xe Máy</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select form-select-sm">
+                        <option selected>Trạng thái</option>
+                        <option value="AVAILABLE">Sẵn sàng</option>
+                        <option value="BUSY">Đang giao hàng</option>
+                        <option value="MAINTENANCE">Bảo trì</option>
+                    </select>
+                </div>
+                <div class="col-auto flex-grow-1">
+                    <input type="text" class="form-control form-control-sm" placeholder="Tìm theo biển số xe...">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-sm btn-secondary"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body px-0 pt-0 pb-2">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Biển số</th>
+                            <th>Loại xe</th>
+                            <th>Tải trọng (Max Weight)</th>
+                            <th>Thể tích (Max Volume)</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="text-center text-muted">
+                            <td colspan="6" class="py-5">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block opacity-50"></i>
+                                Chưa có phương tiện nào trong hệ thống
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="vehicleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Thông tin phương tiện</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Biển số xe <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control text-uppercase" placeholder="VD: 29C-12345" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Loại xe</label>
+                                <select class="form-select">
+                                    <option value="TRUCK_1T">Xe Tải 1 Tấn</option>
+                                    <option value="TRUCK_5T">Xe Tải 5 Tấn</option>
+                                    <option value="VAN">Xe Van</option>
+                                    <option value="MOTORBIKE">Xe Máy</option>
+                                    <option value="CONTAINER">Container</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tải trọng tối đa (kg)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" placeholder="0" min="0">
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Thể tích thùng (m³)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" placeholder="0" step="0.1" min="0">
+                                    <span class="input-group-text">m³</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Tài xế phụ trách (Tùy chọn)</label>
+                                <select class="form-select">
+                                    <option selected value="">-- Chưa gán tài xế --</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Trạng thái hiện tại</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" id="st1" checked>
+                                        <label class="form-check-label text-success" for="st1">Sẵn sàng</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" id="st2">
+                                        <label class="form-check-label text-warning" for="st2">Bảo trì</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary">Lưu thông tin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

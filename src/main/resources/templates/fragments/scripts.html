@@ -1,0 +1,9 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="scripts">
+    <th:block th:replace="~{fragments/libraries :: js-libs}"></th:block>
+    
+    <script th:src="@{/js/main.js}"></script>
+</th:block>
+</html>

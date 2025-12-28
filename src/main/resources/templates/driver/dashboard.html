@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{driver/layout-driver}">
+<head>
+    <title>Tổng Quan - Driver</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Xin chào, Bác tài!</h1>
+        <div class="badge bg-success p-2">Trạng thái: Đang hoạt động</div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card bg-primary text-white shadow-sm h-100">
+                <div class="card-body p-3">
+                    <h6 class="text-white-50 small text-uppercase">Nhiệm vụ hôm nay</h6>
+                    <h2 class="fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card bg-success text-white shadow-sm h-100">
+                <div class="card-body p-3">
+                    <h6 class="text-white-50 small text-uppercase">Đã giao xong</h6>
+                    <h2 class="fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card bg-warning text-dark shadow-sm h-100">
+                <div class="card-body p-3">
+                    <h6 class="text-dark-50 small text-uppercase">COD đang giữ</h6>
+                    <h3 class="fw-bold mb-0">0 đ</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card bg-info text-white shadow-sm h-100">
+                <div class="card-body p-3">
+                    <h6 class="text-white-50 small text-uppercase">Km trong ngày</h6>
+                    <h3 class="fw-bold mb-0">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow border-start border-primary border-4 mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-truck-moving me-2"></i>Chuyến xe đang thực hiện</h6>
+            <span class="badge bg-secondary">Chờ lệnh</span>
+        </div>
+        <div class="card-body text-center py-4">
+            <i class="fas fa-road fa-3x text-muted mb-3 opacity-25"></i>
+            <p class="text-muted mb-0">Hiện chưa có chuyến xe nào đang chạy.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="m-0 fw-bold"><i class="fas fa-bell me-2"></i>Thông báo từ điều hành</h6>
+        </div>
+        <div class="list-group list-group-flush">
+            <div class="list-group-item text-center text-muted fst-italic">
+                Không có thông báo mới.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin}">
+<head>
+    <title>Tổng Quan Hệ Thống</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h1 class="h2 border-bottom pb-2 mb-3">Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h5>Đơn hàng mới</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h5>Doanh thu hôm nay</h5>
+                    <h2>0 đ</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <h5>Người dùng mới</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <h5>Cảnh báo lỗi</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
