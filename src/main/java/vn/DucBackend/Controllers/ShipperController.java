@@ -13,7 +13,7 @@ import vn.DucBackend.Repositories.*;
  * Shipper Controller - Xử lý các trang dành cho tài xế (driver)
  */
 @Controller
-@RequestMapping("/driver")
+@RequestMapping("/shipper")
 public class ShipperController {
 
     @Autowired
@@ -38,24 +38,24 @@ public class ShipperController {
         // TODO: Lọc theo shipper đang đăng nhập
         model.addAttribute("totalTrips", tripRepository.count());
         model.addAttribute("activeTrips", tripRepository.findAll()); // TODO: lọc IN_PROGRESS
-        return "driver/dashboard";
+        return "shipper/dashboard";
     }
 
     // ==========================================
     // CHUYẾN XE HIỆN TẠI
     // ==========================================
-    @GetMapping("/shipments")
-    public String myShipments(Model model, HttpServletRequest request) {
+    @GetMapping("/trips")
+    public String myTrips(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         // TODO: Lọc theo shipper đang đăng nhập
         model.addAttribute("trips", tripRepository.findAll());
-        return "driver/trip/list";
+        return "shipper/trip/list";
     }
 
-    @GetMapping("/shipment-detail")
-    public String shipmentDetail(Model model, HttpServletRequest request) {
+    @GetMapping("/trip-detail")
+    public String tripDetail(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        return "driver/trip/detail";
+        return "shipper/trip/detail";
     }
 
     // ==========================================
@@ -66,7 +66,7 @@ public class ShipperController {
         addCommonAttributes(model, request);
         // TODO: Lọc theo shipper và status = COMPLETED
         model.addAttribute("completedTrips", tripRepository.findAll());
-        return "driver/history";
+        return "shipper/history";
     }
 
     // ==========================================
@@ -76,6 +76,6 @@ public class ShipperController {
     public String updateLocation(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("locations", locationRepository.findAll());
-        return "driver/location";
+        return "shipper/location";
     }
 }

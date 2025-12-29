@@ -66,13 +66,13 @@ public class ManagerController {
     // ==========================================
     // LẬP KẾ HOẠCH
     // ==========================================
-    @GetMapping("/planning")
-    public String shipmentPlanning(Model model, HttpServletRequest request) {
+    @GetMapping("/trip-planning")
+    public String tripPlanning(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("trips", tripRepository.findAll());
         model.addAttribute("shippers", shipperRepository.findAll());
         model.addAttribute("vehicles", vehicleRepository.findAll());
-        return "manager/planning/planning";
+        return "manager/planning/trip-planning";
     }
 
     // ==========================================

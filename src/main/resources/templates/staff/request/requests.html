@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{staff/layout-staff}">
+
+<head>
+    <title>Tiếp Nhận Yêu Cầu - Staff</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Yêu cầu từ khách hàng</h1>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-2">
+                <ul class="nav nav-pills nav-fill">
+                    <li class="nav-item"><a class="nav-link active" href="#">Mới gửi (0)</a></li>
+                    <li class="nav-item"><a class="nav-link text-success" href="#">Đã chốt đơn</a></li>
+                    <li class="nav-item"><a class="nav-link text-secondary" href="#">Đã từ chối</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Khách hàng</th>
+                                <th>Hàng hóa</th>
+                                <th>Lộ trình (Dự kiến)</th>
+                                <th>Thời gian gửi</th>
+                                <th class="text-end pe-4">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center text-muted">
+                                <td colspan="5" class="py-5">
+                                    <i class="fas fa-clipboard-check fa-3x mb-3 d-block opacity-50"></i>
+                                    Không có yêu cầu mới nào
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="processModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold">Tạo đơn hàng & Báo giá</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="alert alert-light border mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Thông tin yêu cầu sẽ hiện tại đây...
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Chi phí báo giá (VNĐ)</label>
+                                    <input type="number" class="form-control" placeholder="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Dự kiến ngày giao</label>
+                                    <input type="date" class="form-control">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-success fw-bold">Duyệt & Tạo Đơn</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
