@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.DucBackend.Entities.Staff;
+import vn.DucBackend.Entities.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +27,13 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
     List<Staff> searchByKeyword(@Param("keyword") String keyword);
 
     boolean existsByUserId(Long userId);
+
+    // update
+    @Query("UPDATE Staff s SET s.fullName = :fullName, s.phone = :phone, s.location.id = :locationId, s.updatedAt = :updatedAt WHERE s.user = :user")
+    int updateStaff(@Param("user") User user, @Param("fullName") String fullName, @Param("phone") String phone,
+            @Param("locationId") Long locationId, @Param("updatedAt") LocalDateTime updatedAt);
+
+    // delete
+    @Query("DELETE FROM Staff s WHERE s.user = :user")
+    int deleteByUser(@Param("user") User user);
 }

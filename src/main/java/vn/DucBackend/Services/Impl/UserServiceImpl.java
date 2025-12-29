@@ -125,7 +125,6 @@ public class UserServiceImpl implements UserService {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setRoleId(user.getRole().getId());
-        dto.setRoleName(user.getRole().getRoleName());
         dto.setIsActive(user.getIsActive());
         dto.setLastLoginAt(user.getLastLoginAt());
         dto.setCreatedAt(user.getCreatedAt());
