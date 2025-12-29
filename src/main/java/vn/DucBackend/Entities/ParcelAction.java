@@ -18,7 +18,11 @@ public class ParcelAction {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_id", nullable = false)
+    @JoinColumn(name = "parcel_id")
+    private Parcel parcel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
     private CustomerRequest request;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,20 +30,25 @@ public class ParcelAction {
     private ActionType actionType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_warehouse_id")
-    private Warehouse fromWarehouse;
+    @JoinColumn(name = "from_location_id")
+    private Location fromLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_warehouse_id")
-    private Warehouse toWarehouse;
+    @JoinColumn(name = "to_location_id")
+    private Location toLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_user_id")
     private User actorUser;
 
-    @Column(name = "action_time")
-    private LocalDateTime actionTime;
-
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

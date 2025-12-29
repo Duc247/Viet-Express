@@ -1,30 +1,26 @@
 package vn.DucBackend.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * DTO cho Trip entity
- */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class TripDTO {
     private Long id;
+    private Long shipperId;
+    private String shipperName;
     private Long vehicleId;
     private String vehicleLicensePlate;
-    private Long driverShipperId;
-    private String driverShipperName;
-    private Long fromWarehouseId;
-    private String fromWarehouseName;
-    private Long toWarehouseId;
-    private String toWarehouseName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String status; // TripStatus: READY, DELIVERING, COMPLETED
+    private String tripType;
+    private Long startLocationId;
+    private String startLocationName;
+    private Long endLocationId;
+    private String endLocationName;
+    private String status;
+    private LocalDateTime startedAt;
+    private LocalDateTime endedAt;
+    private BigDecimal codAmount;
+    private String note;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

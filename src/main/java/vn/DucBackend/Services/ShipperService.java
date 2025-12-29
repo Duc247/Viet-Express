@@ -1,58 +1,41 @@
 package vn.DucBackend.Services;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import vn.DucBackend.DTO.ShipperDTO;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service interface cho Shipper - Quản lý nhân viên giao hàng
- */
 public interface ShipperService {
 
-    // ==================== TẠO / CẬP NHẬT ====================
+    List<ShipperDTO> findAllShippers();
 
-    /** Tạo shipper profile mới */
-    ShipperDTO createShipper(ShipperDTO shipperDTO);
+    List<ShipperDTO> findActiveShippers();
 
-    /** Cập nhật thông tin shipper */
-    ShipperDTO updateShipper(Long id, ShipperDTO shipperDTO);
+    List<ShipperDTO> findAvailableShippers();
 
-    /** Cập nhật trạng thái shipper (AVAILABLE, ON_TRIP, OFF_DUTY) */
-    ShipperDTO updateStatus(Long id, String status);
+    Optional<ShipperDTO> findShipperById(Long id);
 
-    // ==================== TÌM KIẾM ====================
-
-    /** Tìm shipper theo ID */
-    Optional<ShipperDTO> findById(Long id);
-
-    /** Tìm shipper theo user ID */
     Optional<ShipperDTO> findByUserId(Long userId);
 
-    /** Kiểm tra user đã có shipper profile chưa */
-    boolean existsByUserId(Long userId);
+    List<ShipperDTO> findByWorkingArea(String area);
 
-    // ==================== DANH SÁCH ====================
+    List<ShipperDTO> findAvailableShippersByArea(String area);
 
-    /** Lấy tất cả shippers */
-    Page<ShipperDTO> findAll(Pageable pageable);
+    List<ShipperDTO> searchShippers(String keyword);
 
-    /** Lấy shippers theo trạng thái */
-    Page<ShipperDTO> findAllByStatus(String status, Pageable pageable);
+    ShipperDTO createShipper(ShipperDTO dto);
 
-    /** Lấy shippers theo kho */
-    Page<ShipperDTO> findAllByWarehouseId(Long warehouseId, Pageable pageable);
+    ShipperDTO updateShipper(Long id, ShipperDTO dto);
 
-    /** Lấy shippers available trong kho - dùng để phân công */
-    List<ShipperDTO> findAvailableByWarehouseId(Long warehouseId);
+    ShipperDTO updateShipperAvailability(Long id, Boolean isAvailable);
 
-    // ==================== THỐNG KÊ ====================
+    ShipperDTO updateShipperLocation(Long id, Long locationId);
 
-    /** Đếm shipper theo trạng thái */
-    Long countByStatus(String status);
+    ShipperDTO assignTripToShipper(Long shipperId, Long tripId);
 
-    /** Đếm shipper trong kho */
-    Long countByWarehouseId(Long warehouseId);
+    ShipperDTO clearCurrentTrip(Long shipperId);
+
+    void deleteShipper(Long id);
+
+    void toggleShipperStatus(Long id);
 }

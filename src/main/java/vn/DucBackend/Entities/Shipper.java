@@ -12,10 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 public class Shipper {
 
-    public enum ShipperStatus {
-        AVAILABLE, ON_TRIP, OFF_DUTY
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "shipper_id")
@@ -25,14 +21,49 @@ public class Shipper {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "working_area")
+    private String workingArea;
+
+    @Column(name = "is_available")
+    private Boolean isAvailable;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warehouse_id")
-    private Warehouse warehouse;
+    @JoinColumn(name = "current_location_id")
+    private Location currentLocation;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20)
-    private ShipperStatus status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_trip_id")
+    private Trip currentTrip;
 
-    @Column(name = "joined_at")
-    private LocalDateTime joinedAt;
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (isActive == null) {
+            isActive = true;
+        }
+        if (isAvailable == null) {
+            isAvailable = true;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

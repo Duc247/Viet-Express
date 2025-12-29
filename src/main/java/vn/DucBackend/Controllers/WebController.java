@@ -86,51 +86,8 @@ public class WebController {
     }
 
     // =========================================================================
-    // 4. NHÓM ADMIN (Quản trị)
+    // 4. NHÓM ADMIN - Đã chuyển sang AdminController.java
     // =========================================================================
-
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "admin/dashboard";
-    }
-
-    @GetMapping("/admin/users")
-    public String adminUserList() {
-        // Trỏ vào thư mục con: templates/admin/user/users.html
-        return "admin/user/users";
-    }
-
-    @GetMapping("/admin/vehicles")
-    public String vehicleListPage() {
-        // Trỏ vào thư mục con: templates/admin/vehicle/vehicles.html
-        return "admin/vehicle/vehicles";
-    }
-
-    @GetMapping("/admin/orders")
-    public String adminOrdersPage() {
-        // Trỏ vào thư mục con: templates/admin/order/orders.html
-        return "admin/order/orders";
-    }
-
-    // --- CẤU HÌNH ---
-    @GetMapping("/admin/system-config")
-    public String systemConfigPage() {
-        // Trỏ vào thư mục con: templates/admin/config/system-config.html
-        return "admin/config/system-config";
-    }
-
-    @PostMapping("/admin/system-config")
-    public String saveSystemConfig() {
-        System.out.println("Đã lưu cấu hình hệ thống!");
-        return "redirect:/admin/system-config?success=true";
-    }
-
-    // --- NHẬT KÝ ---
-    @GetMapping("/admin/audit-log")
-    public String auditLogPage() {
-        // Trỏ vào thư mục con: templates/admin/log/audit-log.html
-        return "admin/log/audit-log";
-    }
 
     // =========================================================================
     // 5. KHU VỰC MANAGER (Quản lý)

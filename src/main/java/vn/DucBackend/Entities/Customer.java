@@ -12,38 +12,41 @@ import java.time.LocalDateTime;
 @Setter
 public class Customer {
 
-    public enum CustomerType {
-        INDIVIDUAL, BUSINESS
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "customer_type", length = 20)
-    private CustomerType customerType;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "business_name")
-    private String businessName;
-
-    @Column(name = "tax_code")
-    private String taxCode;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "phone")
+    @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(name = "company_name")
+    private String companyName;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

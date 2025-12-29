@@ -12,24 +12,49 @@ import java.time.LocalDateTime;
 @Setter
 public class SystemLog {
 
+    public enum LogLevel {
+        INFO, WARN, ERROR
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "log_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "log_level", nullable = false, length = 10)
+    private LogLevel logLevel;
+
+    @Column(name = "module_name", length = 50)
+    private String moduleName;
+
+    @Column(name = "action_type", length = 100)
+    private String actionType;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "actor_id")
+    private User actor;
 
-    @Column(name = "action")
-    private String action;
+    @Column(name = "target_id")
+    private String targetId;
 
-    @Column(name = "object_type")
-    private String objectType;
+    @Column(name = "log_details", columnDefinition = "TEXT")
+    private String logDetails;
 
-    @Column(name = "object_id")
-    private Long objectId;
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
 
-    @Column(name = "log_time")
-    private LocalDateTime logTime;
+    @Column(name = "user_agent", columnDefinition = "TEXT")
+    private String userAgent;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (logLevel == null) {
+            logLevel = LogLevel.INFO;
+        }
+    }
 }

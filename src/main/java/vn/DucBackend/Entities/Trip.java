@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,8 +13,12 @@ import java.time.LocalDateTime;
 @Setter
 public class Trip {
 
+    public enum TripType {
+        PICKUP, DELIVERY, TRANSFER, RETURN
+    }
+
     public enum TripStatus {
-        READY, DELIVERING, COMPLETED
+        CREATED, IN_PROGRESS, COMPLETED, CANCELLED
     }
 
     @Id
@@ -22,28 +27,58 @@ public class Trip {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipper_id")
+    private Shipper shipper;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "driver_shipper_id")
-    private Shipper driverShipper;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trip_type", nullable = false, length = 20)
+    private TripType tripType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_warehouse_id", nullable = false)
-    private Warehouse fromWarehouse;
+    @JoinColumn(name = "start_location_id", nullable = false)
+    private Location startLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_warehouse_id", nullable = false)
-    private Warehouse toWarehouse;
-
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
+    @JoinColumn(name = "end_location_id", nullable = false)
+    private Location endLocation;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private TripStatus status;
+
+    @Column(name = "started_at")
+    private LocalDateTime startedAt;
+
+    @Column(name = "ended_at")
+    private LocalDateTime endedAt;
+
+    @Column(name = "cod_amount", precision = 15, scale = 2)
+    private BigDecimal codAmount;
+
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (status == null) {
+            status = TripStatus.CREATED;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

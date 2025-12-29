@@ -1,24 +1,19 @@
 package vn.DucBackend.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-/**
- * DTO cho Vehicle entity
- */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class VehicleDTO {
     private Long id;
+    private String vehicleType;
     private String licensePlate;
-    private String type;
-    private BigDecimal maxWeight;
-    private BigDecimal maxVolume;
-    private String status; // VehicleStatus: AVAILABLE, ON_TRIP, MAINTENANCE
+    private BigDecimal capacityWeight;
+    private BigDecimal capacityVolume;
+    private String status;
+    private Long currentLocationId;
+    private String currentLocationName;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

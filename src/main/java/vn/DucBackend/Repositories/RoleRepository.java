@@ -1,30 +1,23 @@
 package vn.DucBackend.Repositories;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import vn.DucBackend.Entities.Role;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import vn.DucBackend.Entities.Role;
-
-/**
- * Repository cho Role entity - Quản lý vai trò người dùng
- * Phục vụ phân quyền trong hệ thống logistics
- */
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
-    // ==================== TÌM KIẾM THEO TÊN ROLE ====================
-    
-    /** Tìm role theo roleName - dùng khi gán quyền cho user */
     Optional<Role> findByRoleName(String roleName);
-    
-    /** Kiểm tra roleName đã tồn tại - dùng khi tạo role mới */
-    Boolean existsByRoleName(String roleName);
-    
-    // ==================== LỌC THEO TRẠNG THÁI ====================
-    
-    /** Lấy danh sách role theo trạng thái */
-    List<Role> findAllByStatus(Boolean status);
+
+    List<Role> findByIsActiveTrue();
+
+    @Query("SELECT r FROM Role r WHERE r.roleName IN :names")
+    List<Role> findByRoleNameIn(@Param("names") List<String> names);
+
+    boolean existsByRoleName(String roleName);
 }

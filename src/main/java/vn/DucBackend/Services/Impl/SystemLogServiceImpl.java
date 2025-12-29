@@ -1,8 +1,6 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.SystemLogDTO;
@@ -13,109 +11,134 @@ import vn.DucBackend.Services.SystemLogService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementation của SystemLogService
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class SystemLogServiceImpl implements SystemLogService {
 
-    private final SystemLogRepository systemLogRepository;
+    private final SystemLogRepository logRepository;
     private final UserRepository userRepository;
 
-    // ==================== CONVERTER ====================
-
-    private SystemLogDTO toDTO(SystemLog log) {
-        return SystemLogDTO.builder()
-                .id(log.getId())
-                .userId(log.getUser() != null ? log.getUser().getId() : null)
-                .userName(log.getUser() != null ? log.getUser().getFullName() : null)
-                .action(log.getAction())
-                .objectType(log.getObjectType())
-                .objectId(log.getObjectId())
-                .logTime(log.getLogTime())
-                .build();
-    }
-
-    // ==================== GHI LOG ====================
-
     @Override
-    public SystemLogDTO log(Long userId, String action, String objectType, Long objectId) {
-        SystemLog log = new SystemLog();
-
-        if (userId != null) {
-            userRepository.findById(userId).ifPresent(log::setUser);
-        }
-        log.setAction(action);
-        log.setObjectType(objectType);
-        log.setObjectId(objectId);
-        log.setLogTime(LocalDateTime.now());
-
-        log = systemLogRepository.save(log);
-        return toDTO(log);
-    }
-
-    // ==================== TRA CỨU ====================
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<SystemLogDTO> findAllByUserId(Long userId, Pageable pageable) {
-        return systemLogRepository.findAllByUser_Id(userId, pageable).map(this::toDTO);
+    public List<SystemLogDTO> findAllLogs() {
+        return logRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<SystemLogDTO> findAllByObjectTypeAndObjectId(String objectType, Long objectId, Pageable pageable) {
-        return systemLogRepository.findAllByObjectTypeAndObjectId(objectType, objectId, pageable).map(this::toDTO);
+    public Optional<SystemLogDTO> findLogById(Long id) {
+        return logRepository.findById(id).map(this::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<SystemLogDTO> findAllByObjectType(String objectType, Pageable pageable) {
-        return systemLogRepository.findAllByObjectType(objectType, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<SystemLogDTO> findAllByAction(String action, Pageable pageable) {
-        return systemLogRepository.findAllByAction(action, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<SystemLogDTO> findAllByLogTimeBetween(LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        return systemLogRepository.findAllByLogTimeBetween(from, to, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<SystemLogDTO> findAllByUserIdAndLogTimeBetween(Long userId, LocalDateTime from, LocalDateTime to) {
-        return systemLogRepository.findAllByUser_IdAndLogTimeBetween(userId, from, to)
-                .stream()
-                .map(this::toDTO)
+    public List<SystemLogDTO> findLogsByLevel(String logLevel) {
+        return logRepository.findByLogLevel(SystemLog.LogLevel.valueOf(logLevel)).stream().map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // ==================== THỐNG KÊ ====================
-
     @Override
-    @Transactional(readOnly = true)
-    public Long countByUserId(Long userId) {
-        return systemLogRepository.countByUser_Id(userId);
+    public List<SystemLogDTO> findLogsByModule(String moduleName) {
+        return logRepository.findByModuleName(moduleName).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Long countByObjectType(String objectType) {
-        return systemLogRepository.countByObjectType(objectType);
+    public List<SystemLogDTO> findLogsByActor(Long actorId) {
+        return logRepository.findByActorIdOrderByCreatedAtDesc(actorId).stream().map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Long countByLogTimeBetween(LocalDateTime from, LocalDateTime to) {
-        return systemLogRepository.countByLogTimeBetween(from, to);
+    public List<SystemLogDTO> findLogsByActionType(String actionType) {
+        return logRepository.findByActionType(actionType).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SystemLogDTO> findLogsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return logRepository.findByDateRange(startDate, endDate).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SystemLogDTO> findLogsByTargetId(String targetId) {
+        return logRepository.findByTargetIdOrderByCreatedAtDesc(targetId).stream().map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SystemLogDTO> findErrorLogs() {
+        return logRepository.findErrorLogs().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SystemLogDTO> findWarningLogs() {
+        return logRepository.findWarningLogs().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SystemLogDTO> findLogsByIpAddress(String ipAddress) {
+        return logRepository.findByIpAddress(ipAddress).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public SystemLogDTO logInfo(String moduleName, String actionType, Long actorId, String targetId, String details,
+            String ipAddress, String userAgent) {
+        return createLog(SystemLog.LogLevel.INFO, moduleName, actionType, actorId, targetId, details, ipAddress,
+                userAgent);
+    }
+
+    @Override
+    public SystemLogDTO logWarning(String moduleName, String actionType, Long actorId, String targetId, String details,
+            String ipAddress, String userAgent) {
+        return createLog(SystemLog.LogLevel.WARN, moduleName, actionType, actorId, targetId, details, ipAddress,
+                userAgent);
+    }
+
+    @Override
+    public SystemLogDTO logError(String moduleName, String actionType, Long actorId, String targetId, String details,
+            String ipAddress, String userAgent) {
+        return createLog(SystemLog.LogLevel.ERROR, moduleName, actionType, actorId, targetId, details, ipAddress,
+                userAgent);
+    }
+
+    @Override
+    public void deleteOldLogs(int daysToKeep) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysToKeep);
+        List<SystemLog> oldLogs = logRepository.findByDateRange(LocalDateTime.of(2000, 1, 1, 0, 0), cutoffDate);
+        logRepository.deleteAll(oldLogs);
+    }
+
+    private SystemLogDTO createLog(SystemLog.LogLevel level, String moduleName, String actionType, Long actorId,
+            String targetId, String details, String ipAddress, String userAgent) {
+        SystemLog log = new SystemLog();
+        log.setLogLevel(level);
+        log.setModuleName(moduleName);
+        log.setActionType(actionType);
+        if (actorId != null) {
+            log.setActor(userRepository.findById(actorId).orElse(null));
+        }
+        log.setTargetId(targetId);
+        log.setLogDetails(details);
+        log.setIpAddress(ipAddress);
+        log.setUserAgent(userAgent);
+        return toDTO(logRepository.save(log));
+    }
+
+    private SystemLogDTO toDTO(SystemLog log) {
+        SystemLogDTO dto = new SystemLogDTO();
+        dto.setId(log.getId());
+        dto.setLogLevel(log.getLogLevel().name());
+        dto.setModuleName(log.getModuleName());
+        dto.setActionType(log.getActionType());
+        if (log.getActor() != null) {
+            dto.setActorId(log.getActor().getId());
+            dto.setActorName(log.getActor().getUsername());
+        }
+        dto.setTargetId(log.getTargetId());
+        dto.setLogDetails(log.getLogDetails());
+        dto.setIpAddress(log.getIpAddress());
+        dto.setUserAgent(log.getUserAgent());
+        dto.setCreatedAt(log.getCreatedAt());
+        return dto;
     }
 }

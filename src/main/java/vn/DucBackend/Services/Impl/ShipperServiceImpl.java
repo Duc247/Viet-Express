@@ -1,26 +1,20 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.ShipperDTO;
 import vn.DucBackend.Entities.Shipper;
-import vn.DucBackend.Entities.Shipper.ShipperStatus;
+import vn.DucBackend.Repositories.LocationRepository;
 import vn.DucBackend.Repositories.ShipperRepository;
+import vn.DucBackend.Repositories.TripRepository;
 import vn.DucBackend.Repositories.UserRepository;
-import vn.DucBackend.Repositories.WarehouseRepository;
 import vn.DucBackend.Services.ShipperService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementation của ShipperService
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,129 +22,142 @@ public class ShipperServiceImpl implements ShipperService {
 
     private final ShipperRepository shipperRepository;
     private final UserRepository userRepository;
-    private final WarehouseRepository warehouseRepository;
-
-    // ==================== CONVERTER ====================
-
-    private ShipperDTO toDTO(Shipper shipper) {
-        return ShipperDTO.builder()
-                .id(shipper.getId())
-                .userId(shipper.getUser() != null ? shipper.getUser().getId() : null)
-                .userFullName(shipper.getUser() != null ? shipper.getUser().getFullName() : null)
-                .userPhone(shipper.getUser() != null ? shipper.getUser().getPhone() : null)
-                .warehouseId(shipper.getWarehouse() != null ? shipper.getWarehouse().getId() : null)
-                .warehouseName(shipper.getWarehouse() != null ? shipper.getWarehouse().getWarehouseName() : null)
-                .status(shipper.getStatus() != null ? shipper.getStatus().name() : null)
-                .joinedAt(shipper.getJoinedAt())
-                .build();
-    }
-
-    private Shipper toEntity(ShipperDTO dto) {
-        Shipper shipper = new Shipper();
-        if (dto.getUserId() != null) {
-            userRepository.findById(dto.getUserId()).ifPresent(shipper::setUser);
-        }
-        if (dto.getWarehouseId() != null) {
-            warehouseRepository.findById(dto.getWarehouseId()).ifPresent(shipper::setWarehouse);
-        }
-        shipper.setStatus(dto.getStatus() != null ? ShipperStatus.valueOf(dto.getStatus()) : ShipperStatus.AVAILABLE);
-        shipper.setJoinedAt(LocalDateTime.now());
-        return shipper;
-    }
-
-    // ==================== TẠO / CẬP NHẬT ====================
+    private final LocationRepository locationRepository;
+    private final TripRepository tripRepository;
 
     @Override
-    public ShipperDTO createShipper(ShipperDTO shipperDTO) {
-        Shipper shipper = toEntity(shipperDTO);
-        shipper = shipperRepository.save(shipper);
-        return toDTO(shipper);
+    public List<ShipperDTO> findAllShippers() {
+        return shipperRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public ShipperDTO updateShipper(Long id, ShipperDTO shipperDTO) {
-        Shipper shipper = shipperRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Shipper not found: " + id));
-
-        if (shipperDTO.getWarehouseId() != null) {
-            warehouseRepository.findById(shipperDTO.getWarehouseId()).ifPresent(shipper::setWarehouse);
-        }
-
-        shipper = shipperRepository.save(shipper);
-        return toDTO(shipper);
+    public List<ShipperDTO> findActiveShippers() {
+        return shipperRepository.findByIsActiveTrue().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public ShipperDTO updateStatus(Long id, String status) {
-        Shipper shipper = shipperRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Shipper not found: " + id));
-        shipper.setStatus(ShipperStatus.valueOf(status));
-        shipper = shipperRepository.save(shipper);
-        return toDTO(shipper);
+    public List<ShipperDTO> findAvailableShippers() {
+        return shipperRepository.findAvailableShippers().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    // ==================== TÌM KIẾM ====================
-
     @Override
-    @Transactional(readOnly = true)
-    public Optional<ShipperDTO> findById(Long id) {
+    public Optional<ShipperDTO> findShipperById(Long id) {
         return shipperRepository.findById(id).map(this::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<ShipperDTO> findByUserId(Long userId) {
-        return shipperRepository.findByUser_Id(userId).map(this::toDTO);
+        return shipperRepository.findByUserId(userId).map(this::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public boolean existsByUserId(Long userId) {
-        return shipperRepository.existsByUser_Id(userId);
-    }
-
-    // ==================== DANH SÁCH ====================
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ShipperDTO> findAll(Pageable pageable) {
-        return shipperRepository.findAll(pageable).map(this::toDTO);
+    public List<ShipperDTO> findByWorkingArea(String area) {
+        return shipperRepository.findByWorkingArea(area).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ShipperDTO> findAllByStatus(String status, Pageable pageable) {
-        ShipperStatus shipperStatus = ShipperStatus.valueOf(status);
-        return shipperRepository.findAllByStatus(shipperStatus, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ShipperDTO> findAllByWarehouseId(Long warehouseId, Pageable pageable) {
-        return shipperRepository.findAllByWarehouse_Id(warehouseId, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ShipperDTO> findAvailableByWarehouseId(Long warehouseId) {
-        return shipperRepository.findAllByWarehouse_IdAndStatus(warehouseId, ShipperStatus.AVAILABLE)
-                .stream()
-                .map(this::toDTO)
+    public List<ShipperDTO> findAvailableShippersByArea(String area) {
+        return shipperRepository.findAvailableShippersByArea(area).stream().map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // ==================== THỐNG KÊ ====================
-
     @Override
-    @Transactional(readOnly = true)
-    public Long countByStatus(String status) {
-        ShipperStatus shipperStatus = ShipperStatus.valueOf(status);
-        return shipperRepository.countByStatus(shipperStatus);
+    public List<ShipperDTO> searchShippers(String keyword) {
+        return shipperRepository.searchByKeyword(keyword).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Long countByWarehouseId(Long warehouseId) {
-        return shipperRepository.countByWarehouse_Id(warehouseId);
+    public ShipperDTO createShipper(ShipperDTO dto) {
+        Shipper shipper = new Shipper();
+        shipper.setUser(userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found")));
+        shipper.setFullName(dto.getFullName());
+        shipper.setPhone(dto.getPhone());
+        shipper.setWorkingArea(dto.getWorkingArea());
+        shipper.setIsAvailable(true);
+        shipper.setIsActive(true);
+        return toDTO(shipperRepository.save(shipper));
+    }
+
+    @Override
+    public ShipperDTO updateShipper(Long id, ShipperDTO dto) {
+        Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));
+        if (dto.getFullName() != null)
+            shipper.setFullName(dto.getFullName());
+        if (dto.getPhone() != null)
+            shipper.setPhone(dto.getPhone());
+        if (dto.getWorkingArea() != null)
+            shipper.setWorkingArea(dto.getWorkingArea());
+        return toDTO(shipperRepository.save(shipper));
+    }
+
+    @Override
+    public ShipperDTO updateShipperAvailability(Long id, Boolean isAvailable) {
+        Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));
+        shipper.setIsAvailable(isAvailable);
+        return toDTO(shipperRepository.save(shipper));
+    }
+
+    @Override
+    public ShipperDTO updateShipperLocation(Long id, Long locationId) {
+        Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));
+        shipper.setCurrentLocation(locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found")));
+        return toDTO(shipperRepository.save(shipper));
+    }
+
+    @Override
+    public ShipperDTO assignTripToShipper(Long shipperId, Long tripId) {
+        Shipper shipper = shipperRepository.findById(shipperId)
+                .orElseThrow(() -> new RuntimeException("Shipper not found"));
+        shipper.setCurrentTrip(
+                tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found")));
+        shipper.setIsAvailable(false);
+        return toDTO(shipperRepository.save(shipper));
+    }
+
+    @Override
+    public ShipperDTO clearCurrentTrip(Long shipperId) {
+        Shipper shipper = shipperRepository.findById(shipperId)
+                .orElseThrow(() -> new RuntimeException("Shipper not found"));
+        shipper.setCurrentTrip(null);
+        shipper.setIsAvailable(true);
+        return toDTO(shipperRepository.save(shipper));
+    }
+
+    @Override
+    public void deleteShipper(Long id) {
+        shipperRepository.deleteById(id);
+    }
+
+    @Override
+    public void toggleShipperStatus(Long id) {
+        Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));
+        shipper.setIsActive(!shipper.getIsActive());
+        shipperRepository.save(shipper);
+    }
+
+    private ShipperDTO toDTO(Shipper shipper) {
+        ShipperDTO dto = new ShipperDTO();
+        dto.setId(shipper.getId());
+        if (shipper.getUser() != null) {
+            dto.setUserId(shipper.getUser().getId());
+            dto.setUsername(shipper.getUser().getUsername());
+        }
+        dto.setFullName(shipper.getFullName());
+        dto.setPhone(shipper.getPhone());
+        dto.setWorkingArea(shipper.getWorkingArea());
+        dto.setIsAvailable(shipper.getIsAvailable());
+        if (shipper.getCurrentLocation() != null) {
+            dto.setCurrentLocationId(shipper.getCurrentLocation().getId());
+            dto.setCurrentLocationName(shipper.getCurrentLocation().getName());
+        }
+        if (shipper.getCurrentTrip() != null) {
+            dto.setCurrentTripId(shipper.getCurrentTrip().getId());
+        }
+        dto.setIsActive(shipper.getIsActive());
+        dto.setCreatedAt(shipper.getCreatedAt());
+        dto.setUpdatedAt(shipper.getUpdatedAt());
+        return dto;
     }
 }

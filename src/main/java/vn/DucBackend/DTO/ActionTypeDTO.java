@@ -1,20 +1,14 @@
 package vn.DucBackend.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
-/**
- * DTO cho ActionType entity
- */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ActionTypeDTO {
     private Long id;
     private String actionCode;
-    private String actionName;
+    private String name;
     private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

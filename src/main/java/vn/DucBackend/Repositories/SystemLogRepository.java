@@ -1,82 +1,41 @@
 package vn.DucBackend.Repositories;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import vn.DucBackend.Entities.SystemLog;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import vn.DucBackend.Entities.SystemLog;
-
-/**
- * Repository cho SystemLog entity - Quản lý log hệ thống (Audit Trail)
- * Phục vụ: audit hành động user, theo dõi thay đổi entity, truy vết lỗi
- */
 @Repository
 public interface SystemLogRepository extends JpaRepository<SystemLog, Long> {
 
-    // ==================== LỌC THEO NGƯỜI THỰC HIỆN ====================
+        List<SystemLog> findByLogLevel(SystemLog.LogLevel logLevel);
 
-    /** Lấy log theo user ID - kiểm tra hành động của một user */
-    Page<SystemLog> findAllByUser_Id(Long userId, Pageable pageable);
+        List<SystemLog> findByModuleName(String moduleName);
 
-    List<SystemLog> findAllByUser_Id(Long userId);
+        List<SystemLog> findByActorId(Long actorId);
 
-    /** Đếm số log của user */
-    Long countByUser_Id(Long userId);
+        List<SystemLog> findByActionType(String actionType);
 
-    // ==================== LỌC THEO ĐỐI TƯỢNG BỊ TÁC ĐỘNG ====================
+        @Query("SELECT sl FROM SystemLog sl WHERE sl.createdAt BETWEEN :startDate AND :endDate ORDER BY sl.createdAt DESC")
+        List<SystemLog> findByDateRange(@Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 
-    /** Lấy log theo loại object và ID - xem lịch sử thay đổi của một entity */
-    Page<SystemLog> findAllByObjectTypeAndObjectId(String objectType, Long objectId, Pageable pageable);
+        @Query("SELECT sl FROM SystemLog sl WHERE sl.actor.id = :actorId ORDER BY sl.createdAt DESC")
+        List<SystemLog> findByActorIdOrderByCreatedAtDesc(@Param("actorId") Long actorId);
 
-    List<SystemLog> findAllByObjectTypeAndObjectId(String objectType, Long objectId);
+        @Query("SELECT sl FROM SystemLog sl WHERE sl.targetId = :targetId ORDER BY sl.createdAt DESC")
+        List<SystemLog> findByTargetIdOrderByCreatedAtDesc(@Param("targetId") String targetId);
 
-    /** Lấy log theo loại object */
-    Page<SystemLog> findAllByObjectType(String objectType, Pageable pageable);
+        @Query("SELECT sl FROM SystemLog sl WHERE sl.logLevel = 'ERROR' ORDER BY sl.createdAt DESC")
+        List<SystemLog> findErrorLogs();
 
-    List<SystemLog> findAllByObjectType(String objectType);
+        @Query("SELECT sl FROM SystemLog sl WHERE sl.logLevel = 'WARN' ORDER BY sl.createdAt DESC")
+        List<SystemLog> findWarningLogs();
 
-    /** Đếm log theo loại object */
-    Long countByObjectType(String objectType);
-
-    // ==================== LỌC THEO HÀNH ĐỘNG ====================
-
-    /** Lấy log theo hành động (CREATE, UPDATE, DELETE, etc.) */
-    Page<SystemLog> findAllByAction(String action, Pageable pageable);
-
-    List<SystemLog> findAllByAction(String action);
-
-    /** Đếm log theo hành động */
-    Long countByAction(String action);
-
-    // ==================== LỌC THEO THỜI GIAN ====================
-
-    /** Lấy log trong khoảng thời gian */
-    Page<SystemLog> findAllByLogTimeBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
-
-    List<SystemLog> findAllByLogTimeBetween(LocalDateTime from, LocalDateTime to);
-
-    /** Lấy log của user trong khoảng thời gian */
-    Page<SystemLog> findAllByUser_IdAndLogTimeBetween(Long userId, LocalDateTime from, LocalDateTime to,
-            Pageable pageable);
-
-    List<SystemLog> findAllByUser_IdAndLogTimeBetween(Long userId, LocalDateTime from, LocalDateTime to);
-
-    /** Lấy log theo hành động và thời gian */
-    Page<SystemLog> findAllByActionAndLogTimeBetween(String action, LocalDateTime from, LocalDateTime to,
-            Pageable pageable);
-
-    /** Đếm log trong khoảng thời gian */
-    Long countByLogTimeBetween(LocalDateTime from, LocalDateTime to);
-
-    // ==================== KẾT HỢP ĐIỀU KIỆN ====================
-
-    /** Lấy log của user theo hành động */
-    Page<SystemLog> findAllByUser_IdAndAction(Long userId, String action, Pageable pageable);
-
-    /** Lấy log theo object type và hành động */
-    Page<SystemLog> findAllByObjectTypeAndAction(String objectType, String action, Pageable pageable);
+        @Query("SELECT sl FROM SystemLog sl WHERE sl.ipAddress = :ip ORDER BY sl.createdAt DESC")
+        List<SystemLog> findByIpAddress(@Param("ip") String ipAddress);
 }

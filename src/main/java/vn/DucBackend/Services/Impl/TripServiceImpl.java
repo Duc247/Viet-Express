@@ -1,17 +1,14 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.TripDTO;
-import vn.DucBackend.DTO.TripItemDTO;
 import vn.DucBackend.Entities.Trip;
-import vn.DucBackend.Entities.Trip.TripStatus;
-import vn.DucBackend.Entities.TripItem;
-import vn.DucBackend.Entities.TripItem.TripItemStatus;
-import vn.DucBackend.Repositories.*;
+import vn.DucBackend.Repositories.LocationRepository;
+import vn.DucBackend.Repositories.ShipperRepository;
+import vn.DucBackend.Repositories.TripRepository;
+import vn.DucBackend.Repositories.VehicleRepository;
 import vn.DucBackend.Services.TripService;
 
 import java.time.LocalDateTime;
@@ -19,227 +16,174 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementation của TripService
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TripServiceImpl implements TripService {
 
     private final TripRepository tripRepository;
-    private final TripItemRepository tripItemRepository;
-    private final VehicleRepository vehicleRepository;
     private final ShipperRepository shipperRepository;
-    private final WarehouseRepository warehouseRepository;
-    private final CustomerRequestRepository customerRequestRepository;
-    private final TrackingCodeRepository trackingCodeRepository;
-
-    // ==================== CONVERTER ====================
-
-    private TripDTO toDTO(Trip trip) {
-        return TripDTO.builder()
-                .id(trip.getId())
-                .vehicleId(trip.getVehicle() != null ? trip.getVehicle().getId() : null)
-                .vehicleLicensePlate(trip.getVehicle() != null ? trip.getVehicle().getLicensePlate() : null)
-                .driverShipperId(trip.getDriverShipper() != null ? trip.getDriverShipper().getId() : null)
-                .driverShipperName(trip.getDriverShipper() != null && trip.getDriverShipper().getUser() != null
-                        ? trip.getDriverShipper().getUser().getFullName()
-                        : null)
-                .fromWarehouseId(trip.getFromWarehouse() != null ? trip.getFromWarehouse().getId() : null)
-                .fromWarehouseName(trip.getFromWarehouse() != null ? trip.getFromWarehouse().getWarehouseName() : null)
-                .toWarehouseId(trip.getToWarehouse() != null ? trip.getToWarehouse().getId() : null)
-                .toWarehouseName(trip.getToWarehouse() != null ? trip.getToWarehouse().getWarehouseName() : null)
-                .startTime(trip.getStartTime())
-                .endTime(trip.getEndTime())
-                .status(trip.getStatus() != null ? trip.getStatus().name() : null)
-                .build();
-    }
-
-    private TripItemDTO toItemDTO(TripItem item) {
-        TripItemDTO dto = TripItemDTO.builder()
-                .id(item.getId())
-                .tripId(item.getTrip() != null ? item.getTrip().getId() : null)
-                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
-                .status(item.getStatus() != null ? item.getStatus().name() : null)
-                .build();
-
-        // Get tracking code
-        if (item.getRequest() != null) {
-            trackingCodeRepository.findByRequest_Id(item.getRequest().getId())
-                    .ifPresent(tc -> dto.setTrackingCode(tc.getCode()));
-        }
-
-        return dto;
-    }
-
-    private Trip toEntity(TripDTO dto) {
-        Trip trip = new Trip();
-
-        if (dto.getVehicleId() != null) {
-            vehicleRepository.findById(dto.getVehicleId()).ifPresent(trip::setVehicle);
-        }
-        if (dto.getDriverShipperId() != null) {
-            shipperRepository.findById(dto.getDriverShipperId()).ifPresent(trip::setDriverShipper);
-        }
-        if (dto.getFromWarehouseId() != null) {
-            warehouseRepository.findById(dto.getFromWarehouseId()).ifPresent(trip::setFromWarehouse);
-        }
-        if (dto.getToWarehouseId() != null) {
-            warehouseRepository.findById(dto.getToWarehouseId()).ifPresent(trip::setToWarehouse);
-        }
-
-        trip.setStatus(TripStatus.READY);
-        return trip;
-    }
-
-    // ==================== TRIP ====================
+    private final VehicleRepository vehicleRepository;
+    private final LocationRepository locationRepository;
 
     @Override
-    public TripDTO createTrip(TripDTO tripDTO) {
-        Trip trip = toEntity(tripDTO);
-        trip = tripRepository.save(trip);
-        return toDTO(trip);
+    public List<TripDTO> findAllTrips() {
+        return tripRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public TripDTO updateTrip(Long id, TripDTO tripDTO) {
-        Trip trip = tripRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trip not found: " + id));
-
-        if (tripDTO.getVehicleId() != null) {
-            vehicleRepository.findById(tripDTO.getVehicleId()).ifPresent(trip::setVehicle);
-        }
-        if (tripDTO.getDriverShipperId() != null) {
-            shipperRepository.findById(tripDTO.getDriverShipperId()).ifPresent(trip::setDriverShipper);
-        }
-
-        trip = tripRepository.save(trip);
-        return toDTO(trip);
-    }
-
-    @Override
-    public TripDTO startTrip(Long id) {
-        Trip trip = tripRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trip not found: " + id));
-        trip.setStatus(TripStatus.DELIVERING);
-        trip.setStartTime(LocalDateTime.now());
-        trip = tripRepository.save(trip);
-        return toDTO(trip);
-    }
-
-    @Override
-    public TripDTO completeTrip(Long id) {
-        Trip trip = tripRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trip not found: " + id));
-        trip.setStatus(TripStatus.COMPLETED);
-        trip.setEndTime(LocalDateTime.now());
-        trip = tripRepository.save(trip);
-        return toDTO(trip);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<TripDTO> findById(Long id) {
+    public Optional<TripDTO> findTripById(Long id) {
         return tripRepository.findById(id).map(this::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<TripDTO> findAll(Pageable pageable) {
-        return tripRepository.findAll(pageable).map(this::toDTO);
+    public List<TripDTO> findTripsByShipperId(Long shipperId) {
+        return tripRepository.findByShipperId(shipperId).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<TripDTO> findAllByStatus(String status, Pageable pageable) {
-        TripStatus tripStatus = TripStatus.valueOf(status);
-        return tripRepository.findAllByStatus(tripStatus, pageable).map(this::toDTO);
+    public List<TripDTO> findTripsByVehicleId(Long vehicleId) {
+        return tripRepository.findByVehicleId(vehicleId).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<TripDTO> findAllByRoute(Long fromWarehouseId, Long toWarehouseId, Pageable pageable) {
-        return tripRepository.findAllByFromWarehouse_IdAndToWarehouse_Id(fromWarehouseId, toWarehouseId, pageable)
-                .map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TripDTO> findAllByVehicleIdAndStatus(Long vehicleId, String status) {
-        TripStatus tripStatus = TripStatus.valueOf(status);
-        return tripRepository.findAllByVehicle_IdAndStatus(vehicleId, tripStatus)
-                .stream()
-                .map(this::toDTO)
+    public List<TripDTO> findTripsByStatus(String status) {
+        return tripRepository.findByStatus(Trip.TripStatus.valueOf(status)).stream().map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<TripDTO> findAllByDriverId(Long driverShipperId, Pageable pageable) {
-        return tripRepository.findAllByDriverShipper_Id(driverShipperId, pageable).map(this::toDTO);
-    }
-
-    // ==================== TRIP ITEM ====================
-
-    @Override
-    public TripItemDTO addItemToTrip(Long tripId, Long requestId) {
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new RuntimeException("Trip not found: " + tripId));
-
-        TripItem item = new TripItem();
-        item.setTrip(trip);
-        customerRequestRepository.findById(requestId).ifPresent(item::setRequest);
-        item.setStatus(TripItemStatus.LOADED);
-
-        item = tripItemRepository.save(item);
-        return toItemDTO(item);
-    }
-
-    @Override
-    public void removeItemFromTrip(Long tripId, Long requestId) {
-        tripItemRepository.findAllByTrip_Id(tripId).stream()
-                .filter(item -> item.getRequest() != null && item.getRequest().getId().equals(requestId))
-                .findFirst()
-                .ifPresent(item -> tripItemRepository.deleteById(item.getId()));
-    }
-
-    @Override
-    public TripItemDTO updateItemStatus(Long tripItemId, String status) {
-        TripItem item = tripItemRepository.findById(tripItemId)
-                .orElseThrow(() -> new RuntimeException("TripItem not found: " + tripItemId));
-        item.setStatus(TripItemStatus.valueOf(status));
-        item = tripItemRepository.save(item);
-        return toItemDTO(item);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TripItemDTO> findAllItemsByTripId(Long tripId) {
-        return tripItemRepository.findAllByTrip_Id(tripId)
-                .stream()
-                .map(this::toItemDTO)
+    public List<TripDTO> findTripsByType(String tripType) {
+        return tripRepository.findByTripType(Trip.TripType.valueOf(tripType)).stream().map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<TripItemDTO> findAllItemsByRequestId(Long requestId) {
-        return tripItemRepository.findAllByRequest_Id(requestId)
-                .stream()
-                .map(this::toItemDTO)
+    public List<TripDTO> findActiveTrips() {
+        return tripRepository.findActiveTrips().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TripDTO> findActiveTripsByShipper(Long shipperId) {
+        return tripRepository.findActiveTripsByShipper(shipperId).stream().map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public boolean existsItemInTrip(Long tripId, Long requestId) {
-        return tripItemRepository.existsByTrip_IdAndRequest_Id(tripId, requestId);
+    public List<TripDTO> findTripsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return tripRepository.findByDateRange(startDate, endDate).stream().map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Long countItemsByTripId(Long tripId) {
-        return tripItemRepository.countByTrip_Id(tripId);
+    public Long countTripsByStatus(String status) {
+        return tripRepository.countByStatus(Trip.TripStatus.valueOf(status));
+    }
+
+    @Override
+    public TripDTO createTrip(TripDTO dto) {
+        Trip trip = new Trip();
+        trip.setTripType(Trip.TripType.valueOf(dto.getTripType()));
+        trip.setStartLocation(locationRepository.findById(dto.getStartLocationId())
+                .orElseThrow(() -> new RuntimeException("Start location not found")));
+        trip.setEndLocation(locationRepository.findById(dto.getEndLocationId())
+                .orElseThrow(() -> new RuntimeException("End location not found")));
+        if (dto.getShipperId() != null) {
+            trip.setShipper(shipperRepository.findById(dto.getShipperId()).orElse(null));
+        }
+        if (dto.getVehicleId() != null) {
+            trip.setVehicle(vehicleRepository.findById(dto.getVehicleId()).orElse(null));
+        }
+        trip.setCodAmount(dto.getCodAmount());
+        trip.setNote(dto.getNote());
+        trip.setStatus(Trip.TripStatus.CREATED);
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO updateTrip(Long id, TripDTO dto) {
+        Trip trip = tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
+        if (dto.getNote() != null)
+            trip.setNote(dto.getNote());
+        if (dto.getCodAmount() != null)
+            trip.setCodAmount(dto.getCodAmount());
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO updateTripStatus(Long id, String status) {
+        Trip trip = tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
+        trip.setStatus(Trip.TripStatus.valueOf(status));
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO startTrip(Long id) {
+        Trip trip = tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
+        trip.setStatus(Trip.TripStatus.IN_PROGRESS);
+        trip.setStartedAt(LocalDateTime.now());
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO completeTrip(Long id) {
+        Trip trip = tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
+        trip.setStatus(Trip.TripStatus.COMPLETED);
+        trip.setEndedAt(LocalDateTime.now());
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO cancelTrip(Long id) {
+        Trip trip = tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
+        trip.setStatus(Trip.TripStatus.CANCELLED);
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO assignShipperToTrip(Long tripId, Long shipperId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found"));
+        trip.setShipper(
+                shipperRepository.findById(shipperId).orElseThrow(() -> new RuntimeException("Shipper not found")));
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public TripDTO assignVehicleToTrip(Long tripId, Long vehicleId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found"));
+        trip.setVehicle(
+                vehicleRepository.findById(vehicleId).orElseThrow(() -> new RuntimeException("Vehicle not found")));
+        return toDTO(tripRepository.save(trip));
+    }
+
+    @Override
+    public void deleteTrip(Long id) {
+        tripRepository.deleteById(id);
+    }
+
+    private TripDTO toDTO(Trip trip) {
+        TripDTO dto = new TripDTO();
+        dto.setId(trip.getId());
+        if (trip.getShipper() != null) {
+            dto.setShipperId(trip.getShipper().getId());
+            dto.setShipperName(trip.getShipper().getFullName());
+        }
+        if (trip.getVehicle() != null) {
+            dto.setVehicleId(trip.getVehicle().getId());
+            dto.setVehicleLicensePlate(trip.getVehicle().getLicensePlate());
+        }
+        dto.setTripType(trip.getTripType().name());
+        dto.setStartLocationId(trip.getStartLocation().getId());
+        dto.setStartLocationName(trip.getStartLocation().getName());
+        dto.setEndLocationId(trip.getEndLocation().getId());
+        dto.setEndLocationName(trip.getEndLocation().getName());
+        dto.setStatus(trip.getStatus().name());
+        dto.setStartedAt(trip.getStartedAt());
+        dto.setEndedAt(trip.getEndedAt());
+        dto.setCodAmount(trip.getCodAmount());
+        dto.setNote(trip.getNote());
+        dto.setCreatedAt(trip.getCreatedAt());
+        dto.setUpdatedAt(trip.getUpdatedAt());
+        return dto;
     }
 }

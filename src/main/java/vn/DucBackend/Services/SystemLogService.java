@@ -1,50 +1,43 @@
 package vn.DucBackend.Services;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import vn.DucBackend.DTO.SystemLogDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Service interface cho SystemLog - Audit trail
- */
 public interface SystemLogService {
 
-    // ==================== GHI LOG ====================
+    List<SystemLogDTO> findAllLogs();
 
-    /** Ghi log hành động */
-    SystemLogDTO log(Long userId, String action, String objectType, Long objectId);
+    Optional<SystemLogDTO> findLogById(Long id);
 
-    // ==================== TRA CỨU ====================
+    List<SystemLogDTO> findLogsByLevel(String logLevel);
 
-    /** Lấy logs của user */
-    Page<SystemLogDTO> findAllByUserId(Long userId, Pageable pageable);
+    List<SystemLogDTO> findLogsByModule(String moduleName);
 
-    /** Lấy logs theo loại object và ID - xem lịch sử thay đổi entity */
-    Page<SystemLogDTO> findAllByObjectTypeAndObjectId(String objectType, Long objectId, Pageable pageable);
+    List<SystemLogDTO> findLogsByActor(Long actorId);
 
-    /** Lấy logs theo loại object */
-    Page<SystemLogDTO> findAllByObjectType(String objectType, Pageable pageable);
+    List<SystemLogDTO> findLogsByActionType(String actionType);
 
-    /** Lấy logs theo hành động */
-    Page<SystemLogDTO> findAllByAction(String action, Pageable pageable);
+    List<SystemLogDTO> findLogsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
-    /** Lấy logs theo thời gian */
-    Page<SystemLogDTO> findAllByLogTimeBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
+    List<SystemLogDTO> findLogsByTargetId(String targetId);
 
-    /** Lấy logs của user trong khoảng thời gian */
-    List<SystemLogDTO> findAllByUserIdAndLogTimeBetween(Long userId, LocalDateTime from, LocalDateTime to);
+    List<SystemLogDTO> findErrorLogs();
 
-    // ==================== THỐNG KÊ ====================
+    List<SystemLogDTO> findWarningLogs();
 
-    /** Đếm logs của user */
-    Long countByUserId(Long userId);
+    List<SystemLogDTO> findLogsByIpAddress(String ipAddress);
 
-    /** Đếm logs theo loại object */
-    Long countByObjectType(String objectType);
+    SystemLogDTO logInfo(String moduleName, String actionType, Long actorId, String targetId, String details,
+            String ipAddress, String userAgent);
 
-    /** Đếm logs trong khoảng thời gian */
-    Long countByLogTimeBetween(LocalDateTime from, LocalDateTime to);
+    SystemLogDTO logWarning(String moduleName, String actionType, Long actorId, String targetId, String details,
+            String ipAddress, String userAgent);
+
+    SystemLogDTO logError(String moduleName, String actionType, Long actorId, String targetId, String details,
+            String ipAddress, String userAgent);
+
+    void deleteOldLogs(int daysToKeep);
 }

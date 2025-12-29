@@ -1,70 +1,50 @@
 package vn.DucBackend.Services;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-/**
- * Service interface cho CustomerRequest - Quản lý vận đơn (Core service)
- */
 public interface CustomerRequestService {
 
-    // ==================== TẠO / CẬP NHẬT VẬN ĐƠN ====================
+    List<CustomerRequestDTO> findAllRequests();
 
-    /** Tạo vận đơn mới - Customer tạo đơn */
-    CustomerRequestDTO createOrder(CustomerRequestDTO requestDTO);
+    Optional<CustomerRequestDTO> findRequestById(Long id);
 
-    /** Cập nhật thông tin vận đơn */
-    CustomerRequestDTO updateOrder(Long id, CustomerRequestDTO requestDTO);
+    Optional<CustomerRequestDTO> findByRequestCode(String requestCode);
 
-    /** Cập nhật trạng thái vận đơn */
-    CustomerRequestDTO updateStatus(Long id, String status);
+    List<CustomerRequestDTO> findRequestsBySenderId(Long senderId);
 
-    /** Staff xác nhận đơn hàng - chuyển PENDING -> CONFIRMED */
-    CustomerRequestDTO confirmOrder(Long id);
+    List<CustomerRequestDTO> findRequestsByReceiverId(Long receiverId);
 
-    /** Hủy vận đơn */
-    CustomerRequestDTO cancelOrder(Long id);
+    List<CustomerRequestDTO> findRequestsByCustomerId(Long customerId);
 
-    /** Cập nhật kho hiện tại của vận đơn */
-    CustomerRequestDTO updateCurrentWarehouse(Long id, Long warehouseId);
+    List<CustomerRequestDTO> findRequestsByStatus(String status);
 
-    // ==================== TÌM KIẾM ====================
+    List<CustomerRequestDTO> findActiveRequests();
 
-    /** Tìm vận đơn theo ID */
-    Optional<CustomerRequestDTO> findById(Long id);
+    List<CustomerRequestDTO> findRequestsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
-    /** Tìm vận đơn theo ID và customer ID - xác thực quyền sở hữu */
-    Optional<CustomerRequestDTO> findByIdAndCustomerId(Long id, Long customerId);
+    List<CustomerRequestDTO> searchRequests(String keyword);
 
-    /** Tìm vận đơn theo tracking code */
-    Optional<CustomerRequestDTO> findByTrackingCode(String trackingCode);
+    Long countRequestsByStatus(String status);
 
-    // ==================== DANH SÁCH ====================
+    CustomerRequestDTO createRequest(CustomerRequestDTO dto);
 
-    /** Lấy tất cả vận đơn */
-    Page<CustomerRequestDTO> findAll(Pageable pageable);
+    CustomerRequestDTO updateRequest(Long id, CustomerRequestDTO dto);
 
-    /** Lấy vận đơn của customer */
-    Page<CustomerRequestDTO> findAllByCustomerId(Long customerId, Pageable pageable);
+    CustomerRequestDTO updateRequestStatus(Long id, String status);
 
-    /** Lấy vận đơn theo trạng thái */
-    Page<CustomerRequestDTO> findAllByStatus(String status, Pageable pageable);
+    CustomerRequestDTO confirmRequest(Long id);
 
-    /** Lấy vận đơn trong kho theo trạng thái */
-    Page<CustomerRequestDTO> findAllByWarehouseIdAndStatus(Long warehouseId, String status, Pageable pageable);
+    CustomerRequestDTO cancelRequest(Long id);
 
-    /** Lấy vận đơn theo thời gian tạo */
-    Page<CustomerRequestDTO> findAllByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
+    void deleteRequest(Long id);
 
-    // ==================== THỐNG KÊ ====================
+    String generateRequestCode();
 
-    /** Đếm vận đơn theo trạng thái */
-    Long countByStatus(String status);
+    java.math.BigDecimal calculateShippingFee(Long serviceTypeId, java.math.BigDecimal distanceKm);
 
-    /** Đếm vận đơn trong kho theo trạng thái */
-    Long countByWarehouseIdAndStatus(Long warehouseId, String status);
+    LocalDateTime calculateEstimatedDeliveryTime(Long serviceTypeId, java.math.BigDecimal distanceKm);
 }

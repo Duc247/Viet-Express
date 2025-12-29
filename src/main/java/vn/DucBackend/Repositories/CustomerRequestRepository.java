@@ -1,43 +1,43 @@
 package vn.DucBackend.Repositories;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.DucBackend.Entities.CustomerRequest;
-import vn.DucBackend.Entities.CustomerRequest.RequestStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CustomerRequestRepository extends JpaRepository<CustomerRequest, Long> {
 
-    // Find by ID and Customer ID
-    Optional<CustomerRequest> findByIdAndCustomer_Id(Long id, Long customerId);
+    Optional<CustomerRequest> findByRequestCode(String requestCode);
 
-    // Find by tracking code (via TrackingCode entity relationship)
-    @Query("SELECT cr FROM CustomerRequest cr JOIN TrackingCode tc ON tc.request = cr WHERE tc.code = :trackingCode")
-    Optional<CustomerRequest> findByTrackingCode(@Param("trackingCode") String trackingCode);
+    List<CustomerRequest> findBySenderId(Long senderId);
 
-    // Find all by Customer ID with pagination
-    Page<CustomerRequest> findAllByCustomer_Id(Long customerId, Pageable pageable);
+    List<CustomerRequest> findByReceiverId(Long receiverId);
 
-    // Find all by Status with pagination
-    Page<CustomerRequest> findAllByStatus(RequestStatus status, Pageable pageable);
+    List<CustomerRequest> findByStatus(CustomerRequest.RequestStatus status);
 
-    // Find all by Warehouse ID and Status with pagination
-    Page<CustomerRequest> findAllByCurrentWarehouse_IdAndStatus(Long warehouseId, RequestStatus status,
-            Pageable pageable);
+    List<CustomerRequest> findByServiceTypeId(Long serviceTypeId);
 
-    // Find all by created date range with pagination
-    Page<CustomerRequest> findAllByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
+    @Query("SELECT r FROM CustomerRequest r WHERE r.sender.id = :customerId OR r.receiver.id = :customerId")
+    List<CustomerRequest> findByCustomerId(@Param("customerId") Long customerId);
 
-    // Count by Status
-    Long countByStatus(RequestStatus status);
+    @Query("SELECT r FROM CustomerRequest r WHERE r.status NOT IN ('DELIVERED', 'CANCELLED', 'RETURNED')")
+    List<CustomerRequest> findActiveRequests();
 
-    // Count by Warehouse ID and Status
-    Long countByCurrentWarehouse_IdAndStatus(Long warehouseId, RequestStatus status);
+    @Query("SELECT r FROM CustomerRequest r WHERE r.createdAt BETWEEN :startDate AND :endDate")
+    List<CustomerRequest> findByDateRange(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT r FROM CustomerRequest r WHERE r.requestCode LIKE %:keyword% OR r.parcelDescription LIKE %:keyword%")
+    List<CustomerRequest> searchByKeyword(@Param("keyword") String keyword);
+
+    @Query("SELECT COUNT(r) FROM CustomerRequest r WHERE r.status = :status")
+    Long countByStatus(@Param("status") CustomerRequest.RequestStatus status);
+
+    boolean existsByRequestCode(String requestCode);
 }

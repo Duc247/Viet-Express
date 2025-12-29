@@ -1,29 +1,23 @@
 package vn.DucBackend.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * DTO cho Payment entity
- */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class PaymentDTO {
     private Long id;
     private Long requestId;
-    private String trackingCode;
-    private String type; // PaymentType: SHIPPING_FEE, COD
-    private Long payerCustomerId;
-    private String payerCustomerName;
-    private BigDecimal totalAmount;
+    private String requestCode;
+    private Long parcelId;
+    private String parcelCode;
+    private String paymentCode;
+    private String paymentType;
+    private String payerType;
+    private String receiverType;
+    private BigDecimal expectedAmount;
     private BigDecimal paidAmount;
-    private String status; // PaymentStatus: UNPAID, PARTIAL, PAID, REMITTED
+    private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

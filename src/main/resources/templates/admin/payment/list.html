@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý Payment</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-credit-card me-2"></i>Quản lý Payment (Thanh toán)</h1>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Mã thanh toán</th>
+                                <th>Mã đơn</th>
+                                <th>Loại (PaymentType)</th>
+                                <th>Số tiền</th>
+                                <th>Đã thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><code>PAY-20251229-1</code></td>
+                                <td><code>REQ-20251229-ABC123</code></td>
+                                <td><span class="badge bg-info">SHIPPING_FEE</span></td>
+                                <td>150,000đ</td>
+                                <td>150,000đ</td>
+                                <td><span class="badge bg-success">PAID</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><code>PAY-20251229-2</code></td>
+                                <td><code>REQ-20251229-ABC123</code></td>
+                                <td><span class="badge bg-warning">COD</span></td>
+                                <td>15,000,000đ</td>
+                                <td>0đ</td>
+                                <td><span class="badge bg-danger">UNPAID</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

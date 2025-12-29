@@ -1,227 +1,269 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.PaymentDTO;
 import vn.DucBackend.DTO.PaymentTransactionDTO;
 import vn.DucBackend.Entities.Payment;
-import vn.DucBackend.Entities.Payment.PaymentStatus;
-import vn.DucBackend.Entities.Payment.PaymentType;
 import vn.DucBackend.Entities.PaymentTransaction;
-import vn.DucBackend.Entities.PaymentTransaction.PaymentMethod;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.PaymentService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementation của PaymentService
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final PaymentTransactionRepository paymentTransactionRepository;
-    private final CustomerRequestRepository customerRequestRepository;
-    private final CustomerRepository customerRepository;
-    private final TrackingCodeRepository trackingCodeRepository;
+    private final PaymentTransactionRepository transactionRepository;
+    private final CustomerRequestRepository requestRepository;
+    private final ParcelRepository parcelRepository;
+    private final UserRepository userRepository;
 
-    // ==================== CONVERTER ====================
+    @Override
+    public List<PaymentDTO> findAllPayments() {
+        return paymentRepository.findAll().stream().map(this::toPaymentDTO).collect(Collectors.toList());
+    }
 
-    private PaymentDTO toDTO(Payment payment) {
-        PaymentDTO dto = PaymentDTO.builder()
-                .id(payment.getId())
-                .requestId(payment.getRequest() != null ? payment.getRequest().getId() : null)
-                .type(payment.getType() != null ? payment.getType().name() : null)
-                .payerCustomerId(payment.getPayerCustomer() != null ? payment.getPayerCustomer().getId() : null)
-                .payerCustomerName(
-                        payment.getPayerCustomer() != null ? payment.getPayerCustomer().getBusinessName() : null)
-                .totalAmount(payment.getTotalAmount())
-                .paidAmount(payment.getPaidAmount())
-                .status(payment.getStatus() != null ? payment.getStatus().name() : null)
-                .createdAt(payment.getCreatedAt())
-                .build();
+    @Override
+    public Optional<PaymentDTO> findPaymentById(Long id) {
+        return paymentRepository.findById(id).map(this::toPaymentDTO);
+    }
 
-        // Get tracking code
-        if (payment.getRequest() != null) {
-            trackingCodeRepository.findByRequest_Id(payment.getRequest().getId())
-                    .ifPresent(tc -> dto.setTrackingCode(tc.getCode()));
+    @Override
+    public Optional<PaymentDTO> findByPaymentCode(String paymentCode) {
+        return paymentRepository.findByPaymentCode(paymentCode).map(this::toPaymentDTO);
+    }
+
+    @Override
+    public List<PaymentDTO> findPaymentsByRequestId(Long requestId) {
+        return paymentRepository.findByRequestId(requestId).stream().map(this::toPaymentDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PaymentDTO> findPaymentsByStatus(String status) {
+        return paymentRepository.findByStatus(Payment.PaymentStatus.valueOf(status)).stream().map(this::toPaymentDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PaymentDTO> findUnpaidPayments() {
+        return paymentRepository.findUnpaidPayments().stream().map(this::toPaymentDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public PaymentDTO createPayment(PaymentDTO dto) {
+        Payment payment = new Payment();
+        payment.setRequest(requestRepository.findById(dto.getRequestId())
+                .orElseThrow(() -> new RuntimeException("Request not found")));
+        if (dto.getParcelId() != null) {
+            payment.setParcel(parcelRepository.findById(dto.getParcelId()).orElse(null));
         }
+        payment.setPaymentCode(
+                dto.getPaymentCode() != null ? dto.getPaymentCode() : generatePaymentCode(dto.getRequestId()));
+        payment.setPaymentType(Payment.PaymentType.valueOf(dto.getPaymentType()));
+        if (dto.getPayerType() != null)
+            payment.setPayerType(Payment.PayerType.valueOf(dto.getPayerType()));
+        if (dto.getReceiverType() != null)
+            payment.setReceiverType(Payment.ReceiverType.valueOf(dto.getReceiverType()));
+        payment.setExpectedAmount(dto.getExpectedAmount());
+        payment.setPaidAmount(BigDecimal.ZERO);
+        payment.setStatus(Payment.PaymentStatus.UNPAID);
+        return toPaymentDTO(paymentRepository.save(payment));
+    }
 
+    @Override
+    public PaymentDTO updatePayment(Long id, PaymentDTO dto) {
+        Payment payment = paymentRepository.findById(id).orElseThrow(() -> new RuntimeException("Payment not found"));
+        if (dto.getExpectedAmount() != null)
+            payment.setExpectedAmount(dto.getExpectedAmount());
+        return toPaymentDTO(paymentRepository.save(payment));
+    }
+
+    @Override
+    public PaymentDTO updatePaymentStatus(Long id, String status) {
+        Payment payment = paymentRepository.findById(id).orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setStatus(Payment.PaymentStatus.valueOf(status));
+        return toPaymentDTO(paymentRepository.save(payment));
+    }
+
+    @Override
+    public void deletePayment(Long id) {
+        paymentRepository.deleteById(id);
+    }
+
+    @Override
+    public BigDecimal getTotalExpectedAmount(Long requestId) {
+        BigDecimal result = paymentRepository.sumExpectedAmountByRequestId(requestId);
+        return result != null ? result : BigDecimal.ZERO;
+    }
+
+    @Override
+    public BigDecimal getTotalPaidAmount(Long requestId) {
+        BigDecimal result = paymentRepository.sumPaidAmountByRequestId(requestId);
+        return result != null ? result : BigDecimal.ZERO;
+    }
+
+    @Override
+    public List<PaymentTransactionDTO> findTransactionsByPaymentId(Long paymentId) {
+        return transactionRepository.findByPaymentIdOrderByTransactionAtDesc(paymentId).stream()
+                .map(this::toTransactionDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PaymentTransactionDTO> findTransactionsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return transactionRepository.findByDateRange(startDate, endDate).stream().map(this::toTransactionDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<PaymentTransactionDTO> findTransactionById(Long id) {
+        return transactionRepository.findById(id).map(this::toTransactionDTO);
+    }
+
+    @Override
+    public Optional<PaymentTransactionDTO> findByTransactionRef(String transactionRef) {
+        return transactionRepository.findByTransactionRef(transactionRef).map(this::toTransactionDTO);
+    }
+
+    @Override
+    public PaymentTransactionDTO createTransaction(PaymentTransactionDTO dto) {
+        PaymentTransaction txn = new PaymentTransaction();
+        txn.setPayment(paymentRepository.findById(dto.getPaymentId())
+                .orElseThrow(() -> new RuntimeException("Payment not found")));
+        txn.setAmount(dto.getAmount());
+        txn.setTransactionType(PaymentTransaction.TransactionType.valueOf(dto.getTransactionType()));
+        txn.setPaymentMethod(PaymentTransaction.PaymentMethod.valueOf(dto.getPaymentMethod()));
+        txn.setTransactionRef(dto.getTransactionRef());
+        txn.setStatus(PaymentTransaction.TransactionStatus.PENDING);
+        if (dto.getPerformedById() != null) {
+            txn.setPerformedBy(userRepository.findById(dto.getPerformedById()).orElse(null));
+        }
+        return toTransactionDTO(transactionRepository.save(txn));
+    }
+
+    @Override
+    public PaymentTransactionDTO recordCashPayment(Long paymentId, BigDecimal amount, Long performedById) {
+        PaymentTransaction txn = new PaymentTransaction();
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        txn.setPayment(payment);
+        txn.setAmount(amount);
+        txn.setTransactionType(PaymentTransaction.TransactionType.IN);
+        txn.setPaymentMethod(PaymentTransaction.PaymentMethod.CASH);
+        txn.setStatus(PaymentTransaction.TransactionStatus.SUCCESS);
+        txn.setTransactionAt(LocalDateTime.now());
+        if (performedById != null) {
+            txn.setPerformedBy(userRepository.findById(performedById).orElse(null));
+        }
+        transactionRepository.save(txn);
+        updatePaymentPaidAmount(payment);
+        return toTransactionDTO(txn);
+    }
+
+    @Override
+    public PaymentTransactionDTO recordOnlinePayment(Long paymentId, BigDecimal amount, String method,
+            String transactionRef) {
+        PaymentTransaction txn = new PaymentTransaction();
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        txn.setPayment(payment);
+        txn.setAmount(amount);
+        txn.setTransactionType(PaymentTransaction.TransactionType.IN);
+        txn.setPaymentMethod(PaymentTransaction.PaymentMethod.valueOf(method));
+        txn.setTransactionRef(transactionRef);
+        txn.setStatus(PaymentTransaction.TransactionStatus.PENDING);
+        return toTransactionDTO(transactionRepository.save(txn));
+    }
+
+    @Override
+    public PaymentTransactionDTO updateTransactionStatus(Long id, String status) {
+        PaymentTransaction txn = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        txn.setStatus(PaymentTransaction.TransactionStatus.valueOf(status));
+        if ("SUCCESS".equals(status)) {
+            txn.setTransactionAt(LocalDateTime.now());
+            transactionRepository.save(txn);
+            updatePaymentPaidAmount(txn.getPayment());
+        } else {
+            transactionRepository.save(txn);
+        }
+        return toTransactionDTO(txn);
+    }
+
+    @Override
+    public BigDecimal getSuccessfulPaymentTotal(Long paymentId) {
+        BigDecimal result = transactionRepository.sumSuccessfulPayments(paymentId);
+        return result != null ? result : BigDecimal.ZERO;
+    }
+
+    @Override
+    public String generatePaymentCode(Long requestId) {
+        String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return String.format("PAY-%s-%d", dateStr, requestId);
+    }
+
+    private void updatePaymentPaidAmount(Payment payment) {
+        BigDecimal paidAmount = getSuccessfulPaymentTotal(payment.getId());
+        payment.setPaidAmount(paidAmount);
+        if (paidAmount.compareTo(payment.getExpectedAmount()) >= 0) {
+            payment.setStatus(Payment.PaymentStatus.PAID);
+        } else if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
+            payment.setStatus(Payment.PaymentStatus.PARTIALLY_PAID);
+        }
+        paymentRepository.save(payment);
+    }
+
+    private PaymentDTO toPaymentDTO(Payment payment) {
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(payment.getId());
+        dto.setRequestId(payment.getRequest().getId());
+        dto.setRequestCode(payment.getRequest().getRequestCode());
+        if (payment.getParcel() != null) {
+            dto.setParcelId(payment.getParcel().getId());
+            dto.setParcelCode(payment.getParcel().getParcelCode());
+        }
+        dto.setPaymentCode(payment.getPaymentCode());
+        dto.setPaymentType(payment.getPaymentType().name());
+        if (payment.getPayerType() != null)
+            dto.setPayerType(payment.getPayerType().name());
+        if (payment.getReceiverType() != null)
+            dto.setReceiverType(payment.getReceiverType().name());
+        dto.setExpectedAmount(payment.getExpectedAmount());
+        dto.setPaidAmount(payment.getPaidAmount());
+        dto.setStatus(payment.getStatus().name());
+        dto.setCreatedAt(payment.getCreatedAt());
+        dto.setUpdatedAt(payment.getUpdatedAt());
         return dto;
     }
 
-    private PaymentTransactionDTO toTransactionDTO(PaymentTransaction transaction) {
-        return PaymentTransactionDTO.builder()
-                .id(transaction.getId())
-                .paymentId(transaction.getPayment() != null ? transaction.getPayment().getId() : null)
-                .amount(transaction.getAmount())
-                .method(transaction.getMethod() != null ? transaction.getMethod().name() : null)
-                .gatewayTransactionId(transaction.getGatewayTransactionId())
-                .gatewayResponseCode(transaction.getGatewayResponseCode())
-                .note(transaction.getNote())
-                .createdAt(transaction.getCreatedAt())
-                .build();
-    }
-
-    private Payment toEntity(PaymentDTO dto) {
-        Payment payment = new Payment();
-
-        if (dto.getRequestId() != null) {
-            customerRequestRepository.findById(dto.getRequestId()).ifPresent(payment::setRequest);
+    private PaymentTransactionDTO toTransactionDTO(PaymentTransaction txn) {
+        PaymentTransactionDTO dto = new PaymentTransactionDTO();
+        dto.setId(txn.getId());
+        dto.setPaymentId(txn.getPayment().getId());
+        dto.setPaymentCode(txn.getPayment().getPaymentCode());
+        dto.setAmount(txn.getAmount());
+        dto.setTransactionType(txn.getTransactionType().name());
+        if (txn.getPaymentMethod() != null)
+            dto.setPaymentMethod(txn.getPaymentMethod().name());
+        dto.setTransactionRef(txn.getTransactionRef());
+        dto.setStatus(txn.getStatus().name());
+        if (txn.getPerformedBy() != null) {
+            dto.setPerformedById(txn.getPerformedBy().getId());
+            dto.setPerformedByName(txn.getPerformedBy().getUsername());
         }
-        if (dto.getType() != null) {
-            payment.setType(PaymentType.valueOf(dto.getType()));
-        }
-        if (dto.getPayerCustomerId() != null) {
-            customerRepository.findById(dto.getPayerCustomerId()).ifPresent(payment::setPayerCustomer);
-        }
-
-        payment.setTotalAmount(dto.getTotalAmount());
-        payment.setPaidAmount(dto.getPaidAmount() != null ? dto.getPaidAmount() : BigDecimal.ZERO);
-        payment.setStatus(PaymentStatus.UNPAID);
-        payment.setCreatedAt(LocalDateTime.now());
-
-        return payment;
-    }
-
-    // ==================== PAYMENT ====================
-
-    @Override
-    public PaymentDTO createPayment(PaymentDTO paymentDTO) {
-        Payment payment = toEntity(paymentDTO);
-        payment = paymentRepository.save(payment);
-        return toDTO(payment);
-    }
-
-    @Override
-    public PaymentDTO updatePayment(Long id, PaymentDTO paymentDTO) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found: " + id));
-
-        if (paymentDTO.getTotalAmount() != null)
-            payment.setTotalAmount(paymentDTO.getTotalAmount());
-        if (paymentDTO.getPaidAmount() != null)
-            payment.setPaidAmount(paymentDTO.getPaidAmount());
-
-        payment = paymentRepository.save(payment);
-        return toDTO(payment);
-    }
-
-    @Override
-    public PaymentDTO updateStatus(Long id, String status) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found: " + id));
-        payment.setStatus(PaymentStatus.valueOf(status));
-        payment = paymentRepository.save(payment);
-        return toDTO(payment);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<PaymentDTO> findById(Long id) {
-        return paymentRepository.findById(id).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentDTO> findAllByRequestId(Long requestId) {
-        return paymentRepository.findAllByRequest_Id(requestId)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PaymentDTO> findAllByType(String type, Pageable pageable) {
-        PaymentType paymentType = PaymentType.valueOf(type);
-        return paymentRepository.findAllByType(paymentType, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PaymentDTO> findAllByStatus(String status, Pageable pageable) {
-        PaymentStatus paymentStatus = PaymentStatus.valueOf(status);
-        return paymentRepository.findAllByStatus(paymentStatus, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public BigDecimal getTotalAmountByRequestId(Long requestId) {
-        return paymentRepository.sumTotalAmountByRequest_Id(requestId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public BigDecimal getPaidAmountByRequestId(Long requestId) {
-        return paymentRepository.sumPaidAmountByRequest_Id(requestId);
-    }
-
-    // ==================== PAYMENT TRANSACTION ====================
-
-    @Override
-    public PaymentTransactionDTO addTransaction(PaymentTransactionDTO transactionDTO) {
-        Payment payment = paymentRepository.findById(transactionDTO.getPaymentId())
-                .orElseThrow(() -> new RuntimeException("Payment not found: " + transactionDTO.getPaymentId()));
-
-        PaymentTransaction transaction = new PaymentTransaction();
-        transaction.setPayment(payment);
-        transaction.setAmount(transactionDTO.getAmount());
-        if (transactionDTO.getMethod() != null) {
-            transaction.setMethod(PaymentMethod.valueOf(transactionDTO.getMethod()));
-        }
-        transaction.setGatewayTransactionId(transactionDTO.getGatewayTransactionId());
-        transaction.setGatewayResponseCode(transactionDTO.getGatewayResponseCode());
-        transaction.setNote(transactionDTO.getNote());
-        transaction.setCreatedAt(LocalDateTime.now());
-
-        transaction = paymentTransactionRepository.save(transaction);
-
-        // Update paid amount in payment
-        BigDecimal newPaidAmount = payment.getPaidAmount().add(transactionDTO.getAmount());
-        payment.setPaidAmount(newPaidAmount);
-
-        // Update payment status
-        if (newPaidAmount.compareTo(payment.getTotalAmount()) >= 0) {
-            payment.setStatus(PaymentStatus.PAID);
-        } else if (newPaidAmount.compareTo(BigDecimal.ZERO) > 0) {
-            payment.setStatus(PaymentStatus.PARTIAL);
-        }
-        paymentRepository.save(payment);
-
-        return toTransactionDTO(transaction);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentTransactionDTO> findAllTransactionsByPaymentId(Long paymentId) {
-        return paymentTransactionRepository.findAllByPayment_Id(paymentId)
-                .stream()
-                .map(this::toTransactionDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<PaymentTransactionDTO> findLatestTransactionByPaymentId(Long paymentId) {
-        return paymentTransactionRepository.findTop1ByPayment_IdOrderByCreatedAtDesc(paymentId)
-                .map(this::toTransactionDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<PaymentTransactionDTO> findTransactionByGatewayId(String gatewayTransactionId) {
-        return paymentTransactionRepository.findByGatewayTransactionId(gatewayTransactionId)
-                .map(this::toTransactionDTO);
+        dto.setGatewayResponse(txn.getGatewayResponse());
+        dto.setTransactionAt(txn.getTransactionAt());
+        dto.setCreatedAt(txn.getCreatedAt());
+        return dto;
     }
 }

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý Địa điểm</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-map-marker-alt me-2"></i>Quản lý Địa điểm / Kho</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <a href="/admin/locations/create" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> Thêm địa điểm
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form class="row g-3" method="get" action="/admin/locations">
+                    <div class="col-md-3">
+                        <label class="form-label">Loại địa điểm</label>
+                        <select class="form-select" name="type">
+                            <option value="">Tất cả</option>
+                            <option value="WAREHOUSE">Kho hàng</option>
+                            <option value="SENDER_ADDRESS">Địa chỉ người gửi</option>
+                            <option value="RECEIVER_ADDRESS">Địa chỉ người nhận</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" class="form-control" name="keyword" placeholder="Tên, địa chỉ, mã kho...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" name="status">
+                            <option value="">Tất cả</option>
+                            <option value="active">Hoạt động</option>
+                            <option value="inactive">Ngừng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="/admin/locations" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> Đặt lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 50px">#</th>
+                                <th>Mã</th>
+                                <th>Tên địa điểm</th>
+                                <th>Loại</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th style="width: 150px">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample data - sẽ được thay bằng th:each khi có controller -->
+                            <tr>
+                                <td>1</td>
+                                <td><code>WH-HCM-01</code></td>
+                                <td>Kho Tân Bình</td>
+                                <td><span class="badge bg-primary">Kho hàng</span></td>
+                                <td>123 Cộng Hòa, Tân Bình, TP.HCM</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-info" title="Xem">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><code>WH-HN-01</code></td>
+                                <td>Kho Hoàng Mai</td>
+                                <td><span class="badge bg-primary">Kho hàng</span></td>
+                                <td>456 Giải Phóng, Hoàng Mai, Hà Nội</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-info" title="Xem">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td><code>-</code></td>
+                                <td>Nguyễn Văn A</td>
+                                <td><span class="badge bg-info">Người gửi</span></td>
+                                <td>789 Lý Thường Kiệt, Q.10, TP.HCM</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-info" title="Xem">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

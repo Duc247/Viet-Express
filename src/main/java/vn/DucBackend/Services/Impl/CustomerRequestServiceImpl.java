@@ -1,251 +1,207 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.Entities.CustomerRequest;
-import vn.DucBackend.Entities.CustomerRequest.RequestStatus;
-import vn.DucBackend.Entities.TrackingCode;
+import vn.DucBackend.Entities.ServiceType;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.CustomerRequestService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-/**
- * Implementation của CustomerRequestService - Core Order Service
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CustomerRequestServiceImpl implements CustomerRequestService {
 
-    private final CustomerRequestRepository customerRequestRepository;
+    private final CustomerRequestRepository requestRepository;
     private final CustomerRepository customerRepository;
+    private final LocationRepository locationRepository;
     private final ServiceTypeRepository serviceTypeRepository;
-    private final WarehouseRepository warehouseRepository;
-    private final TrackingCodeRepository trackingCodeRepository;
 
-    // ==================== CONVERTER ====================
+    @Override
+    public List<CustomerRequestDTO> findAllRequests() {
+        return requestRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<CustomerRequestDTO> findRequestById(Long id) {
+        return requestRepository.findById(id).map(this::toDTO);
+    }
+
+    @Override
+    public Optional<CustomerRequestDTO> findByRequestCode(String requestCode) {
+        return requestRepository.findByRequestCode(requestCode).map(this::toDTO);
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findRequestsBySenderId(Long senderId) {
+        return requestRepository.findBySenderId(senderId).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findRequestsByReceiverId(Long receiverId) {
+        return requestRepository.findByReceiverId(receiverId).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findRequestsByCustomerId(Long customerId) {
+        return requestRepository.findByCustomerId(customerId).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findRequestsByStatus(String status) {
+        return requestRepository.findByStatus(CustomerRequest.RequestStatus.valueOf(status)).stream().map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findActiveRequests() {
+        return requestRepository.findActiveRequests().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findRequestsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return requestRepository.findByDateRange(startDate, endDate).stream().map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CustomerRequestDTO> searchRequests(String keyword) {
+        return requestRepository.searchByKeyword(keyword).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countRequestsByStatus(String status) {
+        return requestRepository.countByStatus(CustomerRequest.RequestStatus.valueOf(status));
+    }
+
+    @Override
+    public CustomerRequestDTO createRequest(CustomerRequestDTO dto) {
+        CustomerRequest request = new CustomerRequest();
+        request.setRequestCode(dto.getRequestCode() != null ? dto.getRequestCode() : generateRequestCode());
+        request.setSender(customerRepository.findById(dto.getSenderId())
+                .orElseThrow(() -> new RuntimeException("Sender not found")));
+        if (dto.getReceiverId() != null) {
+            request.setReceiver(customerRepository.findById(dto.getReceiverId()).orElse(null));
+        }
+        request.setSenderLocation(locationRepository.findById(dto.getSenderLocationId())
+                .orElseThrow(() -> new RuntimeException("Sender location not found")));
+        request.setReceiverLocation(locationRepository.findById(dto.getReceiverLocationId())
+                .orElseThrow(() -> new RuntimeException("Receiver location not found")));
+        request.setServiceType(serviceTypeRepository.findById(dto.getServiceTypeId())
+                .orElseThrow(() -> new RuntimeException("Service type not found")));
+        request.setDistanceKm(dto.getDistanceKm());
+        request.setParcelDescription(dto.getParcelDescription());
+        request.setShippingFee(dto.getShippingFee() != null ? dto.getShippingFee()
+                : calculateShippingFee(dto.getServiceTypeId(), dto.getDistanceKm()));
+        request.setCodAmount(dto.getCodAmount());
+        request.setEstimatedDeliveryTime(dto.getEstimatedDeliveryTime() != null ? dto.getEstimatedDeliveryTime()
+                : calculateEstimatedDeliveryTime(dto.getServiceTypeId(), dto.getDistanceKm()));
+        request.setNote(dto.getNote());
+        request.setStatus(CustomerRequest.RequestStatus.PENDING);
+        return toDTO(requestRepository.save(request));
+    }
+
+    @Override
+    public CustomerRequestDTO updateRequest(Long id, CustomerRequestDTO dto) {
+        CustomerRequest request = requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+        if (dto.getParcelDescription() != null)
+            request.setParcelDescription(dto.getParcelDescription());
+        if (dto.getCodAmount() != null)
+            request.setCodAmount(dto.getCodAmount());
+        if (dto.getNote() != null)
+            request.setNote(dto.getNote());
+        return toDTO(requestRepository.save(request));
+    }
+
+    @Override
+    public CustomerRequestDTO updateRequestStatus(Long id, String status) {
+        CustomerRequest request = requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+        request.setStatus(CustomerRequest.RequestStatus.valueOf(status));
+        return toDTO(requestRepository.save(request));
+    }
+
+    @Override
+    public CustomerRequestDTO confirmRequest(Long id) {
+        return updateRequestStatus(id, "CONFIRMED");
+    }
+
+    @Override
+    public CustomerRequestDTO cancelRequest(Long id) {
+        return updateRequestStatus(id, "CANCELLED");
+    }
+
+    @Override
+    public void deleteRequest(Long id) {
+        requestRepository.deleteById(id);
+    }
+
+    @Override
+    public String generateRequestCode() {
+        String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String uuid = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        return "REQ-" + dateStr + "-" + uuid;
+    }
+
+    @Override
+    public BigDecimal calculateShippingFee(Long serviceTypeId, BigDecimal distanceKm) {
+        ServiceType serviceType = serviceTypeRepository.findById(serviceTypeId).orElse(null);
+        if (serviceType != null && serviceType.getPricePerKm() != null && distanceKm != null) {
+            return serviceType.getPricePerKm().multiply(distanceKm);
+        }
+        return BigDecimal.ZERO;
+    }
+
+    @Override
+    public LocalDateTime calculateEstimatedDeliveryTime(Long serviceTypeId, BigDecimal distanceKm) {
+        ServiceType serviceType = serviceTypeRepository.findById(serviceTypeId).orElse(null);
+        if (serviceType != null && serviceType.getAverageSpeedKmh() != null && distanceKm != null) {
+            double hours = distanceKm.doubleValue() / serviceType.getAverageSpeedKmh().doubleValue();
+            return LocalDateTime.now().plusHours((long) Math.ceil(hours));
+        }
+        return LocalDateTime.now().plusDays(3);
+    }
 
     private CustomerRequestDTO toDTO(CustomerRequest request) {
-        CustomerRequestDTO dto = CustomerRequestDTO.builder()
-                .id(request.getId())
-                .customerId(request.getCustomer() != null ? request.getCustomer().getId() : null)
-                .serviceTypeId(request.getServiceType() != null ? request.getServiceType().getId() : null)
-                .serviceTypeName(request.getServiceType() != null ? request.getServiceType().getServiceName() : null)
-                .expectedPickupTime(request.getExpectedPickupTime())
-                .note(request.getNote())
-                .imageOrder(request.getImageOrder())
-                .pickupContactName(request.getPickupContactName())
-                .pickupContactPhone(request.getPickupContactPhone())
-                .pickupAddressDetail(request.getPickupAddressDetail())
-                .pickupWard(request.getPickupWard())
-                .pickupDistrict(request.getPickupDistrict())
-                .pickupProvince(request.getPickupProvince())
-                .deliveryContactName(request.getDeliveryContactName())
-                .deliveryContactPhone(request.getDeliveryContactPhone())
-                .deliveryAddressDetail(request.getDeliveryAddressDetail())
-                .deliveryWard(request.getDeliveryWard())
-                .deliveryDistrict(request.getDeliveryDistrict())
-                .deliveryProvince(request.getDeliveryProvince())
-                .weight(request.getWeight())
-                .length(request.getLength())
-                .width(request.getWidth())
-                .height(request.getHeight())
-                .codAmount(request.getCodAmount())
-                .currentWarehouseId(
-                        request.getCurrentWarehouse() != null ? request.getCurrentWarehouse().getId() : null)
-                .currentWarehouseName(
-                        request.getCurrentWarehouse() != null ? request.getCurrentWarehouse().getWarehouseName() : null)
-                .status(request.getStatus() != null ? request.getStatus().name() : null)
-                .createdAt(request.getCreatedAt())
-                .build();
-
-        // Get tracking code
-        trackingCodeRepository.findByRequest_Id(request.getId())
-                .ifPresent(tc -> dto.setTrackingCode(tc.getCode()));
-
+        CustomerRequestDTO dto = new CustomerRequestDTO();
+        dto.setId(request.getId());
+        dto.setRequestCode(request.getRequestCode());
+        dto.setSenderId(request.getSender().getId());
+        dto.setSenderName(request.getSender().getName());
+        dto.setSenderPhone(request.getSender().getPhone());
+        if (request.getReceiver() != null) {
+            dto.setReceiverId(request.getReceiver().getId());
+            dto.setReceiverName(request.getReceiver().getName());
+            dto.setReceiverPhone(request.getReceiver().getPhone());
+        }
+        dto.setSenderLocationId(request.getSenderLocation().getId());
+        dto.setSenderLocationName(request.getSenderLocation().getName());
+        dto.setSenderAddress(request.getSenderLocation().getAddressText());
+        dto.setReceiverLocationId(request.getReceiverLocation().getId());
+        dto.setReceiverLocationName(request.getReceiverLocation().getName());
+        dto.setReceiverAddress(request.getReceiverLocation().getAddressText());
+        dto.setServiceTypeId(request.getServiceType().getId());
+        dto.setServiceTypeName(request.getServiceType().getName());
+        dto.setDistanceKm(request.getDistanceKm());
+        dto.setParcelDescription(request.getParcelDescription());
+        dto.setShippingFee(request.getShippingFee());
+        dto.setCodAmount(request.getCodAmount());
+        dto.setEstimatedDeliveryTime(request.getEstimatedDeliveryTime());
+        dto.setStatus(request.getStatus().name());
+        dto.setNote(request.getNote());
+        dto.setCreatedAt(request.getCreatedAt());
+        dto.setUpdatedAt(request.getUpdatedAt());
         return dto;
-    }
-
-    private CustomerRequest toEntity(CustomerRequestDTO dto) {
-        CustomerRequest request = new CustomerRequest();
-
-        if (dto.getCustomerId() != null) {
-            customerRepository.findById(dto.getCustomerId()).ifPresent(request::setCustomer);
-        }
-        if (dto.getServiceTypeId() != null) {
-            serviceTypeRepository.findById(dto.getServiceTypeId()).ifPresent(request::setServiceType);
-        }
-
-        request.setExpectedPickupTime(dto.getExpectedPickupTime());
-        request.setNote(dto.getNote());
-        request.setImageOrder(dto.getImageOrder());
-        request.setPickupContactName(dto.getPickupContactName());
-        request.setPickupContactPhone(dto.getPickupContactPhone());
-        request.setPickupAddressDetail(dto.getPickupAddressDetail());
-        request.setPickupWard(dto.getPickupWard());
-        request.setPickupDistrict(dto.getPickupDistrict());
-        request.setPickupProvince(dto.getPickupProvince());
-        request.setDeliveryContactName(dto.getDeliveryContactName());
-        request.setDeliveryContactPhone(dto.getDeliveryContactPhone());
-        request.setDeliveryAddressDetail(dto.getDeliveryAddressDetail());
-        request.setDeliveryWard(dto.getDeliveryWard());
-        request.setDeliveryDistrict(dto.getDeliveryDistrict());
-        request.setDeliveryProvince(dto.getDeliveryProvince());
-        request.setWeight(dto.getWeight());
-        request.setLength(dto.getLength());
-        request.setWidth(dto.getWidth());
-        request.setHeight(dto.getHeight());
-        request.setCodAmount(dto.getCodAmount());
-        request.setStatus(RequestStatus.PENDING);
-        request.setCreatedAt(LocalDateTime.now());
-
-        return request;
-    }
-
-    private String generateTrackingCode() {
-        String code;
-        do {
-            code = "VN" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
-        } while (trackingCodeRepository.existsByCode(code));
-        return code;
-    }
-
-    // ==================== TẠO / CẬP NHẬT VẬN ĐƠN ====================
-
-    @Override
-    public CustomerRequestDTO createOrder(CustomerRequestDTO requestDTO) {
-        CustomerRequest request = toEntity(requestDTO);
-        request = customerRequestRepository.save(request);
-
-        // Generate tracking code
-        TrackingCode trackingCode = new TrackingCode();
-        trackingCode.setRequest(request);
-        trackingCode.setCode(generateTrackingCode());
-        trackingCode.setStatus(true);
-        trackingCode.setCreatedAt(LocalDateTime.now());
-        trackingCodeRepository.save(trackingCode);
-
-        return toDTO(request);
-    }
-
-    @Override
-    public CustomerRequestDTO updateOrder(Long id, CustomerRequestDTO requestDTO) {
-        CustomerRequest request = customerRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CustomerRequest not found: " + id));
-
-        if (requestDTO.getNote() != null)
-            request.setNote(requestDTO.getNote());
-        if (requestDTO.getExpectedPickupTime() != null)
-            request.setExpectedPickupTime(requestDTO.getExpectedPickupTime());
-
-        request = customerRequestRepository.save(request);
-        return toDTO(request);
-    }
-
-    @Override
-    public CustomerRequestDTO updateStatus(Long id, String status) {
-        CustomerRequest request = customerRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CustomerRequest not found: " + id));
-        request.setStatus(RequestStatus.valueOf(status));
-        request = customerRequestRepository.save(request);
-        return toDTO(request);
-    }
-
-    @Override
-    public CustomerRequestDTO confirmOrder(Long id) {
-        return updateStatus(id, RequestStatus.CONFIRMED.name());
-    }
-
-    @Override
-    public CustomerRequestDTO cancelOrder(Long id) {
-        return updateStatus(id, RequestStatus.CANCELLED.name());
-    }
-
-    @Override
-    public CustomerRequestDTO updateCurrentWarehouse(Long id, Long warehouseId) {
-        CustomerRequest request = customerRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CustomerRequest not found: " + id));
-
-        warehouseRepository.findById(warehouseId).ifPresent(request::setCurrentWarehouse);
-        request = customerRequestRepository.save(request);
-        return toDTO(request);
-    }
-
-    // ==================== TÌM KIẾM ====================
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<CustomerRequestDTO> findById(Long id) {
-        return customerRequestRepository.findById(id).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<CustomerRequestDTO> findByIdAndCustomerId(Long id, Long customerId) {
-        return customerRequestRepository.findByIdAndCustomer_Id(id, customerId).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<CustomerRequestDTO> findByTrackingCode(String trackingCode) {
-        return customerRequestRepository.findByTrackingCode(trackingCode).map(this::toDTO);
-    }
-
-    // ==================== DANH SÁCH ====================
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CustomerRequestDTO> findAll(Pageable pageable) {
-        return customerRequestRepository.findAll(pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CustomerRequestDTO> findAllByCustomerId(Long customerId, Pageable pageable) {
-        return customerRequestRepository.findAllByCustomer_Id(customerId, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CustomerRequestDTO> findAllByStatus(String status, Pageable pageable) {
-        RequestStatus requestStatus = RequestStatus.valueOf(status);
-        return customerRequestRepository.findAllByStatus(requestStatus, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CustomerRequestDTO> findAllByWarehouseIdAndStatus(Long warehouseId, String status, Pageable pageable) {
-        RequestStatus requestStatus = RequestStatus.valueOf(status);
-        return customerRequestRepository.findAllByCurrentWarehouse_IdAndStatus(warehouseId, requestStatus, pageable)
-                .map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<CustomerRequestDTO> findAllByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        return customerRequestRepository.findAllByCreatedAtBetween(from, to, pageable).map(this::toDTO);
-    }
-
-    // ==================== THỐNG KÊ ====================
-
-    @Override
-    @Transactional(readOnly = true)
-    public Long countByStatus(String status) {
-        RequestStatus requestStatus = RequestStatus.valueOf(status);
-        return customerRequestRepository.countByStatus(requestStatus);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Long countByWarehouseIdAndStatus(Long warehouseId, String status) {
-        RequestStatus requestStatus = RequestStatus.valueOf(status);
-        return customerRequestRepository.countByCurrentWarehouse_IdAndStatus(warehouseId, requestStatus);
     }
 }

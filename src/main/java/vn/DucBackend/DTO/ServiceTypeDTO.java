@@ -1,25 +1,18 @@
 package vn.DucBackend.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-/**
- * DTO cho ServiceType entity
- */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ServiceTypeDTO {
     private Long id;
-    private String serviceCode;
-    private String serviceName;
-    private BigDecimal basePrice;
-    private BigDecimal pricePerKg;
+    private String code;
+    private String name;
     private String description;
-    private Boolean status;
+    private BigDecimal pricePerKm;
+    private BigDecimal averageSpeedKmh;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

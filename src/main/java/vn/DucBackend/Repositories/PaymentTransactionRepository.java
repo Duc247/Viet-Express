@@ -1,68 +1,37 @@
 package vn.DucBackend.Repositories;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import vn.DucBackend.Entities.PaymentTransaction;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import vn.DucBackend.Entities.PaymentTransaction;
-import vn.DucBackend.Entities.PaymentTransaction.PaymentMethod;
-
-/**
- * Repository cho PaymentTransaction entity - Quản lý giao dịch thanh toán
- * Phục vụ: ghi nhận từng giao dịch thanh toán, tra cứu lịch sử giao dịch
- */
 @Repository
 public interface PaymentTransactionRepository extends JpaRepository<PaymentTransaction, Long> {
 
-    // ==================== LỌC THEO PAYMENT ====================
+    List<PaymentTransaction> findByPaymentId(Long paymentId);
 
-    /** Lấy tất cả giao dịch của một payment */
-    List<PaymentTransaction> findAllByPayment_Id(Long paymentId);
+    List<PaymentTransaction> findByStatus(PaymentTransaction.TransactionStatus status);
 
-    Page<PaymentTransaction> findAllByPayment_Id(Long paymentId, Pageable pageable);
+    List<PaymentTransaction> findByTransactionType(PaymentTransaction.TransactionType transactionType);
 
-    /** Lấy giao dịch mới nhất của một payment */
-    Optional<PaymentTransaction> findTop1ByPayment_IdOrderByCreatedAtDesc(Long paymentId);
+    List<PaymentTransaction> findByPaymentMethod(PaymentTransaction.PaymentMethod paymentMethod);
 
-    /** Đếm số giao dịch của payment */
-    Long countByPayment_Id(Long paymentId);
+    List<PaymentTransaction> findByPerformedById(Long userId);
 
-    // ==================== LỌC THEO PHƯƠNG THỨC THANH TOÁN ====================
+    @Query("SELECT pt FROM PaymentTransaction pt WHERE pt.payment.id = :paymentId ORDER BY pt.transactionAt DESC")
+    List<PaymentTransaction> findByPaymentIdOrderByTransactionAtDesc(@Param("paymentId") Long paymentId);
 
-    /**
-     * Lấy danh sách giao dịch theo phương thức (CASH, BANK_TRANSFER, VNPAY, MOMO)
-     */
-    Page<PaymentTransaction> findAllByMethod(PaymentMethod method, Pageable pageable);
+    @Query("SELECT pt FROM PaymentTransaction pt WHERE pt.transactionAt BETWEEN :startDate AND :endDate")
+    List<PaymentTransaction> findByDateRange(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
-    List<PaymentTransaction> findAllByMethod(PaymentMethod method);
+    @Query("SELECT SUM(pt.amount) FROM PaymentTransaction pt WHERE pt.payment.id = :paymentId AND pt.status = 'SUCCESS' AND pt.transactionType = 'IN'")
+    java.math.BigDecimal sumSuccessfulPayments(@Param("paymentId") Long paymentId);
 
-    /** Đếm số giao dịch theo phương thức */
-    Long countByMethod(PaymentMethod method);
-
-    // ==================== TÌM KIẾM THEO GATEWAY TRANSACTION ====================
-
-    /** Tìm giao dịch theo mã giao dịch từ cổng thanh toán */
-    Optional<PaymentTransaction> findByGatewayTransactionId(String gatewayTransactionId);
-
-    /** Kiểm tra mã giao dịch gateway đã tồn tại */
-    Boolean existsByGatewayTransactionId(String gatewayTransactionId);
-
-    // ==================== LỌC THEO THỜI GIAN ====================
-
-    /** Lấy giao dịch trong khoảng thời gian */
-    Page<PaymentTransaction> findAllByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
-
-    List<PaymentTransaction> findAllByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
-
-    /** Lấy giao dịch theo phương thức trong khoảng thời gian */
-    Page<PaymentTransaction> findAllByMethodAndCreatedAtBetween(PaymentMethod method, LocalDateTime from,
-            LocalDateTime to, Pageable pageable);
-
-    /** Đếm giao dịch trong khoảng thời gian */
-    Long countByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
+    @Query("SELECT pt FROM PaymentTransaction pt WHERE pt.transactionRef = :ref")
+    java.util.Optional<PaymentTransaction> findByTransactionRef(@Param("ref") String transactionRef);
 }

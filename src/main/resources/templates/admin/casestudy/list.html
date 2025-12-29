@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý CaseStudy</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-star me-2"></i>Quản lý CaseStudy (Dự án tiêu biểu)</h1>
+            <a href="/admin/casestudy/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Tiêu đề</th>
+                                <th>Slug</th>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Nổi bật</th>
+                                <th>Xuất bản</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Vận chuyển máy móc công nghiệp</td>
+                                <td><code>van-chuyen-may-moc</code></td>
+                                <td>Công ty ABC</td>
+                                <td>Giao nhanh</td>
+                                <td><span class="badge bg-warning"><i class="fas fa-star"></i></span></td>
+                                <td><span class="badge bg-success">Đã xuất bản</span></td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

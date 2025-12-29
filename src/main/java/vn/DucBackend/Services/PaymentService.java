@@ -1,59 +1,58 @@
 package vn.DucBackend.Services;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import vn.DucBackend.DTO.PaymentDTO;
 import vn.DucBackend.DTO.PaymentTransactionDTO;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service interface cho Payment - Quản lý thanh toán
- */
 public interface PaymentService {
 
-    // ==================== PAYMENT ====================
+    // Payment operations
+    List<PaymentDTO> findAllPayments();
 
-    /** Tạo payment mới cho vận đơn */
-    PaymentDTO createPayment(PaymentDTO paymentDTO);
+    Optional<PaymentDTO> findPaymentById(Long id);
 
-    /** Cập nhật thông tin payment */
-    PaymentDTO updatePayment(Long id, PaymentDTO paymentDTO);
+    Optional<PaymentDTO> findByPaymentCode(String paymentCode);
 
-    /** Cập nhật trạng thái payment */
-    PaymentDTO updateStatus(Long id, String status);
+    List<PaymentDTO> findPaymentsByRequestId(Long requestId);
 
-    /** Tìm payment theo ID */
-    Optional<PaymentDTO> findById(Long id);
+    List<PaymentDTO> findPaymentsByStatus(String status);
 
-    /** Lấy tất cả payments của vận đơn */
-    List<PaymentDTO> findAllByRequestId(Long requestId);
+    List<PaymentDTO> findUnpaidPayments();
 
-    /** Lấy payments theo loại */
-    Page<PaymentDTO> findAllByType(String type, Pageable pageable);
+    PaymentDTO createPayment(PaymentDTO dto);
 
-    /** Lấy payments theo trạng thái */
-    Page<PaymentDTO> findAllByStatus(String status, Pageable pageable);
+    PaymentDTO updatePayment(Long id, PaymentDTO dto);
 
-    /** Tính tổng số tiền cần thanh toán của vận đơn */
-    BigDecimal getTotalAmountByRequestId(Long requestId);
+    PaymentDTO updatePaymentStatus(Long id, String status);
 
-    /** Tính tổng số tiền đã thanh toán của vận đơn */
-    BigDecimal getPaidAmountByRequestId(Long requestId);
+    void deletePayment(Long id);
 
-    // ==================== PAYMENT TRANSACTION ====================
+    BigDecimal getTotalExpectedAmount(Long requestId);
 
-    /** Thêm giao dịch thanh toán */
-    PaymentTransactionDTO addTransaction(PaymentTransactionDTO transactionDTO);
+    BigDecimal getTotalPaidAmount(Long requestId);
 
-    /** Lấy tất cả giao dịch của payment */
-    List<PaymentTransactionDTO> findAllTransactionsByPaymentId(Long paymentId);
+    // Payment Transaction operations
+    List<PaymentTransactionDTO> findTransactionsByPaymentId(Long paymentId);
 
-    /** Lấy giao dịch mới nhất của payment */
-    Optional<PaymentTransactionDTO> findLatestTransactionByPaymentId(Long paymentId);
+    List<PaymentTransactionDTO> findTransactionsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
-    /** Tìm giao dịch theo gateway transaction ID */
-    Optional<PaymentTransactionDTO> findTransactionByGatewayId(String gatewayTransactionId);
+    Optional<PaymentTransactionDTO> findTransactionById(Long id);
+
+    Optional<PaymentTransactionDTO> findByTransactionRef(String transactionRef);
+
+    PaymentTransactionDTO createTransaction(PaymentTransactionDTO dto);
+
+    PaymentTransactionDTO recordCashPayment(Long paymentId, BigDecimal amount, Long performedById);
+
+    PaymentTransactionDTO recordOnlinePayment(Long paymentId, BigDecimal amount, String method, String transactionRef);
+
+    PaymentTransactionDTO updateTransactionStatus(Long id, String status);
+
+    BigDecimal getSuccessfulPaymentTotal(Long paymentId);
+
+    String generatePaymentCode(Long requestId);
 }

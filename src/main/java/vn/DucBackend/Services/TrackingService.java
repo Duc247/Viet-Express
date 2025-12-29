@@ -1,45 +1,44 @@
 package vn.DucBackend.Services;
 
-import vn.DucBackend.DTO.ParcelActionDTO;
 import vn.DucBackend.DTO.TrackingCodeDTO;
+import vn.DucBackend.DTO.ParcelActionDTO;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service interface cho Tracking - Quản lý tracking timeline
- */
 public interface TrackingService {
 
-    // ==================== TRACKING CODE ====================
-
-    /** Sinh tracking code mới cho vận đơn */
-    TrackingCodeDTO generateTrackingCode(Long requestId);
-
-    /** Tìm tracking code theo request ID */
-    Optional<TrackingCodeDTO> findTrackingCodeByRequestId(Long requestId);
-
-    /** Tìm tracking code theo mã code */
+    // TrackingCode operations
     Optional<TrackingCodeDTO> findByCode(String code);
 
-    /** Kiểm tra mã tracking đã tồn tại */
-    boolean existsByCode(String code);
+    Optional<TrackingCodeDTO> findByRequestId(Long requestId);
 
-    // ==================== PARCEL ACTION (TRACKING LOG) ====================
+    TrackingCodeDTO createTrackingCode(Long requestId);
 
-    /** Thêm action mới vào tracking timeline */
-    ParcelActionDTO addParcelAction(Long requestId, String actionCode, Long actorUserId,
-            Long fromWarehouseId, Long toWarehouseId, String note);
+    String generateTrackingCode();
 
-    /** Lấy danh sách tracking timeline theo request ID (order by time ASC) */
-    List<ParcelActionDTO> getTrackingTimeline(Long requestId);
+    // ParcelAction (Tracking Log) operations
+    List<ParcelActionDTO> findActionsByParcelId(Long parcelId);
 
-    /** Lấy danh sách tracking timeline theo tracking code */
-    List<ParcelActionDTO> getTrackingTimelineByCode(String trackingCode);
+    List<ParcelActionDTO> findActionsByRequestId(Long requestId);
 
-    /** Lấy action mới nhất của vận đơn */
-    Optional<ParcelActionDTO> getLatestAction(Long requestId);
+    List<ParcelActionDTO> getTrackingHistory(String trackingCode);
 
-    /** Lấy action đầu tiên của vận đơn */
-    Optional<ParcelActionDTO> getFirstAction(Long requestId);
+    ParcelActionDTO logAction(Long parcelId, Long requestId, String actionCode,
+            Long fromLocationId, Long toLocationId,
+            Long actorUserId, String note);
+
+    ParcelActionDTO logCreated(Long requestId, Long actorUserId);
+
+    ParcelActionDTO logPickedUp(Long parcelId, Long shipperId, Long locationId);
+
+    ParcelActionDTO logInWarehouse(Long parcelId, Long locationId, Long staffId);
+
+    ParcelActionDTO logInTransit(Long parcelId, Long fromLocationId, Long toLocationId, Long shipperId);
+
+    ParcelActionDTO logDelivered(Long parcelId, Long shipperId, Long locationId);
+
+    ParcelActionDTO logFailed(Long parcelId, Long shipperId, String note);
+
+    ParcelActionDTO logReturned(Long parcelId, Long locationId, Long staffId);
 }

@@ -13,8 +13,16 @@ import java.time.LocalDateTime;
 @Setter
 public class PaymentTransaction {
 
+    public enum TransactionType {
+        IN, OUT
+    }
+
     public enum PaymentMethod {
-        CASH, BANK_TRANSFER, VNPAY, MOMO
+        CASH, VNPAY, MOMO, BANK_TRANSFER
+    }
+
+    public enum TransactionStatus {
+        PENDING, SUCCESS, FAILED
     }
 
     @Id
@@ -30,18 +38,41 @@ public class PaymentTransaction {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "method", length = 20)
-    private PaymentMethod method;
+    @Column(name = "transaction_type", nullable = false, length = 10)
+    private TransactionType transactionType;
 
-    @Column(name = "gateway_transaction_id")
-    private String gatewayTransactionId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    private PaymentMethod paymentMethod;
 
-    @Column(name = "gateway_response_code")
-    private String gatewayResponseCode;
+    @Column(name = "transaction_ref", length = 100)
+    private String transactionRef;
 
-    @Column(name = "note", columnDefinition = "TEXT")
-    private String note;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private TransactionStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "performed_by_id")
+    private User performedBy;
+
+    @Column(name = "gateway_response", columnDefinition = "TEXT")
+    private String gatewayResponse;
+
+    @Column(name = "transaction_at")
+    private LocalDateTime transactionAt;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (transactionAt == null) {
+            transactionAt = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = TransactionStatus.PENDING;
+        }
+    }
 }

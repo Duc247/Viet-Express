@@ -1,8 +1,6 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.UserDTO;
@@ -12,11 +10,10 @@ import vn.DucBackend.Repositories.UserRepository;
 import vn.DucBackend.Services.UserService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-/**
- * Implementation của UserService
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,136 +22,114 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    // ==================== CONVERTER ====================
-
-    private UserDTO toDTO(User user) {
-        return UserDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .fullName(user.getFullName())
-                .phone(user.getPhone())
-                .email(user.getEmail())
-                .status(user.getStatus())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .roleId(user.getRole() != null ? user.getRole().getId() : null)
-                .roleName(user.getRole() != null ? user.getRole().getRoleName() : null)
-                .build();
-    }
-
-    private User toEntity(UserDTO dto) {
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setPasswordHash(dto.getPasswordHash());
-        user.setFullName(dto.getFullName());
-        user.setPhone(dto.getPhone());
-        user.setEmail(dto.getEmail());
-        user.setStatus(dto.getStatus() != null ? dto.getStatus() : true);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-
-        if (dto.getRoleId() != null) {
-            roleRepository.findById(dto.getRoleId()).ifPresent(user::setRole);
-        }
-        return user;
-    }
-
-    // ==================== TẠO / CẬP NHẬT ====================
-
     @Override
-    public UserDTO createUser(UserDTO userDTO) {
-        User user = toEntity(userDTO);
-        user = userRepository.save(user);
-        return toDTO(user);
+    public List<UserDTO> findAllUsers() {
+        return userRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public UserDTO updateUser(Long id, UserDTO userDTO) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found: " + id));
-
-        if (userDTO.getFullName() != null)
-            user.setFullName(userDTO.getFullName());
-        if (userDTO.getPhone() != null)
-            user.setPhone(userDTO.getPhone());
-        if (userDTO.getEmail() != null)
-            user.setEmail(userDTO.getEmail());
-        if (userDTO.getPasswordHash() != null)
-            user.setPasswordHash(userDTO.getPasswordHash());
-        if (userDTO.getRoleId() != null) {
-            roleRepository.findById(userDTO.getRoleId()).ifPresent(user::setRole);
-        }
-        user.setUpdatedAt(LocalDateTime.now());
-
-        user = userRepository.save(user);
-        return toDTO(user);
+    public List<UserDTO> findActiveUsers() {
+        return userRepository.findByIsActiveTrue().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public UserDTO changeStatus(Long id, Boolean status) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found: " + id));
-        user.setStatus(status);
-        user.setUpdatedAt(LocalDateTime.now());
-        user = userRepository.save(user);
-        return toDTO(user);
-    }
-
-    // ==================== TÌM KIẾM ====================
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<UserDTO> findById(Long id) {
+    public Optional<UserDTO> findUserById(Long id) {
         return userRepository.findById(id).map(this::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Optional<UserDTO> findByEmail(String email) {
-        return userRepository.findByEmail(email).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public Optional<UserDTO> findByUsername(String username) {
         return userRepository.findByUsername(username).map(this::toDTO);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public List<UserDTO> findUsersByRole(String roleName) {
+        return userRepository.findByRoleRoleName(roleName).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public List<UserDTO> findActiveUsersByRole(String roleName) {
+        return userRepository.findActiveUsersByRole(roleName).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDTO> searchUsers(String keyword) {
+        return userRepository.searchByUsername(keyword).stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDTO createUser(UserDTO dto) {
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword()); // Should be encoded in production
+        user.setRole(roleRepository.findById(dto.getRoleId())
+                .orElseThrow(() -> new RuntimeException("Role not found")));
+        user.setIsActive(true);
+        return toDTO(userRepository.save(user));
+    }
+
+    @Override
+    public UserDTO updateUser(Long id, UserDTO dto) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        if (dto.getUsername() != null)
+            user.setUsername(dto.getUsername());
+        if (dto.getRoleId() != null) {
+            user.setRole(
+                    roleRepository.findById(dto.getRoleId()).orElseThrow(() -> new RuntimeException("Role not found")));
+        }
+        return toDTO(userRepository.save(user));
+    }
+
+    @Override
+    public UserDTO updatePassword(Long id, String newPassword) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(newPassword); // Should be encoded in production
+        return toDTO(userRepository.save(user));
+    }
+
+    @Override
+    public void updateLastLogin(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void toggleUserStatus(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setIsActive(!user.getIsActive());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
 
-    // ==================== DANH SÁCH ====================
-
     @Override
-    @Transactional(readOnly = true)
-    public Page<UserDTO> findAll(Pageable pageable) {
-        return userRepository.findAll(pageable).map(this::toDTO);
+    public boolean validatePassword(Long id, String password) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            return user.getPassword().equals(password); // Should use encoder in production
+        }
+        return false;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<UserDTO> findAllByRoleName(String roleName, Pageable pageable) {
-        return userRepository.findAllByRole_RoleName(roleName, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<UserDTO> findAllByStatus(Boolean status, Pageable pageable) {
-        return userRepository.findAllByStatus(status, pageable).map(this::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<UserDTO> searchByFullName(String keyword, Pageable pageable) {
-        return userRepository.findAllByFullNameContainingIgnoreCase(keyword, pageable).map(this::toDTO);
+    private UserDTO toDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setRoleId(user.getRole().getId());
+        dto.setRoleName(user.getRole().getRoleName());
+        dto.setIsActive(user.getIsActive());
+        dto.setLastLoginAt(user.getLastLoginAt());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        return dto;
     }
 }

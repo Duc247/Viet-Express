@@ -21,16 +21,39 @@ public class Staff {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "email", length = 100)
+    private String email;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warehouse_id")
-    private Warehouse warehouse;
+    @JoinColumn(name = "location_id")
+    private Location location;
 
-    @Column(name = "staff_position")
-    private String staffPosition;
+    @Column(name = "is_active")
+    private Boolean isActive;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "joined_at")
-    private LocalDateTime joinedAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (isActive == null) {
+            isActive = true;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

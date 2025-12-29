@@ -1,51 +1,33 @@
 package vn.DucBackend.Repositories;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import vn.DucBackend.Entities.Vehicle;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import vn.DucBackend.Entities.Vehicle;
-import vn.DucBackend.Entities.Vehicle.VehicleStatus;
-
-/**
- * Repository cho Vehicle entity - Quản lý phương tiện vận chuyển
- * Phục vụ: quản lý xe vận chuyển, phân bổ xe cho trip trung chuyển
- */
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
-    // ==================== TÌM KIẾM THEO BIỂN SỐ XE ====================
-
-    /** Tìm xe theo biển số - dùng khi tra cứu hoặc phân bổ xe */
     Optional<Vehicle> findByLicensePlate(String licensePlate);
 
-    /** Kiểm tra biển số đã tồn tại - dùng khi thêm xe mới */
-    Boolean existsByLicensePlate(String licensePlate);
+    List<Vehicle> findByStatus(Vehicle.VehicleStatus status);
 
-    // ==================== LỌC THEO TRẠNG THÁI XE ====================
+    List<Vehicle> findByVehicleType(Vehicle.VehicleType vehicleType);
 
-    /** Lấy danh sách xe theo trạng thái (AVAILABLE, ON_TRIP, MAINTENANCE) */
-    List<Vehicle> findAllByStatus(VehicleStatus status);
+    List<Vehicle> findByCurrentLocationId(Long locationId);
 
-    Page<Vehicle> findAllByStatus(VehicleStatus status, Pageable pageable);
+    @Query("SELECT v FROM Vehicle v WHERE v.status = 'AVAILABLE'")
+    List<Vehicle> findAvailableVehicles();
 
-    /** Đếm số xe theo trạng thái */
-    Long countByStatus(VehicleStatus status);
+    @Query("SELECT v FROM Vehicle v WHERE v.status = 'AVAILABLE' AND v.vehicleType = :type")
+    List<Vehicle> findAvailableVehiclesByType(@Param("type") Vehicle.VehicleType type);
 
-    // ==================== LỌC THEO LOẠI XE ====================
+    @Query("SELECT v FROM Vehicle v WHERE v.licensePlate LIKE %:keyword%")
+    List<Vehicle> searchByLicensePlate(@Param("keyword") String keyword);
 
-    /** Lấy danh sách xe theo loại (type field) */
-    List<Vehicle> findAllByType(String type);
-
-    Page<Vehicle> findAllByType(String type, Pageable pageable);
-
-    /** Lấy xe available theo loại - dùng khi phân bổ xe cho trip */
-    List<Vehicle> findAllByStatusAndType(VehicleStatus status, String type);
-
-    /** Đếm số xe theo loại */
-    Long countByType(String type);
+    boolean existsByLicensePlate(String licensePlate);
 }

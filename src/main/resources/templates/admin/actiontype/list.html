@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý ActionType</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-bolt me-2"></i>Quản lý ActionType (Loại hành động)</h1>
+            <a href="/admin/actiontype/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Mã hành động</th>
+                                <th>Tên</th>
+                                <th>Mô tả</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><code>CREATED</code></td>
+                                <td>Tạo đơn</td>
+                                <td>Đơn hàng mới được tạo</td>
+                                <td>01/01/2025</td>
+                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><code>PICKED_UP</code></td>
+                                <td>Đã lấy hàng</td>
+                                <td>Tài xế đã lấy hàng từ người gửi</td>
+                                <td>01/01/2025</td>
+                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td><code>IN_WAREHOUSE</code></td>
+                                <td>Đã nhập kho</td>
+                                <td>Hàng đã về kho</td>
+                                <td>01/01/2025</td>
+                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td><code>IN_TRANSIT</code></td>
+                                <td>Đang vận chuyển</td>
+                                <td>Hàng đang được vận chuyển giữa các kho</td>
+                                <td>01/01/2025</td>
+                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td><code>DELIVERED</code></td>
+                                <td>Đã giao</td>
+                                <td>Giao hàng thành công</td>
+                                <td>01/01/2025</td>
+                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

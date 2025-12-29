@@ -21,12 +21,14 @@ public class TrackingCode {
     @JoinColumn(name = "request_id", unique = true, nullable = false)
     private CustomerRequest request;
 
-    @Column(name = "code", unique = true, nullable = false)
+    @Column(name = "code", unique = true, nullable = false, length = 50)
     private String code;
-
-    @Column(name = "status")
-    private Boolean status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
