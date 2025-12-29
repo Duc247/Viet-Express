@@ -1,4 +1,4 @@
-package vn.tan.controller;
+package vn.DucBackend.Controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
