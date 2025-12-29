@@ -18,7 +18,7 @@
                     <table class="table table-hover table-striped mb-0">
                         <thead class="table-dark">
                             <tr>
-                                <th>#</th>
+                                <th>ID</th>
                                 <th>Mã</th>
                                 <th>Tên dịch vụ</th>
                                 <th>Mô tả</th>
@@ -29,13 +29,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="st, iter : ${serviceTypes}" th:if="${serviceTypes != null}">
-                                <td th:text="${iter.index + 1}"></td>
+                            <tr th:each="st : ${serviceTypes}">
+                                <td th:text="${st.id}"></td>
                                 <td><code th:text="${st.code}"></code></td>
                                 <td th:text="${st.name}"></td>
                                 <td th:text="${st.description}"></td>
-                                <td th:text="${#numbers.formatDecimal(st.pricePerKm, 0, 'COMMA', 0, 'POINT')} + 'đ'">
-                                </td>
+                                <td th:text="${st.pricePerKm != null ? st.pricePerKm + 'đ' : '-'}"></td>
                                 <td th:text="${st.averageSpeedKmh}"></td>
                                 <td>
                                     <span class="badge bg-success" th:if="${st.isActive}">Hoạt động</span>
@@ -46,7 +45,7 @@
                                         class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
                                 </td>
                             </tr>
-                            <tr th:if="${serviceTypes == null or #lists.isEmpty(serviceTypes)}">
+                            <tr th:if="${#lists.isEmpty(serviceTypes)}">
                                 <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>

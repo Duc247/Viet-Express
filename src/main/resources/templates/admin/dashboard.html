@@ -1,50 +1,129 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/layout-admin}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
 <head>
     <title>Tổng Quan Hệ Thống</title>
 </head>
+
 <body>
 
-<div layout:fragment="content">
-    <h1 class="h2 border-bottom pb-2 mb-3">Dashboard</h1>
-    
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <h5>Đơn hàng mới</h5>
-                    <h2>0</h2>
+    <div layout:fragment="content">
+        <h1 class="h2 border-bottom pb-2 mb-3"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Tổng đơn hàng</h6>
+                                <h2 class="mb-0" th:text="${totalOrders != null ? totalOrders : 0}">0</h2>
+                            </div>
+                            <i class="fas fa-file-invoice fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/request" class="text-white text-decoration-none small">Xem chi tiết →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Khách hàng</h6>
+                                <h2 class="mb-0" th:text="${totalCustomers != null ? totalCustomers : 0}">0</h2>
+                            </div>
+                            <i class="fas fa-users fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/customer" class="text-white text-decoration-none small">Xem chi tiết →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Tài xế</h6>
+                                <h2 class="mb-0" th:text="${totalShippers != null ? totalShippers : 0}">0</h2>
+                            </div>
+                            <i class="fas fa-biking fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/shipper" class="text-white text-decoration-none small">Xem chi tiết →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Địa điểm</h6>
+                                <h2 class="mb-0" th:text="${totalLocations != null ? totalLocations : 0}">0</h2>
+                            </div>
+                            <i class="fas fa-map-marker-alt fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/location" class="text-white text-decoration-none small">Xem chi tiết →</a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <h5>Doanh thu hôm nay</h5>
-                    <h2>0 đ</h2>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-link me-2"></i>Truy cập nhanh</div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6"><a href="/admin/location" class="btn btn-outline-primary w-100"><i
+                                        class="fas fa-map-marker-alt me-1"></i> Location</a></div>
+                            <div class="col-6"><a href="/admin/route" class="btn btn-outline-primary w-100"><i
+                                        class="fas fa-project-diagram me-1"></i> Route</a></div>
+                            <div class="col-6"><a href="/admin/parcel" class="btn btn-outline-success w-100"><i
+                                        class="fas fa-box me-1"></i> Parcel</a></div>
+                            <div class="col-6"><a href="/admin/trip" class="btn btn-outline-success w-100"><i
+                                        class="fas fa-route me-1"></i> Trip</a></div>
+                            <div class="col-6"><a href="/admin/payment" class="btn btn-outline-warning w-100"><i
+                                        class="fas fa-credit-card me-1"></i> Payment</a></div>
+                            <div class="col-6"><a href="/admin/servicetype" class="btn btn-outline-warning w-100"><i
+                                        class="fas fa-tags me-1"></i> ServiceType</a></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white mb-4">
-                <div class="card-body">
-                    <h5>Người dùng mới</h5>
-                    <h2>0</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">
-                    <h5>Cảnh báo lỗi</h5>
-                    <h2>0</h2>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-cog me-2"></i>Hệ thống</div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6"><a href="/admin/user" class="btn btn-outline-secondary w-100"><i
+                                        class="fas fa-users me-1"></i> User</a></div>
+                            <div class="col-6"><a href="/admin/role" class="btn btn-outline-secondary w-100"><i
+                                        class="fas fa-user-shield me-1"></i> Role</a></div>
+                            <div class="col-6"><a href="/admin/actiontype" class="btn btn-outline-dark w-100"><i
+                                        class="fas fa-bolt me-1"></i> ActionType</a></div>
+                            <div class="col-6"><a href="/admin/systemlog" class="btn btn-outline-dark w-100"><i
+                                        class="fas fa-history me-1"></i> SystemLog</a></div>
+                            <div class="col-6"><a href="/admin/casestudy" class="btn btn-outline-info w-100"><i
+                                        class="fas fa-star me-1"></i> CaseStudy</a></div>
+                            <div class="col-6"><a href="/admin/system-config" class="btn btn-outline-info w-100"><i
+                                        class="fas fa-cogs me-1"></i> Config</a></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>

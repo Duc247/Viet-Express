@@ -11,66 +11,44 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2"><i class="fas fa-box me-2"></i>Quản lý Parcel (Kiện hàng)</h1>
         </div>
-        <div class="card mb-4">
-            <div class="card-body">
-                <form class="row g-3" method="get">
-                    <div class="col-md-3">
-                        <select class="form-select" name="status">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="CREATED">Mới tạo</option>
-                            <option value="PICKED_UP">Đã lấy</option>
-                            <option value="IN_WAREHOUSE">Trong kho</option>
-                            <option value="IN_TRANSIT">Đang vận chuyển</option>
-                            <option value="DELIVERED">Đã giao</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" name="keyword" placeholder="Mã kiện, mã đơn...">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search"></i> Tìm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped mb-0">
                         <thead class="table-dark">
                             <tr>
-                                <th>#</th>
+                                <th>ID</th>
                                 <th>Mã kiện</th>
                                 <th>Mô tả</th>
                                 <th>COD</th>
                                 <th>Trọng lượng</th>
                                 <th>Vị trí hiện tại</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="p, iter : ${parcels}" th:if="${parcels != null}">
-                                <td th:text="${iter.index + 1}"></td>
+                            <tr th:each="p : ${parcels}">
+                                <td th:text="${p.id}"></td>
                                 <td><code th:text="${p.parcelCode}"></code></td>
                                 <td th:text="${p.description}"></td>
-                                <td th:text="${#numbers.formatDecimal(p.codAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
-                                <td th:text="${p.weightKg} + ' kg'"></td>
-                                <td th:text="${p.currentLocationName != null ? p.currentLocationName : '-'}"></td>
+                                <td th:text="${p.codAmount != null ? p.codAmount + 'đ' : '0đ'}"></td>
+                                <td th:text="${p.weightKg != null ? p.weightKg + ' kg' : '-'}"></td>
+                                <td th:text="${p.currentLocation != null ? p.currentLocation.name : '-'}"></td>
                                 <td>
-                                    <span class="badge bg-secondary" th:if="${p.status == 'CREATED'}">Mới tạo</span>
-                                    <span class="badge bg-info" th:if="${p.status == 'IN_WAREHOUSE'}">Trong kho</span>
-                                    <span class="badge bg-primary" th:if="${p.status == 'IN_TRANSIT'}">Đang vận
+                                    <span class="badge bg-secondary" th:if="${p.status.name() == 'CREATED'}">Mới
+                                        tạo</span>
+                                    <span class="badge bg-info" th:if="${p.status.name() == 'IN_WAREHOUSE'}">Trong
+                                        kho</span>
+                                    <span class="badge bg-primary" th:if="${p.status.name() == 'IN_TRANSIT'}">Đang vận
                                         chuyển</span>
-                                    <span class="badge bg-success" th:if="${p.status == 'DELIVERED'}">Đã giao</span>
-                                </td>
-                                <td>
-                                    <a th:href="@{/admin/parcel/{id}(id=${p.id})}"
-                                        class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                    <span class="badge bg-success" th:if="${p.status.name() == 'DELIVERED'}">Đã
+                                        giao</span>
+                                    <span class="badge bg-warning" th:if="${p.status.name() == 'PICKED_UP'}">Đã
+                                        lấy</span>
                                 </td>
                             </tr>
-                            <tr th:if="${parcels == null or #lists.isEmpty(parcels)}">
-                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
+                            <tr th:if="${#lists.isEmpty(parcels)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

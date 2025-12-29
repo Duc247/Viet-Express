@@ -11,40 +11,13 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2"><i class="fas fa-history me-2"></i>SystemLog (Nhật ký hệ thống)</h1>
         </div>
-        <div class="card mb-4">
-            <div class="card-body">
-                <form class="row g-3" method="get">
-                    <div class="col-md-2">
-                        <select class="form-select" name="level">
-                            <option value="">Tất cả Level</option>
-                            <option value="INFO">INFO</option>
-                            <option value="WARN">WARN</option>
-                            <option value="ERROR">ERROR</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control" name="module" placeholder="Module...">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="date" class="form-control" name="dateFrom">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="date" class="form-control" name="dateTo">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-search"></i>
-                            Lọc</button>
-                    </div>
-                </form>
-            </div>
-        </div>
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped mb-0 table-sm">
                         <thead class="table-dark">
                             <tr>
-                                <th>#</th>
+                                <th>ID</th>
                                 <th>Level</th>
                                 <th>Module</th>
                                 <th>Action</th>
@@ -55,21 +28,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="log, iter : ${logs}" th:if="${logs != null}">
-                                <td th:text="${iter.index + 1}"></td>
+                            <tr th:each="log : ${logs}">
+                                <td th:text="${log.id}"></td>
                                 <td>
-                                    <span class="badge bg-info" th:if="${log.logLevel == 'INFO'}">INFO</span>
-                                    <span class="badge bg-warning" th:if="${log.logLevel == 'WARN'}">WARN</span>
-                                    <span class="badge bg-danger" th:if="${log.logLevel == 'ERROR'}">ERROR</span>
+                                    <span class="badge bg-info" th:if="${log.logLevel.name() == 'INFO'}">INFO</span>
+                                    <span class="badge bg-warning" th:if="${log.logLevel.name() == 'WARN'}">WARN</span>
+                                    <span class="badge bg-danger" th:if="${log.logLevel.name() == 'ERROR'}">ERROR</span>
                                 </td>
                                 <td th:text="${log.moduleName}"></td>
                                 <td th:text="${log.actionType}"></td>
-                                <td th:text="${log.actorName != null ? log.actorName : '-'}"></td>
+                                <td th:text="${log.actor != null ? log.actor.username : '-'}"></td>
                                 <td th:text="${log.targetId != null ? log.targetId : '-'}"></td>
                                 <td th:text="${log.ipAddress != null ? log.ipAddress : '-'}"></td>
                                 <td th:text="${#temporals.format(log.createdAt, 'dd/MM HH:mm')}"></td>
                             </tr>
-                            <tr th:if="${logs == null or #lists.isEmpty(logs)}">
+                            <tr th:if="${#lists.isEmpty(logs)}">
                                 <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
