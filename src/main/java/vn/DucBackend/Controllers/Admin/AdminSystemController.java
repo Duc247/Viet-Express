@@ -13,8 +13,9 @@ import vn.DucBackend.Services.RoleService;
 import vn.DucBackend.Services.SystemLogService;
 
 /**
- * Admin System Controller - Quản lý hệ thống (Role, ActionType, SystemLog, Config)
- * 
+ * Admin System Controller - Quản lý hệ thống (Role, ActionType, SystemLog,
+ * Config)
+ * siuuuu
  * @RequestMapping("/admin") - Tất cả endpoint bắt đầu bằng /admin
  */
 @Controller
@@ -38,7 +39,7 @@ public class AdminSystemController {
     // ==========================================
     // ROLE - Quản lý vai trò (chỉ xem, không sửa xoá)
     // ==========================================
-    
+
     /**
      * GET /admin/role - Hiển thị danh sách vai trò
      */
