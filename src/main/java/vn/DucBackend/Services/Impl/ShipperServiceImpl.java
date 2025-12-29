@@ -1,6 +1,8 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.ShipperDTO;
@@ -19,10 +21,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class ShipperServiceImpl implements ShipperService {
-
+	
+	@Autowired
     private final ShipperRepository shipperRepository;
+	@Autowired
     private final UserRepository userRepository;
+	@Autowired
     private final LocationRepository locationRepository;
+	@Autowired
     private final TripRepository tripRepository;
 
     @Override
