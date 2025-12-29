@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{driver/layout-driver}">
+
+<head>
+    <title>Cập nhật vị trí</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <h2 class="mb-4"><i class="fas fa-map-marker-alt me-2"></i>Cập nhật vị trí</h2>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-location-arrow me-2"></i>Vị trí hiện tại</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn vị trí</label>
+                            <select class="form-select form-select-lg">
+                                <option value="">-- Chọn vị trí --</option>
+                                <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}">
+                                </option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-check me-2"></i>Xác nhận vị trí
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Lịch sử cập nhật</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Kho Tân Bình</span>
+                                <small class="text-muted">14:30 hôm nay</small>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Điểm lấy hàng 1</span>
+                                <small class="text-muted">10:15 hôm nay</small>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Kho Tân Bình</span>
+                                <small class="text-muted">08:00 hôm nay</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-map me-2"></i>Bản đồ</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div
+                            style="height: 400px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+                                <p>Bản đồ sẽ hiển thị ở đây</p>
+                                <small>(Tích hợp Google Maps/Leaflet)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

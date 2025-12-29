@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpServletRequest;
+import vn.DucBackend.Entities.*;
 import vn.DucBackend.Repositories.*;
 
 /**
@@ -51,7 +53,6 @@ public class AdminController {
     @Autowired
     private CustomerRequestRepository customerRequestRepository;
 
-    // Inject requestURI vào model cho sidebar
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
     }
@@ -62,13 +63,10 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-
-        // Thống kê cho dashboard
         model.addAttribute("totalOrders", customerRequestRepository.count());
         model.addAttribute("totalCustomers", customerRepository.count());
         model.addAttribute("totalShippers", shipperRepository.count());
         model.addAttribute("totalLocations", locationRepository.count());
-
         return "admin/dashboard";
     }
 
@@ -89,6 +87,13 @@ public class AdminController {
         return "admin/parcel/list";
     }
 
+    @GetMapping("/parcel/{id}")
+    public String parcelDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("parcel", parcelRepository.findById(id).orElse(null));
+        return "admin/parcel/detail";
+    }
+
     @GetMapping("/trip")
     public String tripList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
@@ -96,11 +101,28 @@ public class AdminController {
         return "admin/trip/list";
     }
 
+    @GetMapping("/trip/create")
+    public String tripForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("trip", new Trip());
+        model.addAttribute("locations", locationRepository.findAll());
+        model.addAttribute("shippers", shipperRepository.findAll());
+        model.addAttribute("vehicles", vehicleRepository.findAll());
+        return "admin/trip/form";
+    }
+
     @GetMapping("/payment")
     public String paymentList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("payments", paymentRepository.findAll());
         return "admin/payment/list";
+    }
+
+    @GetMapping("/payment/{id}")
+    public String paymentDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("payment", paymentRepository.findById(id).orElse(null));
+        return "admin/payment/detail";
     }
 
     // ==========================================
@@ -116,6 +138,7 @@ public class AdminController {
     @GetMapping("/location/create")
     public String locationForm(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
+        model.addAttribute("location", new Location());
         return "admin/location/form";
     }
 
@@ -126,11 +149,27 @@ public class AdminController {
         return "admin/route/list";
     }
 
+    @GetMapping("/route/create")
+    public String routeForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("route", new Route());
+        model.addAttribute("locations", locationRepository.findAll());
+        return "admin/route/form";
+    }
+
     @GetMapping("/vehicle")
     public String vehicleList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("vehicles", vehicleRepository.findAll());
-        return "admin/vehicle/vehicles";
+        return "admin/vehicle/list";
+    }
+
+    @GetMapping("/vehicle/create")
+    public String vehicleForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("vehicle", new Vehicle());
+        model.addAttribute("locations", locationRepository.findAll());
+        return "admin/vehicle/form";
     }
 
     @GetMapping("/servicetype")
@@ -140,6 +179,13 @@ public class AdminController {
         return "admin/servicetype/list";
     }
 
+    @GetMapping("/servicetype/create")
+    public String serviceTypeForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("serviceType", new ServiceType());
+        return "admin/servicetype/form";
+    }
+
     // ==========================================
     // NHÂN SỰ (User, Customer, Shipper, Staff)
     // ==========================================
@@ -147,7 +193,15 @@ public class AdminController {
     public String userList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("users", userRepository.findAll());
-        return "admin/user/users";
+        return "admin/user/list";
+    }
+
+    @GetMapping("/user/create")
+    public String userForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("user", new User());
+        model.addAttribute("roles", roleRepository.findAll());
+        return "admin/user/form";
     }
 
     @GetMapping("/customer")
@@ -157,6 +211,14 @@ public class AdminController {
         return "admin/customer/list";
     }
 
+    @GetMapping("/customer/create")
+    public String customerForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("customer", new Customer());
+        model.addAttribute("users", userRepository.findAll());
+        return "admin/customer/form";
+    }
+
     @GetMapping("/shipper")
     public String shipperList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
@@ -164,11 +226,29 @@ public class AdminController {
         return "admin/shipper/list";
     }
 
+    @GetMapping("/shipper/create")
+    public String shipperForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("shipper", new Shipper());
+        model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("locations", locationRepository.findAll());
+        return "admin/shipper/form";
+    }
+
     @GetMapping("/staff")
     public String staffList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("staffList", staffRepository.findAll());
         return "admin/staff/list";
+    }
+
+    @GetMapping("/staff/create")
+    public String staffForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("staff", new Staff());
+        model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("locations", locationRepository.findAll());
+        return "admin/staff/form";
     }
 
     // ==========================================
@@ -181,6 +261,15 @@ public class AdminController {
         return "admin/casestudy/list";
     }
 
+    @GetMapping("/casestudy/create")
+    public String caseStudyForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("caseStudy", new CaseStudy());
+        model.addAttribute("serviceTypes", serviceTypeRepository.findAll());
+        model.addAttribute("requests", customerRequestRepository.findAll());
+        return "admin/casestudy/form";
+    }
+
     // ==========================================
     // HỆ THỐNG (Role, ActionType, SystemLog)
     // ==========================================
@@ -191,11 +280,25 @@ public class AdminController {
         return "admin/role/list";
     }
 
+    @GetMapping("/role/create")
+    public String roleForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("role", new Role());
+        return "admin/role/form";
+    }
+
     @GetMapping("/actiontype")
     public String actionTypeList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("actionTypes", actionTypeRepository.findAll());
         return "admin/actiontype/list";
+    }
+
+    @GetMapping("/actiontype/create")
+    public String actionTypeForm(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("actionType", new ActionType());
+        return "admin/actiontype/form";
     }
 
     @GetMapping("/systemlog")
