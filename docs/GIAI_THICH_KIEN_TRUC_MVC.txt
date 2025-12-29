@@ -1,0 +1,515 @@
+=================================================================
+          GIẢI THÍCH CHI TIẾT VỀ KIẾN TRÚC MVC 
+               TRONG PROJECT SPRING BOOT
+=================================================================
+
+Tác giả: Gemini AI Assistant
+Ngày tạo: 30/12/2024
+Project: Viet Express Logistics
+
+=================================================================
+                    TỔNG QUAN KIẾN TRÚC
+=================================================================
+
+Project này sử dụng kiến trúc MVC (Model-View-Controller) của 
+Spring Boot, được chia thành các tầng rõ ràng:
+
+    ┌─────────────────────────────────────────────────────────┐
+    │                      BROWSER/CLIENT                     │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │                     CONTROLLER                          │
+    │  (AdminPersonnelController, AdminSystemController,...)  │
+    │  - Nhận request từ browser                              │
+    │  - Gọi Service xử lý logic                              │
+    │  - Trả về View (HTML) hoặc JSON                         │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │                      SERVICE                            │
+    │  (UserService, CustomerService, ShipperService,...)     │
+    │  - Xử lý business logic                                 │
+    │  - Chuyển đổi Entity ↔ DTO                              │
+    │  - Gọi Repository để truy vấn database                  │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │                     REPOSITORY                          │
+    │  (UserRepository, CustomerRepository,...)               │
+    │  - Interface kế thừa JpaRepository                      │
+    │  - Spring Data JPA tự động implement các method         │
+    │  - Thực hiện các truy vấn SQL đến database              │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │                      DATABASE                           │
+    │              (MySQL - LogisticsDB)                      │
+    └─────────────────────────────────────────────────────────┘
+
+
+=================================================================
+                   1. CONTROLLER LAYER
+=================================================================
+
+📁 Vị trí: src/main/java/vn/DucBackend/Controllers/Admin/
+
+Controllers nhận HTTP requests và điều phối công việc:
+
+┌─────────────────────────────────────────────────────────────┐
+│ AdminPersonnelController.java                               │
+│ ─────────────────────────────────────────────────────────── │
+│ Quản lý: User, Customer, Shipper, Staff                     │
+│                                                             │
+│ Các endpoint:                                               │
+│                                                             │
+│ USER:                                                       │
+│   GET  /admin/user          → Danh sách users               │
+│   GET  /admin/user/search   → Tìm kiếm user                 │
+│   GET  /admin/user/create   → Form tạo mới                  │
+│   POST /admin/user/create   → Xử lý tạo mới                 │
+│   GET  /admin/user/edit/{id}→ Form chỉnh sửa                │
+│   POST /admin/user/edit/{id}→ Xử lý cập nhật                │
+│   GET  /admin/user/delete/{id}→ Xoá user                    │
+│   GET  /admin/user/toggle/{id}→ Bật/tắt trạng thái          │
+│                                                             │
+│ CUSTOMER:                                                   │
+│   GET  /admin/customer      → Danh sách khách hàng          │
+│   GET  /admin/customer/create → Form tạo mới                │
+│   POST /admin/customer/create → Xử lý tạo mới               │
+│   ...                                                       │
+│                                                             │
+│ SHIPPER:                                                    │
+│   GET  /admin/shipper       → Danh sách shipper             │
+│   ...                                                       │
+│                                                             │
+│ STAFF:                                                      │
+│   GET  /admin/staff         → Danh sách nhân viên           │
+│   ...                                                       │
+└─────────────────────────────────────────────────────────────┘
+
+VÍ DỤ CODE CONTROLLER:
+─────────────────────────────────────────────────────────────
+
+@Controller
+@RequestMapping("/admin")
+public class AdminPersonnelController {
+
+    @Autowired
+    private UserService userService;  // Inject Service
+    
+    @Autowired
+    private RoleService roleService;
+    
+    // GET - Hiển thị danh sách
+    @GetMapping("/user")
+    public String userList(Model model, HttpServletRequest request) {
+        // 1. Gọi Service lấy dữ liệu
+        List<UserDTO> users = userService.findAllUsers();
+        
+        // 2. Đẩy dữ liệu vào Model cho View
+        model.addAttribute("users", users);
+        
+        // 3. Trả về tên template (Thymeleaf sẽ render)
+        return "admin/user/list";  // → templates/admin/user/list.html
+    }
+    
+    // POST - Xử lý tạo mới
+    @PostMapping("/user/create")
+    public String createUser(@ModelAttribute UserDTO dto, 
+                             RedirectAttributes redirectAttributes) {
+        try {
+            // Gọi Service tạo user
+            userService.createUser(dto);
+            
+            // Thêm flash message thành công
+            redirectAttributes.addFlashAttribute("success", "Tạo user thành công!");
+        } catch (Exception e) {
+            // Thêm flash message lỗi
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        
+        // Redirect về danh sách
+        return "redirect:/admin/user";
+    }
+}
+
+
+=================================================================
+                    2. SERVICE LAYER
+=================================================================
+
+📁 Vị trí: src/main/java/vn/DucBackend/Services/
+
+Service Layer chứa business logic và chuyển đổi Entity ↔ DTO:
+
+┌─────────────────────────────────────────────────────────────┐
+│ Tại sao cần Service Layer?                                  │
+│ ─────────────────────────────────────────────────────────── │
+│ 1. Separation of Concerns:                                  │
+│    Controller không nên chứa business logic                 │
+│                                                             │
+│ 2. Reusability:                                             │
+│    Nhiều Controller có thể dùng chung 1 Service             │
+│                                                             │
+│ 3. Testability:                                             │
+│    Dễ viết unit test cho Service                            │
+│                                                             │
+│ 4. Transaction Management:                                  │
+│    @Transactional đảm bảo tính toàn vẹn dữ liệu             │
+└─────────────────────────────────────────────────────────────┘
+
+VÍ DỤ CODE SERVICE:
+─────────────────────────────────────────────────────────────
+
+// Interface
+public interface UserService {
+    List<UserDTO> findAllUsers();
+    UserDTO createUser(UserDTO dto);
+    UserDTO updateUser(Long id, UserDTO dto);
+    void deleteUser(Long id);
+}
+
+// Implementation
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    
+    @Override
+    public List<UserDTO> findAllUsers() {
+        // 1. Gọi Repository lấy Entity từ database
+        List<User> users = userRepository.findAll();
+        
+        // 2. Chuyển đổi Entity → DTO
+        return users.stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+    }
+    
+    @Override
+    public UserDTO createUser(UserDTO dto) {
+        // 1. Chuyển DTO → Entity
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        
+        // 2. Lấy Role từ database
+        Role role = roleRepository.findById(dto.getRoleId())
+            .orElseThrow(() -> new RuntimeException("Role not found"));
+        user.setRole(role);
+        
+        // 3. Lưu vào database
+        User savedUser = userRepository.save(user);
+        
+        // 4. Trả về DTO
+        return toDTO(savedUser);
+    }
+    
+    // Helper method: Chuyển Entity → DTO
+    private UserDTO toDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        if (user.getRole() != null) {
+            dto.setRoleId(user.getRole().getId());
+            dto.setRoleName(user.getRole().getRoleName());
+        }
+        dto.setIsActive(user.getIsActive());
+        dto.setCreatedAt(user.getCreatedAt());
+        return dto;
+    }
+}
+
+
+=================================================================
+                    3. DTO (Data Transfer Object)
+=================================================================
+
+📁 Vị trí: src/main/java/vn/DucBackend/DTO/
+
+DTO là object chỉ chứa dữ liệu, dùng để truyền giữa các layer:
+
+┌─────────────────────────────────────────────────────────────┐
+│ Tại sao cần DTO?                                            │
+│ ─────────────────────────────────────────────────────────── │
+│ 1. Security:                                                │
+│    Không expose toàn bộ Entity (như password) ra view       │
+│                                                             │
+│ 2. Flexibility:                                             │
+│    DTO có thể khác cấu trúc Entity                          │
+│    (VD: UserDTO có thêm roleName từ bảng khác)              │
+│                                                             │
+│ 3. Performance:                                             │
+│    Tránh Lazy Loading issues khi trả về Entity              │
+└─────────────────────────────────────────────────────────────┘
+
+VÍ DỤ:
+─────────────────────────────────────────────────────────────
+
+// Entity (lưu trong database)
+@Entity
+public class User {
+    private Long id;
+    private String username;
+    private String password;      // ⚠️ Không muốn expose
+    private String email;
+    private Role role;            // Object phức tạp
+}
+
+// DTO (truyền ra view)
+@Data
+public class UserDTO {
+    private Long id;
+    private String username;
+    private String email;
+    private Long roleId;          // Chỉ lấy ID
+    private String roleName;      // Flatten từ Role object
+}
+
+
+=================================================================
+                     4. VIEW LAYER
+=================================================================
+
+📁 Vị trí: src/main/resources/templates/admin/
+
+Views sử dụng Thymeleaf template engine:
+
+┌─────────────────────────────────────────────────────────────┐
+│ templates/admin/                                            │
+│ ├── user/                                                   │
+│ │   ├── list.html         ← Danh sách user                  │
+│ │   └── form.html         ← Form tạo/sửa user               │
+│ ├── customer/                                               │
+│ │   ├── list.html                                           │
+│ │   └── form.html                                           │
+│ ├── shipper/                                                │
+│ │   ├── list.html                                           │
+│ │   └── form.html                                           │
+│ ├── staff/                                                  │
+│ │   ├── list.html                                           │
+│ │   └── form.html                                           │
+│ ├── role/                                                   │
+│ │   └── list.html         ← Chỉ xem (role cố định)          │
+│ └── layout-admin.html     ← Layout chung                    │
+└─────────────────────────────────────────────────────────────┘
+
+VÍ DỤ CODE THYMELEAF:
+─────────────────────────────────────────────────────────────
+
+<!-- list.html - Hiển thị danh sách -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- th:each - Vòng lặp qua danh sách users -->
+        <tr th:each="u : ${users}">
+            <td th:text="${u.id}"></td>
+            <td th:text="${u.username}"></td>
+            <td th:text="${u.email}"></td>
+            <td>
+                <!-- Link động với tham số -->
+                <a th:href="@{/admin/user/edit/{id}(id=${u.id})}">Sửa</a>
+                <a th:href="@{/admin/user/delete/{id}(id=${u.id})}">Xoá</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- form.html - Form nhập liệu -->
+<form th:action="@{/admin/user/create}" method="post">
+    <input type="text" name="username" th:value="${user.username}">
+    <input type="email" name="email" th:value="${user.email}">
+    
+    <!-- Dropdown chọn role -->
+    <select name="roleId">
+        <option th:each="r : ${roles}" 
+                th:value="${r.id}" 
+                th:text="${r.roleName}">
+        </option>
+    </select>
+    
+    <button type="submit">Lưu</button>
+</form>
+
+
+=================================================================
+                  5. DATALOADER - Khởi tạo dữ liệu
+=================================================================
+
+📁 Vị trí: src/main/java/vn/DucBackend/Config/DataLoader.java
+
+DataLoader tự động chạy khi app khởi động để tạo 4 roles cố định:
+
+┌─────────────────────────────────────────────────────────────┐
+│ 4 ROLES CỐ ĐỊNH                                             │
+│ ─────────────────────────────────────────────────────────── │
+│ 1. ADMIN     - Quản trị viên hệ thống (toàn quyền)          │
+│ 2. MANAGER   - Quản lý (quản lý vận hành, nhân sự)          │
+│ 3. STAFF     - Nhân viên (xử lý đơn, hỗ trợ khách)          │
+│ 4. CUSTOMER  - Khách hàng (tạo đơn, theo dõi đơn)           │
+└─────────────────────────────────────────────────────────────┘
+
+CODE:
+─────────────────────────────────────────────────────────────
+
+@Component
+public class DataLoader implements CommandLineRunner {
+    
+    @Autowired
+    private RoleRepository roleRepository;
+    
+    @Override
+    public void run(String... args) throws Exception {
+        // Chỉ tạo nếu chưa có
+        if (roleRepository.count() == 0) {
+            createRole("ADMIN", "Quản trị viên hệ thống");
+            createRole("MANAGER", "Quản lý");
+            createRole("STAFF", "Nhân viên");
+            createRole("CUSTOMER", "Khách hàng");
+        }
+    }
+}
+
+
+=================================================================
+                    6. LUỒNG XỬ LÝ REQUEST
+=================================================================
+
+Ví dụ: User truy cập /admin/user
+
+    ┌──────────────────────────────────────────────────────┐
+    │ 1. Browser gửi GET /admin/user                       │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 2. Spring MVC tìm Controller có @GetMapping("/user") │
+    │    → AdminPersonnelController.userList()             │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 3. Controller gọi userService.findAllUsers()         │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 4. Service gọi userRepository.findAll()              │
+    │    → Trả về List<User> (Entity)                      │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 5. Service chuyển đổi List<User> → List<UserDTO>     │
+    │    → Trả về cho Controller                           │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 6. Controller thêm vào Model:                        │
+    │    model.addAttribute("users", listUserDTO)          │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 7. Controller trả về "admin/user/list"               │
+    │    → Thymeleaf render file list.html                 │
+    └──────────────────────────────────────────────────────┘
+                            │
+                            ▼
+    ┌──────────────────────────────────────────────────────┐
+    │ 8. HTML được gửi về Browser                          │
+    └──────────────────────────────────────────────────────┘
+
+
+=================================================================
+                   7. CẤU TRÚC THƯ MỤC
+=================================================================
+
+src/main/java/vn/DucBackend/
+├── Config/
+│   └── DataLoader.java         ← Khởi tạo 4 roles
+├── Controllers/
+│   └── Admin/
+│       ├── AdminPersonnelController.java   ← User,Customer,Shipper,Staff
+│       ├── AdminOperationController.java   ← Request,Parcel,Trip,Payment
+│       ├── AdminResourceController.java    ← Location,Route,Vehicle,ServiceType
+│       ├── AdminSystemController.java      ← Role,ActionType,SystemLog
+│       ├── AdminMarketingController.java   ← CaseStudy
+│       └── AdminDashboardController.java   ← Dashboard
+├── Services/
+│   ├── UserService.java
+│   ├── CustomerService.java
+│   ├── ShipperService.java
+│   ├── StaffService.java
+│   ├── RoleService.java
+│   └── Impl/
+│       ├── UserServiceImpl.java
+│       ├── CustomerServiceImpl.java
+│       └── ...
+├── DTO/
+│   ├── UserDTO.java
+│   ├── CustomerDTO.java
+│   ├── ShipperDTO.java
+│   └── ...
+├── Entities/
+│   ├── User.java
+│   ├── Customer.java
+│   ├── Role.java
+│   └── ...
+└── Repositories/
+    ├── UserRepository.java
+    ├── CustomerRepository.java
+    └── ...
+
+src/main/resources/templates/admin/
+├── user/
+│   ├── list.html
+│   └── form.html
+├── customer/
+│   ├── list.html
+│   └── form.html
+├── shipper/
+│   ├── list.html
+│   └── form.html
+├── staff/
+│   ├── list.html
+│   └── form.html
+├── role/
+│   └── list.html
+└── layout-admin.html
+
+
+=================================================================
+                        KẾT LUẬN
+=================================================================
+
+✅ Controller: Nhận request → Gọi Service → Trả View
+✅ Service: Xử lý logic → Entity ↔ DTO → Gọi Repository  
+✅ DTO: Object truyền dữ liệu giữa các layer
+✅ Repository: Interface truy vấn database
+✅ View: Thymeleaf template hiển thị HTML
+✅ DataLoader: Tự động tạo 4 roles khi app khởi động
+
+─────────────────────────────────────────────────────────────
+HẾT
+─────────────────────────────────────────────────────────────
