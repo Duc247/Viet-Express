@@ -10,7 +10,6 @@
     <div layout:fragment="content">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2"><i class="fas fa-box me-2"></i>Quản lý Parcel (Kiện hàng)</h1>
-            <a href="/admin/parcel/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
         </div>
         <div class="card mb-4">
             <div class="card-body">
@@ -20,6 +19,7 @@
                             <option value="">Tất cả trạng thái</option>
                             <option value="CREATED">Mới tạo</option>
                             <option value="PICKED_UP">Đã lấy</option>
+                            <option value="IN_WAREHOUSE">Trong kho</option>
                             <option value="IN_TRANSIT">Đang vận chuyển</option>
                             <option value="DELIVERED">Đã giao</option>
                         </select>
@@ -41,7 +41,6 @@
                             <tr>
                                 <th>#</th>
                                 <th>Mã kiện</th>
-                                <th>Mã đơn (Request)</th>
                                 <th>Mô tả</th>
                                 <th>COD</th>
                                 <th>Trọng lượng</th>
@@ -51,19 +50,27 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><code>PCL-20251229-1-01</code></td>
-                                <td><code>REQ-20251229-ABC123</code></td>
-                                <td>Điện thoại iPhone</td>
-                                <td>15,000,000đ</td>
-                                <td>0.5 kg</td>
-                                <td>Kho Tân Bình</td>
-                                <td><span class="badge bg-info">Đang vận chuyển</span></td>
+                            <tr th:each="p, iter : ${parcels}" th:if="${parcels != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td><code th:text="${p.parcelCode}"></code></td>
+                                <td th:text="${p.description}"></td>
+                                <td th:text="${#numbers.formatDecimal(p.codAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                <td th:text="${p.weightKg} + ' kg'"></td>
+                                <td th:text="${p.currentLocationName != null ? p.currentLocationName : '-'}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                    <span class="badge bg-secondary" th:if="${p.status == 'CREATED'}">Mới tạo</span>
+                                    <span class="badge bg-info" th:if="${p.status == 'IN_WAREHOUSE'}">Trong kho</span>
+                                    <span class="badge bg-primary" th:if="${p.status == 'IN_TRANSIT'}">Đang vận
+                                        chuyển</span>
+                                    <span class="badge bg-success" th:if="${p.status == 'DELIVERED'}">Đã giao</span>
                                 </td>
+                                <td>
+                                    <a th:href="@{/admin/parcel/{id}(id=${p.id})}"
+                                        class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${parcels == null or #lists.isEmpty(parcels)}">
+                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

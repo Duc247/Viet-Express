@@ -22,25 +22,35 @@
                                 <th>Tiêu đề</th>
                                 <th>Slug</th>
                                 <th>Khách hàng</th>
-                                <th>Dịch vụ</th>
                                 <th>Nổi bật</th>
                                 <th>Xuất bản</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Vận chuyển máy móc công nghiệp</td>
-                                <td><code>van-chuyen-may-moc</code></td>
-                                <td>Công ty ABC</td>
-                                <td>Giao nhanh</td>
-                                <td><span class="badge bg-warning"><i class="fas fa-star"></i></span></td>
-                                <td><span class="badge bg-success">Đã xuất bản</span></td>
+                            <tr th:each="cs, iter : ${caseStudies}" th:if="${caseStudies != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td th:text="${cs.title}"></td>
+                                <td><code th:text="${cs.slug}"></code></td>
+                                <td th:text="${cs.clientNameDisplay}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                    <span class="badge bg-warning" th:if="${cs.isFeatured}"><i
+                                            class="fas fa-star"></i></span>
+                                    <span th:unless="${cs.isFeatured}">-</span>
                                 </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${cs.isPublished}">Đã xuất bản</span>
+                                    <span class="badge bg-secondary" th:unless="${cs.isPublished}">Nháp</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/casestudy/{id}(id=${cs.id})}"
+                                        class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                    <a th:href="@{/admin/casestudy/edit/{id}(id=${cs.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${caseStudies == null or #lists.isEmpty(caseStudies)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

@@ -24,25 +24,34 @@
                                 <th>Khu vực</th>
                                 <th>Vị trí hiện tại</th>
                                 <th>Sẵn sàng</th>
-                                <th>Chuyến hiện tại</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Trần Văn B</td>
-                                <td>0987654321</td>
-                                <td>TP.HCM</td>
-                                <td>Kho Tân Bình</td>
-                                <td><span class="badge bg-success">Có</span></td>
-                                <td>-</td>
-                                <td><span class="badge bg-success">Hoạt động</span></td>
+                            <tr th:each="s, iter : ${shippers}" th:if="${shippers != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td th:text="${s.fullName}"></td>
+                                <td th:text="${s.phone}"></td>
+                                <td th:text="${s.workingArea}"></td>
+                                <td th:text="${s.currentLocationName != null ? s.currentLocationName : '-'}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                    <span class="badge bg-success" th:if="${s.isAvailable}">Có</span>
+                                    <span class="badge bg-secondary" th:unless="${s.isAvailable}">Không</span>
                                 </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${s.isActive}">Hoạt động</span>
+                                    <span class="badge bg-secondary" th:unless="${s.isActive}">Ngừng</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/shipper/{id}(id=${s.id})}"
+                                        class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                    <a th:href="@{/admin/shipper/edit/{id}(id=${s.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${shippers == null or #lists.isEmpty(shippers)}">
+                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

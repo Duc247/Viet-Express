@@ -19,34 +19,42 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Loại (TripType)</th>
+                                <th>Loại</th>
                                 <th>Shipper</th>
                                 <th>Vehicle</th>
                                 <th>Điểm đi</th>
                                 <th>Điểm đến</th>
-                                <th>Bắt đầu</th>
-                                <th>Kết thúc</th>
-                                <th>COD thu</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><span class="badge bg-primary">PICKUP</span></td>
-                                <td>Nguyễn Văn A</td>
-                                <td>59A-12345</td>
-                                <td>Kho Tân Bình</td>
-                                <td>123 Lý Thường Kiệt</td>
-                                <td>29/12 08:00</td>
-                                <td>-</td>
-                                <td>0đ</td>
-                                <td><span class="badge bg-warning">IN_PROGRESS</span></td>
+                            <tr th:each="t, iter : ${trips}" th:if="${trips != null}">
+                                <td th:text="${iter.index + 1}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                    <span class="badge bg-info" th:if="${t.tripType == 'PICKUP'}">PICKUP</span>
+                                    <span class="badge bg-primary" th:if="${t.tripType == 'TRANSFER'}">TRANSFER</span>
+                                    <span class="badge bg-success" th:if="${t.tripType == 'DELIVERY'}">DELIVERY</span>
+                                    <span class="badge bg-warning" th:if="${t.tripType == 'RETURN'}">RETURN</span>
                                 </td>
+                                <td th:text="${t.shipperName}"></td>
+                                <td th:text="${t.vehicleLicensePlate}"></td>
+                                <td th:text="${t.startLocationName}"></td>
+                                <td th:text="${t.endLocationName}"></td>
+                                <td>
+                                    <span class="badge bg-secondary" th:if="${t.status == 'CREATED'}">Mới</span>
+                                    <span class="badge bg-warning" th:if="${t.status == 'IN_PROGRESS'}">Đang thực
+                                        hiện</span>
+                                    <span class="badge bg-success" th:if="${t.status == 'COMPLETED'}">Hoàn thành</span>
+                                    <span class="badge bg-danger" th:if="${t.status == 'CANCELLED'}">Đã hủy</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/trip/{id}(id=${t.id})}" class="btn btn-sm btn-outline-info"><i
+                                            class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${trips == null or #lists.isEmpty(trips)}">
+                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

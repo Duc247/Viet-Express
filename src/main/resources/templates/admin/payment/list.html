@@ -20,7 +20,7 @@
                                 <th>#</th>
                                 <th>Mã thanh toán</th>
                                 <th>Mã đơn</th>
-                                <th>Loại (PaymentType)</th>
+                                <th>Loại</th>
                                 <th>Số tiền</th>
                                 <th>Đã thanh toán</th>
                                 <th>Trạng thái</th>
@@ -28,29 +28,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><code>PAY-20251229-1</code></td>
-                                <td><code>REQ-20251229-ABC123</code></td>
-                                <td><span class="badge bg-info">SHIPPING_FEE</span></td>
-                                <td>150,000đ</td>
-                                <td>150,000đ</td>
-                                <td><span class="badge bg-success">PAID</span></td>
+                            <tr th:each="p, iter : ${payments}" th:if="${payments != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td><code th:text="${p.paymentCode}"></code></td>
+                                <td><code th:text="${p.requestCode}"></code></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                    <span class="badge bg-info" th:if="${p.paymentType == 'SHIPPING_FEE'}">Phí
+                                        ship</span>
+                                    <span class="badge bg-warning" th:if="${p.paymentType == 'COD'}">COD</span>
+                                </td>
+                                <td th:text="${#numbers.formatDecimal(p.expectedAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">
+                                </td>
+                                <td th:text="${#numbers.formatDecimal(p.paidAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${p.status == 'PAID'}">Đã TT</span>
+                                    <span class="badge bg-danger" th:if="${p.status == 'UNPAID'}">Chưa TT</span>
+                                    <span class="badge bg-warning" th:if="${p.status == 'PARTIALLY_PAID'}">TT 1
+                                        phần</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/payment/{id}(id=${p.id})}"
+                                        class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><code>PAY-20251229-2</code></td>
-                                <td><code>REQ-20251229-ABC123</code></td>
-                                <td><span class="badge bg-warning">COD</span></td>
-                                <td>15,000,000đ</td>
-                                <td>0đ</td>
-                                <td><span class="badge bg-danger">UNPAID</span></td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
-                                </td>
+                            <tr th:if="${payments == null or #lists.isEmpty(payments)}">
+                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

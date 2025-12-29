@@ -19,26 +19,32 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Điểm đi (From Location)</th>
-                                <th>Điểm đến (To Location)</th>
+                                <th>Điểm đi</th>
+                                <th>Điểm đến</th>
                                 <th>Khoảng cách (km)</th>
-                                <th>Thời gian ước tính (h)</th>
+                                <th>Thời gian (giờ)</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Kho Tân Bình</td>
-                                <td>Kho Hoàng Mai</td>
-                                <td>1700</td>
-                                <td>24</td>
-                                <td><span class="badge bg-success">Hoạt động</span></td>
+                            <tr th:each="r, iter : ${routes}" th:if="${routes != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td th:text="${r.fromLocationName}"></td>
+                                <td th:text="${r.toLocationName}"></td>
+                                <td th:text="${r.distanceKm}"></td>
+                                <td th:text="${r.estimatedHours}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    <span class="badge bg-success" th:if="${r.isActive}">Hoạt động</span>
+                                    <span class="badge bg-secondary" th:unless="${r.isActive}">Ngừng</span>
                                 </td>
+                                <td>
+                                    <a th:href="@{/admin/route/edit/{id}(id=${r.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${routes == null or #lists.isEmpty(routes)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

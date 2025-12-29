@@ -22,46 +22,25 @@
                                 <th>Tên vai trò</th>
                                 <th>Mô tả</th>
                                 <th>Trạng thái</th>
-                                <th>Ngày tạo</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><span class="badge bg-danger">ADMIN</span></td>
-                                <td>Quản trị viên hệ thống</td>
-                                <td><span class="badge bg-success">Hoạt động</span></td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                            <tr th:each="r, iter : ${roles}" th:if="${roles != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td><span class="badge bg-primary" th:text="${r.roleName}"></span></td>
+                                <td th:text="${r.description}"></td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${r.isActive}">Hoạt động</span>
+                                    <span class="badge bg-secondary" th:unless="${r.isActive}">Ngừng</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/role/edit/{id}(id=${r.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><span class="badge bg-primary">MANAGER</span></td>
-                                <td>Quản lý kho</td>
-                                <td><span class="badge bg-success">Hoạt động</span></td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td><span class="badge bg-info">SHIPPER</span></td>
-                                <td>Tài xế giao hàng</td>
-                                <td><span class="badge bg-success">Hoạt động</span></td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td><span class="badge bg-secondary">CUSTOMER</span></td>
-                                <td>Khách hàng</td>
-                                <td><span class="badge bg-success">Hoạt động</span></td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
+                            <tr th:if="${roles == null or #lists.isEmpty(roles)}">
+                                <td colspan="5" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

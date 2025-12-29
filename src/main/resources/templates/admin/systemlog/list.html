@@ -3,7 +3,7 @@
     layout:decorate="~{admin/layout-admin}">
 
 <head>
-    <title>Quản lý SystemLog</title>
+    <title>SystemLog</title>
 </head>
 
 <body>
@@ -23,18 +23,13 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <select class="form-select" name="module">
-                            <option value="">Tất cả Module</option>
-                            <option value="AUTH">AUTH</option>
-                            <option value="ORDER">ORDER</option>
-                            <option value="PAYMENT">PAYMENT</option>
-                        </select>
+                        <input type="text" class="form-control" name="module" placeholder="Module...">
                     </div>
                     <div class="col-md-3">
-                        <input type="date" class="form-control" name="dateFrom" placeholder="Từ ngày">
+                        <input type="date" class="form-control" name="dateFrom">
                     </div>
                     <div class="col-md-3">
-                        <input type="date" class="form-control" name="dateTo" placeholder="Đến ngày">
+                        <input type="date" class="form-control" name="dateTo">
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-search"></i>
@@ -57,42 +52,25 @@
                                 <th>Target</th>
                                 <th>IP</th>
                                 <th>Thời gian</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><span class="badge bg-info">INFO</span></td>
-                                <td>AUTH</td>
-                                <td>LOGIN</td>
-                                <td>admin</td>
-                                <td>-</td>
-                                <td>192.168.1.1</td>
-                                <td>29/12 14:30</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a></td>
+                            <tr th:each="log, iter : ${logs}" th:if="${logs != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td>
+                                    <span class="badge bg-info" th:if="${log.logLevel == 'INFO'}">INFO</span>
+                                    <span class="badge bg-warning" th:if="${log.logLevel == 'WARN'}">WARN</span>
+                                    <span class="badge bg-danger" th:if="${log.logLevel == 'ERROR'}">ERROR</span>
+                                </td>
+                                <td th:text="${log.moduleName}"></td>
+                                <td th:text="${log.actionType}"></td>
+                                <td th:text="${log.actorName != null ? log.actorName : '-'}"></td>
+                                <td th:text="${log.targetId != null ? log.targetId : '-'}"></td>
+                                <td th:text="${log.ipAddress != null ? log.ipAddress : '-'}"></td>
+                                <td th:text="${#temporals.format(log.createdAt, 'dd/MM HH:mm')}"></td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><span class="badge bg-warning">WARN</span></td>
-                                <td>PAYMENT</td>
-                                <td>PAYMENT_FAILED</td>
-                                <td>system</td>
-                                <td>PAY-001</td>
-                                <td>-</td>
-                                <td>29/12 14:25</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a></td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td><span class="badge bg-danger">ERROR</span></td>
-                                <td>ORDER</td>
-                                <td>CREATE_FAILED</td>
-                                <td>user1</td>
-                                <td>-</td>
-                                <td>10.0.0.5</td>
-                                <td>29/12 14:20</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a></td>
+                            <tr th:if="${logs == null or #lists.isEmpty(logs)}">
+                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

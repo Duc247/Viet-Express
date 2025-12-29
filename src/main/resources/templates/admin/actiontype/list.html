@@ -22,55 +22,22 @@
                                 <th>Mã hành động</th>
                                 <th>Tên</th>
                                 <th>Mô tả</th>
-                                <th>Ngày tạo</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><code>CREATED</code></td>
-                                <td>Tạo đơn</td>
-                                <td>Đơn hàng mới được tạo</td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                            <tr th:each="at, iter : ${actionTypes}" th:if="${actionTypes != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td><code th:text="${at.actionCode}"></code></td>
+                                <td th:text="${at.name}"></td>
+                                <td th:text="${at.description}"></td>
+                                <td>
+                                    <a th:href="@{/admin/actiontype/edit/{id}(id=${at.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><code>PICKED_UP</code></td>
-                                <td>Đã lấy hàng</td>
-                                <td>Tài xế đã lấy hàng từ người gửi</td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td><code>IN_WAREHOUSE</code></td>
-                                <td>Đã nhập kho</td>
-                                <td>Hàng đã về kho</td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td><code>IN_TRANSIT</code></td>
-                                <td>Đang vận chuyển</td>
-                                <td>Hàng đang được vận chuyển giữa các kho</td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td><code>DELIVERED</code></td>
-                                <td>Đã giao</td>
-                                <td>Giao hàng thành công</td>
-                                <td>01/01/2025</td>
-                                <td><a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                </td>
+                            <tr th:if="${actionTypes == null or #lists.isEmpty(actionTypes)}">
+                                <td colspan="5" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>

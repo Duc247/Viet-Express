@@ -23,24 +23,27 @@
                                 <th>Điện thoại</th>
                                 <th>Email</th>
                                 <th>Công ty</th>
-                                <th>Tài khoản (User)</th>
-                                <th>Ngày tạo</th>
+                                <th>Tài khoản</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Nguyễn Văn A</td>
-                                <td>0901234567</td>
-                                <td>a@email.com</td>
-                                <td>Công ty ABC</td>
-                                <td>nguyenvana</td>
-                                <td>29/12/2025</td>
+                            <tr th:each="c, iter : ${customers}" th:if="${customers != null}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td th:text="${c.name}"></td>
+                                <td th:text="${c.phone}"></td>
+                                <td th:text="${c.email}"></td>
+                                <td th:text="${c.companyName != null ? c.companyName : '-'}"></td>
+                                <td th:text="${c.username != null ? c.username : '-'}"></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                    <a th:href="@{/admin/customer/{id}(id=${c.id})}"
+                                        class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                    <a th:href="@{/admin/customer/edit/{id}(id=${c.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
                                 </td>
+                            </tr>
+                            <tr th:if="${customers == null or #lists.isEmpty(customers)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>
                     </table>
