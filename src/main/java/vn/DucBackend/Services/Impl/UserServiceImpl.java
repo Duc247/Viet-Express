@@ -54,17 +54,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> searchUsers(String keyword) {
-        return userRepository.searchByUsername(keyword).stream().map(this::toDTO).collect(Collectors.toList());
+        return userRepository.searchByUser(keyword).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public UserDTO createUser(UserDTO dto) {
         User user = new User();
         user.setUsername(dto.getUsername());
-        user.setPassword(dto.getPassword()); // Should be encoded in production
+        user.setPassword(dto.getPassword());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
         user.setRole(roleRepository.findById(dto.getRoleId())
                 .orElseThrow(() -> new RuntimeException("Role not found")));
         user.setIsActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
         return toDTO(userRepository.save(user));
     }
 
@@ -77,6 +81,7 @@ public class UserServiceImpl implements UserService {
             user.setRole(
                     roleRepository.findById(dto.getRoleId()).orElseThrow(() -> new RuntimeException("Role not found")));
         }
+        user.setUpdatedAt(LocalDateTime.now());
         return toDTO(userRepository.save(user));
     }
 
@@ -84,6 +89,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO updatePassword(Long id, String newPassword) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setPassword(newPassword); // Should be encoded in production
+        user.setUpdatedAt(LocalDateTime.now());
         return toDTO(userRepository.save(user));
     }
 
@@ -98,6 +104,7 @@ public class UserServiceImpl implements UserService {
     public void toggleUserStatus(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setIsActive(!user.getIsActive());
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 

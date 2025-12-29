@@ -74,7 +74,6 @@ public class ShipperServiceImpl implements ShipperService {
         shipper.setFullName(dto.getFullName());
         shipper.setPhone(dto.getPhone());
         shipper.setWorkingArea(dto.getWorkingArea());
-        shipper.setIsAvailable(true);
         shipper.setIsActive(true);
         return toDTO(shipperRepository.save(shipper));
     }

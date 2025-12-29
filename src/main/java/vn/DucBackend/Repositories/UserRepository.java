@@ -27,8 +27,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findActiveUsersByRole(@Param("roleName") String roleName);
 
     // đây là thể hiện nút tìm kiếm
-    @Query("SELECT u FROM User u WHERE u.username LIKE %:keyword%")
-    List<User> searchByUsername(@Param("keyword") String keyword);
+    @Query("SELECT u FROM User u WHERE u.username LIKE %:keyword% or u.email LIKE %:keyword% or u.phone LIKE %:keyword%")
+    List<User> searchByUser(@Param("keyword") String keyword);
 
     // đây là tìm theo email
     @Query("SELECT u FROM User u WHERE u.email LIKE %:keyword%")
@@ -43,42 +43,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByPhone(String phone);
-
-    // Tới phần update user - cần @Modifying cho UPDATE/DELETE queries
-    @Modifying
-    @Query("UPDATE User u SET u.role = :role WHERE u.username = :username")
-    int updateRole(@Param("username") String username, @Param("role") Role role);
-
-    @Modifying
-    @Query("UPDATE User u SET u.phone = :phone WHERE u.username = :username")
-    int updatePhone(@Param("username") String username, @Param("phone") String phone);
-
-    @Modifying
-    @Query("UPDATE User u SET u.email = :email WHERE u.username = :username")
-    int updateEmail(@Param("username") String username, @Param("email") String email);
-
-    @Modifying
-    @Query("UPDATE User u SET u.avatar = :avatar WHERE u.username = :username")
-    int updateAvatar(@Param("username") String username, @Param("avatar") String avatar);
-
-    @Modifying
-    @Query("UPDATE User u SET u.password = :password WHERE u.username = :username")
-    int updatePassword(@Param("username") String username, @Param("password") String password);
-
-    // INSERT: JPQL không hỗ trợ INSERT, sử dụng method save() từ JpaRepository
-    // Ví dụ: userRepository.save(new User(...));
-
-    // DELETE user - sử dụng 'DELETE' thay vì 'remove'
-    @Modifying
-    @Query("DELETE FROM User u WHERE u.username = :username")
-    int deleteByUsernameCustom(@Param("username") String username);
-
-    @Modifying
-    @Query("DELETE FROM User u WHERE u.email = :email")
-    int deleteByEmailCustom(@Param("email") String email);
-
-    @Modifying
-    @Query("DELETE FROM User u WHERE u.phone = :phone")
-    int deleteByPhoneCustom(@Param("phone") String phone);
 
 }
