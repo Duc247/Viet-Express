@@ -1,36 +1,55 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/master-layout}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/master-layout}">
+
 <head>
     <title>Đăng nhập - logistic Logistics</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card shadow border-0">
-                    <div class="card-body p-5">
-                        <h3 class="text-center fw-bold mb-4">Đăng nhập</h3>
-                        <form th:action="@{/auth/login}" method="post">
-                            <div class="mb-3">
-                                <label class="form-label">Email / Tên đăng nhập</label>
-                                <input type="text" name="username" class="form-control" required>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow border-0">
+                        <div class="card-body p-5">
+                            <h3 class="text-center fw-bold mb-4">Đăng nhập</h3>
+
+                            <!-- Error Message -->
+                            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show"
+                                role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <span th:text="${errorMessage}"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                            <div class="mb-4">
-                                <label class="form-label">Mật khẩu</label>
-                                <input type="password" name="password" class="form-control" required>
+
+                            <!-- Success Message -->
+                            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show"
+                                role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span th:text="${successMessage}"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Đăng nhập</button>
-                            </div>
-                        </form>
+
+                            <form th:action="@{/auth/login}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label">Email / Tên đăng nhập</label>
+                                    <input type="text" name="username" class="form-control" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Mật khẩu</label>
+                                    <input type="password" name="password" class="form-control" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Đăng nhập</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

@@ -11,8 +11,18 @@
                     style="width: 60px; height: 60px; font-size: 24px;">
                     <i class="fas fa-user"></i>
                 </div>
-                <h6 class="fw-bold mb-0">Xin chào, Bạn</h6>
-                <small class="text-muted">Thành viên</small>
+                <!-- Hiển thị tên và mã user từ session -->
+                <h6 class="fw-bold mb-0">
+                    Xin chào, <span th:if="${session.customerName}" th:text="${session.customerName}"></span><span
+                        th:unless="${session.customerName}" th:text="${session.username} ?: 'Khách hàng'"></span>
+                </h6>
+                <small class="text-muted d-block" th:if="${session.customerCode}"
+                    th:text="'Mã KH: ' + ${session.customerCode}">Mã KH: CUST-XXX</small>
+                <small class="text-muted" th:unless="${session.customerCode}">Khách hàng</small>
+                <!-- Nút đăng xuất -->
+                <a href="/auth/logout" class="btn btn-outline-danger btn-sm mt-2">
+                    <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                </a>
             </div>
 
             <h6 class="sidebar-heading px-3 mt-2 mb-1 text-muted text-uppercase">

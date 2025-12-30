@@ -7,25 +7,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Auth Controller - Xử lý các trang đăng nhập, đăng ký
+ * Auth Controller - Xử lý đăng ký, quên mật khẩu, xác thực OTP
+ * (Login và Logout được xử lý bởi LoginController)
  */
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
-
-    // ==========================================
-    // ĐĂNG NHẬP
-    // ==========================================
-    @GetMapping("/login")
-    public String loginPage() {
-        return "auth/login";
-    }
-
-    @PostMapping("/login")
-    public String handleLogin() {
-        // TODO: Implement authentication logic
-        return "redirect:/customer/dashboard";
-    }
 
     // ==========================================
     // ĐĂNG KÝ
@@ -67,14 +54,5 @@ public class AuthController {
     public String handleVerifyOtp() {
         // TODO: Verify OTP
         return "redirect:/auth/login?success=reset";
-    }
-
-    // ==========================================
-    // ĐĂNG XUẤT
-    // ==========================================
-    @GetMapping("/logout")
-    public String logout() {
-        // TODO: Clear session
-        return "redirect:/auth/login?logout=true";
     }
 }
