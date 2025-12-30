@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,18 +57,6 @@ public class CustomerController {
         addCommonAttributes(model, request);
         model.addAttribute("orders", customerRequestRepository.findAll());
         return "customer/order/history";
-    }
-
-    @GetMapping("/create-order")
-    public String createOrderForm(Model model, HttpServletRequest request) {
-        addCommonAttributes(model, request);
-        return "customer/order/form";
-    }
-
-    @PostMapping("/create-order")
-    public String handleCreateOrder() {
-        System.out.println("Khách hàng đã tạo đơn mới!");
-        return "redirect:/customer/dashboard?success=create";
     }
 
     // ==========================================

@@ -17,6 +17,9 @@ public class Staff {
     @Column(name = "staff_id")
     private Long id;
 
+    @Column(name = "staff_code", unique = true, nullable = false, length = 20)
+    private String staffCode;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
