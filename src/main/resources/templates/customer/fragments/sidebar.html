@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
-    <nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse py-3 border-end" style="min-height: 100vh;">
+    <nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse py-3 border-end"
+        style="min-height: 100vh;">
         <div class="position-sticky pt-3">
-            
+
             <div class="text-center mb-4 pb-3 border-bottom">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 60px; height: 60px; font-size: 24px;">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
+                    style="width: 60px; height: 60px; font-size: 24px;">
                     <i class="fas fa-user"></i>
                 </div>
                 <h6 class="fw-bold mb-0">Xin chào, Bạn</h6>
@@ -17,31 +20,43 @@
             </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark" 
-                       th:classappend="${requestURI == '/customer/dashboard' ? 'active fw-bold text-primary' : ''}"
-                       href="/customer/dashboard">
+                    <a class="nav-link text-dark"
+                        th:classappend="${requestURI == '/customer/dashboard' ? 'active fw-bold text-primary' : ''}"
+                        href="/customer/dashboard">
                         <i class="fas fa-home me-2"></i> Tổng quan
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" 
-                       th:classappend="${requestURI == '/customer/create-order' ? 'active fw-bold text-primary' : ''}"
-                       href="/customer/create-order">
+                    <a class="nav-link text-dark"
+                        th:classappend="${requestURI == '/customer/create-order' ? 'active fw-bold text-primary' : ''}"
+                        href="/customer/create-order">
                         <i class="fas fa-plus-circle me-2"></i> Tạo đơn hàng
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="#">
+                    <a class="nav-link text-dark"
+                        th:classappend="${requestURI == '/customer/orders' ? 'active fw-bold text-primary' : ''}"
+                        href="/customer/orders">
                         <i class="fas fa-box-open me-2"></i> Đơn hàng của tôi
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" href="#">
-                        <i class="fas fa-user-cog me-2"></i> Hồ sơ cá nhân
+                    <a class="nav-link text-dark"
+                        th:classappend="${requestURI == '/customer/tracking' ? 'active fw-bold text-primary' : ''}"
+                        href="/customer/tracking">
+                        <i class="fas fa-search-location me-2"></i> Tra cứu vận đơn
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                        th:classappend="${requestURI == '/customer/payments' ? 'active fw-bold text-primary' : ''}"
+                        href="/customer/payments">
+                        <i class="fas fa-credit-card me-2"></i> Thanh toán
                     </a>
                 </li>
             </ul>
         </div>
     </nav>
 </body>
+
 </html>

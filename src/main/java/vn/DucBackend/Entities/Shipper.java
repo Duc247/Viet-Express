@@ -17,6 +17,9 @@ public class Shipper {
     @Column(name = "shipper_id")
     private Long id;
 
+    @Column(name = "shipper_code", unique = true, nullable = false, length = 20)
+    private String shipperCode;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;

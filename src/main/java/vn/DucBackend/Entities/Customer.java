@@ -17,6 +17,9 @@ public class Customer {
     @Column(name = "customer_id")
     private Long id;
 
+    @Column(name = "customer_code", unique = true, nullable = false, length = 20)
+    private String customerCode;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
