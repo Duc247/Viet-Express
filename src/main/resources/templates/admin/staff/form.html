@@ -16,42 +16,65 @@
             <a href="/admin/staff" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
         </div>
 
-        <div class="card">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-info-circle me-2"></i>Thông tin nhân viên
+            </div>
             <div class="card-body">
                 <form th:action="${isEdit ? '/admin/staff/edit/' + staff.id : '/admin/staff/create'}" method="post">
                     <div class="row">
+                        <!-- Tài khoản liên kết -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tài khoản liên kết <span class="text-danger">*</span></label>
+                            <label class="form-label"><i class="fas fa-user me-1"></i>Tài khoản liên kết <span
+                                    class="text-danger">*</span></label>
                             <select name="userId" class="form-select" required>
                                 <option value="">-- Chọn tài khoản --</option>
                                 <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"
-                                    th:selected="${staff.userId == u.id}"></option>
+                                    th:selected="${staff?.userId == u.id}"></option>
                             </select>
                         </div>
+                        <!-- Họ và tên -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                            <input type="text" name="fullName" class="form-control" th:value="${staff.fullName}"
-                                required>
+                            <label class="form-label"><i class="fas fa-id-card me-1"></i>Họ và tên <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" name="fullName" class="form-control" th:value="${staff?.fullName}"
+                                required placeholder="Nhập họ và tên">
                         </div>
+                        <!-- Email -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" th:value="${staff.email}">
+                            <label class="form-label"><i class="fas fa-envelope me-1"></i>Email</label>
+                            <input type="email" name="email" class="form-control" th:value="${staff?.email}"
+                                placeholder="example@email.com">
                         </div>
+                        <!-- Số điện thoại -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Số điện thoại</label>
-                            <input type="text" name="phone" class="form-control" th:value="${staff.phone}">
+                            <label class="form-label"><i class="fas fa-phone me-1"></i>Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control" th:value="${staff?.phone}"
+                                placeholder="0912345678">
                         </div>
+                        <!-- Chi nhánh làm việc -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Chi nhánh làm việc</label>
+                            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Chi nhánh làm
+                                việc</label>
                             <select name="locationId" class="form-select">
                                 <option value="">-- Chọn chi nhánh --</option>
                                 <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
-                                    th:selected="${staff.locationId == loc.id}"></option>
+                                    th:selected="${staff?.locationId == loc.id}"></option>
                             </select>
                         </div>
+                        <!-- Trạng thái hoạt động -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="isActive" value="true"
+                                    th:checked="${staff?.isActive == null || staff?.isActive}" id="isActiveSwitch">
+                                <label class="form-check-label" for="isActiveSwitch">Đang hoạt động</label>
+                            </div>
+                        </div>
                     </div>
+                    <hr>
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-success">
                             <i class="fas fa-save me-1"></i>
                             <span th:text="${isEdit ? 'Cập nhật' : 'Tạo mới'}"></span>
                         </button>

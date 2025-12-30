@@ -104,9 +104,8 @@ public class LoginController {
             Optional<Customer> customerOpt = customerRepository.findByUserId(user.getId());
             if (customerOpt.isPresent()) {
                 Customer customer = customerOpt.get();
-                session.setAttribute("customerCode", customer.getCustomerCode());
                 session.setAttribute("customerId", customer.getId());
-                session.setAttribute("customerName", customer.getName());
+                session.setAttribute("customerName", customer.getFullName());
             }
             redirectAttributes.addFlashAttribute("successMessage",
                     "Đăng nhập thành công! Xin chào, " + user.getUsername());
@@ -116,7 +115,6 @@ public class LoginController {
             Optional<Staff> staffOpt = staffRepository.findByUserId(user.getId());
             if (staffOpt.isPresent()) {
                 Staff staff = staffOpt.get();
-                session.setAttribute("staffCode", staff.getStaffCode());
                 session.setAttribute("staffId", staff.getId());
                 session.setAttribute("staffName", staff.getFullName());
             }

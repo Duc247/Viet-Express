@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ Location (Địa điểm/Chi nhánh) và Route (Tuyến đường)
+ * Được sử dụng bởi: AdminPersonnelController, AdminResourceController
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

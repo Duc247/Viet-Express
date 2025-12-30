@@ -3,40 +3,64 @@
     layout:decorate="~{admin/layout-admin}">
 
 <head>
-    <title>Quản lý User</title>
+    <title>Quản lý Tài khoản</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2"><i class="fas fa-users me-2"></i>Quản lý User (Tài khoản)</h1>
-            <div class="d-flex gap-2">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-users"></i>Quản lý Tài khoản</h1>
+            <div class="d-flex gap-2 flex-wrap">
+                <!-- Lọc theo Role -->
                 <form th:action="@{/admin/user/search}" method="get" class="d-flex">
-                    <input type="text" name="keyword" class="form-control form-control-sm me-2"
-                        placeholder="Tìm kiếm..." th:value="${keyword}">
-                    <button type="submit" class="btn btn-outline-secondary btn-sm"><i
-                            class="fas fa-search"></i></button>
+                    <select name="roleName" class="form-select form-select-sm" style="width: 160px;"
+                        onchange="this.form.submit()">
+                        <option value="">Tất cả vai trò</option>
+                        <option th:each="role : ${roles}" th:value="${role.roleName}" th:text="${role.roleName}"
+                            th:selected="${selectedRole == role.roleName}"></option>
+                    </select>
                 </form>
-                <a href="/admin/user/create" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Thêm
-                    mới</a>
+                <!-- Tìm kiếm -->
+                <form th:action="@{/admin/user/search}" method="get" class="d-flex gap-2">
+                    <input type="text" name="keyword" class="form-control form-control-sm" style="width: 200px;"
+                        placeholder="Tìm kiếm..." th:value="${keyword}">
+                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-search"></i></button>
+                </form>
+                <a href="/admin/user/create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> Thêm mới
+                </a>
             </div>
+        </div>
+
+        <!-- Filter info -->
+        <div th:if="${selectedRole != null}"
+            class="alert alert-info py-2 d-flex justify-content-between align-items-center mb-3">
+            <span><i class="fas fa-filter me-2"></i>Đang lọc: <strong th:text="${selectedRole}">Role</strong></span>
+            <a href="/admin/user" class="btn btn-sm btn-outline-info"><i class="fas fa-times me-1"></i>Xóa bộ lọc</a>
+        </div>
+        <div th:if="${keyword != null}"
+            class="alert alert-info py-2 d-flex justify-content-between align-items-center mb-3">
+            <span><i class="fas fa-search me-2"></i>Kết quả: "<strong th:text="${keyword}">Keyword</strong>"</span>
+            <a href="/admin/user" class="btn btn-sm btn-outline-info"><i class="fas fa-times me-1"></i>Xóa bộ lọc</a>
         </div>
 
         <!-- Flash messages -->
         <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${success}"></span>
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${error}"></span>
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
+        <!-- Data Table -->
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="table-dark">
+                    <table class="table table-hover mb-0">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Username</th>
@@ -45,12 +69,12 @@
                                 <th>Vai trò</th>
                                 <th>Trạng thái</th>
                                 <th>Ngày tạo</th>
-                                <th>Thao tác</th>
+                                <th class="text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="u : ${users}">
-                                <td th:text="${u.id}"></td>
+                                <td><code th:text="${u.id}"></code></td>
                                 <td><strong th:text="${u.username}"></strong></td>
                                 <td th:text="${u.email}"></td>
                                 <td th:text="${u.phone}"></td>
@@ -59,27 +83,38 @@
                                         th:text="${u.roleName != null ? u.roleName : '-'}"></span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${u.isActive}">Hoạt động</span>
-                                    <span class="badge bg-secondary" th:unless="${u.isActive}">Ngừng</span>
+                                    <span class="badge bg-success" th:if="${u.isActive}">
+                                        <i class="fas fa-check me-1"></i>Hoạt động
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${u.isActive}">
+                                        <i class="fas fa-pause me-1"></i>Ngừng
+                                    </span>
                                 </td>
                                 <td
                                     th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'dd/MM/yyyy') : '-'}">
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     <div class="btn-group btn-group-sm">
-                                        <a th:href="@{/admin/user/edit/{id}(id=${u.id})}"
-                                            class="btn btn-outline-warning" title="Sửa"><i class="fas fa-edit"></i></a>
-                                        <a th:href="@{/admin/user/toggle/{id}(id=${u.id})}" class="btn btn-outline-info"
-                                            title="Bật/Tắt"><i class="fas fa-power-off"></i></a>
-                                        <a th:href="@{/admin/user/delete/{id}(id=${u.id})}"
-                                            class="btn btn-outline-danger" title="Xoá"
-                                            onclick="return confirm('Bạn có chắc muốn xoá?')"><i
-                                                class="fas fa-trash"></i></a>
+                                        <a th:href="@{/admin/user/edit/{id}(id=${u.id})}" class="btn btn-warning"
+                                            title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/admin/user/toggle/{id}(id=${u.id})}" class="btn btn-info"
+                                            title="Bật/Tắt">
+                                            <i class="fas fa-power-off"></i>
+                                        </a>
+                                        <a th:href="@{/admin/user/delete/{id}(id=${u.id})}" class="btn btn-danger"
+                                            title="Xoá" onclick="return confirm('Bạn có chắc muốn xoá?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(users)}">
-                                <td colspan="8" class="text-center text-muted py-4">Chưa có tài khoản</td>
+                                <td colspan="8" class="empty-state">
+                                    <i class="fas fa-inbox d-block"></i>
+                                    <span>Chưa có dữ liệu</span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

@@ -16,9 +16,7 @@
                     Xin chào, <span th:if="${session.staffName}" th:text="${session.staffName}"></span><span
                         th:unless="${session.staffName}" th:text="${session.username} ?: 'Nhân viên'"></span>
                 </h6>
-                <small class="text-muted d-block" th:if="${session.staffCode}"
-                    th:text="'Mã NV: ' + ${session.staffCode}">Mã NV: STAFF-XXX</small>
-                <small class="text-muted" th:unless="${session.staffCode}">Nhân viên kho</small>
+                <small class="text-muted">Nhân viên kho</small>
                 <a href="/auth/logout" class="btn btn-outline-danger btn-sm mt-2">
                     <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
                 </a>

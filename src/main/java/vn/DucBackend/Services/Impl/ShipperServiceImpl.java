@@ -7,30 +7,40 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.ShipperDTO;
 import vn.DucBackend.Entities.Shipper;
+import vn.DucBackend.Entities.Location;
 import vn.DucBackend.Repositories.LocationRepository;
 import vn.DucBackend.Repositories.ShipperRepository;
 import vn.DucBackend.Repositories.TripRepository;
 import vn.DucBackend.Repositories.UserRepository;
 import vn.DucBackend.Services.ShipperService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ Shipper (Tài xế giao hàng)
+ * Được sử dụng bởi: AdminPersonnelController (CRUD Shipper)
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ShipperServiceImpl implements ShipperService {
-	
-	@Autowired
+
+    @Autowired
     private final ShipperRepository shipperRepository;
-	@Autowired
+    @Autowired
     private final UserRepository userRepository;
-	@Autowired
+    @Autowired
     private final LocationRepository locationRepository;
-	@Autowired
+    @Autowired
     private final TripRepository tripRepository;
 
+    /**
+     * Lấy danh sách tất cả Shipper
+     * Sử dụng bởi: AdminPersonnelController.shipperList() - GET /admin/shipper
+     */
     @Override
     public List<ShipperDTO> findAllShippers() {
         return shipperRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
@@ -46,6 +56,11 @@ public class ShipperServiceImpl implements ShipperService {
         return shipperRepository.findAvailableShippers().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Tìm Shipper theo ID
+     * Sử dụng bởi: AdminPersonnelController.shipperEditForm() - GET
+     * /admin/shipper/edit/{id}
+     */
     @Override
     public Optional<ShipperDTO> findShipperById(Long id) {
         return shipperRepository.findById(id).map(this::toDTO);
@@ -67,11 +82,21 @@ public class ShipperServiceImpl implements ShipperService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Tìm kiếm Shipper theo keyword (fullName, phone)
+     * Sử dụng bởi: AdminPersonnelController.shipperSearch() - GET
+     * /admin/shipper/search
+     */
     @Override
     public List<ShipperDTO> searchShippers(String keyword) {
         return shipperRepository.searchByKeyword(keyword).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Tạo Shipper mới từ User có sẵn
+     * Sử dụng bởi: AdminPersonnelController.shipperCreate() - POST
+     * /admin/shipper/create
+     */
     @Override
     public ShipperDTO createShipper(ShipperDTO dto) {
         Shipper shipper = new Shipper();
@@ -81,9 +106,25 @@ public class ShipperServiceImpl implements ShipperService {
         shipper.setPhone(dto.getPhone());
         shipper.setWorkingArea(dto.getWorkingArea());
         shipper.setIsActive(true);
+        shipper.setIsAvailable(true);
+        shipper.setCreatedAt(dto.getCreatedAt());
+        shipper.setUpdatedAt(dto.getUpdatedAt());
+        if (dto.getCurrentLocationId() != null) {
+            shipper.setCurrentLocation(locationRepository.findById(dto.getCurrentLocationId())
+                    .orElseThrow(() -> new RuntimeException("Location not found")));
+        }
+        if (dto.getCurrentTripId() != null) {
+            shipper.setCurrentTrip(tripRepository.findById(dto.getCurrentTripId())
+                    .orElseThrow(() -> new RuntimeException("Trip not found")));
+        }
         return toDTO(shipperRepository.save(shipper));
     }
 
+    /**
+     * Cập nhật thông tin Shipper
+     * Sử dụng bởi: AdminPersonnelController.shipperUpdate() - POST
+     * /admin/shipper/edit/{id}
+     */
     @Override
     public ShipperDTO updateShipper(Long id, ShipperDTO dto) {
         Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));
@@ -93,6 +134,18 @@ public class ShipperServiceImpl implements ShipperService {
             shipper.setPhone(dto.getPhone());
         if (dto.getWorkingArea() != null)
             shipper.setWorkingArea(dto.getWorkingArea());
+        if (dto.getCurrentLocationId() != null) {
+            shipper.setCurrentLocation(locationRepository.findById(dto.getCurrentLocationId())
+                    .orElseThrow(() -> new RuntimeException("Location not found")));
+        }
+        if (dto.getCurrentTripId() != null) {
+            shipper.setCurrentTrip(tripRepository.findById(dto.getCurrentTripId())
+                    .orElseThrow(() -> new RuntimeException("Trip not found")));
+        }
+        shipper.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : false);
+        shipper.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : false);
+        shipper.setUpdatedAt(LocalDateTime.now());
+
         return toDTO(shipperRepository.save(shipper));
     }
 
@@ -130,11 +183,21 @@ public class ShipperServiceImpl implements ShipperService {
         return toDTO(shipperRepository.save(shipper));
     }
 
+    /**
+     * Xóa Shipper theo ID
+     * Sử dụng bởi: AdminPersonnelController.shipperDelete() - POST
+     * /admin/shipper/delete/{id}
+     */
     @Override
     public void deleteShipper(Long id) {
         shipperRepository.deleteById(id);
     }
 
+    /**
+     * Bật/tắt trạng thái active của Shipper
+     * Sử dụng bởi: AdminPersonnelController.shipperToggleStatus() - POST
+     * /admin/shipper/toggle-status/{id}
+     */
     @Override
     public void toggleShipperStatus(Long id) {
         Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));

@@ -44,15 +44,28 @@ public class AdminPersonnelController {
     public String userList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("users", userService.findAllUsers());
+        model.addAttribute("roles", roleService.findAllRoles());
         return "admin/user/list";
     }
 
     // Tìm kiếm User
     @GetMapping("/user/search")
-    public String searchUser(@RequestParam String keyword, Model model, HttpServletRequest request) {
+    public String searchUser(@RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String roleName,
+            Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("users", userService.searchUsers(keyword));
-        model.addAttribute("keyword", keyword);
+
+        if (roleName != null && !roleName.isEmpty()) {
+            model.addAttribute("users", userService.findUsersByRole(roleName));
+            model.addAttribute("selectedRole", roleName);
+        } else if (keyword != null && !keyword.isEmpty()) {
+            model.addAttribute("users", userService.searchUsers(keyword));
+            model.addAttribute("keyword", keyword);
+        } else {
+            model.addAttribute("users", userService.findAllUsers());
+        }
+
+        model.addAttribute("roles", roleService.findAllRoles());
         return "admin/user/list";
     }
 
@@ -62,6 +75,7 @@ public class AdminPersonnelController {
         addCommonAttributes(model, request);
         model.addAttribute("user", new UserDTO());
         model.addAttribute("roles", roleService.findAllRoles());
+        model.addAttribute("locations", locationService.findAllLocations());
         model.addAttribute("isEdit", false);
         return "admin/user/form";
     }
@@ -71,6 +85,7 @@ public class AdminPersonnelController {
     public String createUser(@ModelAttribute UserDTO dto, RedirectAttributes redirectAttributes) {
         try {
             userService.createUser(dto);
+
             redirectAttributes.addFlashAttribute("success", "Tạo user thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -84,6 +99,7 @@ public class AdminPersonnelController {
         addCommonAttributes(model, request);
         model.addAttribute("user", userService.findUserById(id).orElse(null));
         model.addAttribute("roles", roleService.findAllRoles());
+        model.addAttribute("locations", locationService.findAllLocations());
         model.addAttribute("isEdit", true);
         return "admin/user/form";
     }
@@ -385,5 +401,33 @@ public class AdminPersonnelController {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/staff";
+    }
+
+    // ==========================================
+    // PROFILE DETAIL PAGES
+    // ==========================================
+
+    // Chi tiết Customer
+    @GetMapping("/customer/detail/{id}")
+    public String customerDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("customer", customerService.findCustomerById(id).orElse(null));
+        return "admin/customer/profile";
+    }
+
+    // Chi tiết Staff
+    @GetMapping("/staff/detail/{id}")
+    public String staffDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("staff", staffService.findStaffById(id).orElse(null));
+        return "admin/staff/profile";
+    }
+
+    // Chi tiết Shipper
+    @GetMapping("/shipper/detail/{id}")
+    public String shipperDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        model.addAttribute("shipper", shipperService.findShipperById(id).orElse(null));
+        return "admin/shipper/profile";
     }
 }

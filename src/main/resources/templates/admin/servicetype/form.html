@@ -3,65 +3,77 @@
     layout:decorate="~{admin/layout-admin}">
 
 <head>
-    <title>Thêm/Sửa ServiceType</title>
+    <title th:text="${isEdit ? 'Chỉnh sửa ServiceType' : 'Thêm mới ServiceType'}">ServiceType</title>
 </head>
 
 <body>
     <div layout:fragment="content">
         <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2"><i class="fas fa-tags me-2"></i>
-                <span th:if="${serviceType == null || serviceType.id == null}">Thêm mới ServiceType</span>
-                <span th:if="${serviceType != null && serviceType.id != null}">Sửa ServiceType</span>
+                <span th:text="${isEdit ? 'Chỉnh sửa Loại dịch vụ' : 'Thêm mới Loại dịch vụ'}">ServiceType</span>
             </h1>
             <a href="/admin/servicetype" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
         </div>
 
         <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="fas fa-tags me-1"></i>Thông tin loại dịch vụ</h5>
+            </div>
             <div class="card-body">
-                <form th:action="@{/admin/servicetype/save}" method="post" th:object="${serviceType}">
-                    <input type="hidden" th:field="*{id}" th:if="${serviceType != null && serviceType.id != null}">
+                <form th:action="@{/admin/servicetype/save}" method="post">
+                    <input type="hidden" name="id" th:value="${serviceType?.id}">
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Mã dịch vụ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" th:field="*{code}" required
+                            <label class="form-label"><i class="fas fa-barcode me-1"></i>Mã dịch vụ <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="code" th:value="${serviceType?.code}" required
                                 placeholder="VD: EXPRESS">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Tên dịch vụ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" th:field="*{name}" required
+                            <label class="form-label"><i class="fas fa-tag me-1"></i>Tên dịch vụ <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name" th:value="${serviceType?.name}" required
                                 placeholder="VD: Giao nhanh">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Trạng thái</label>
-                            <select class="form-select" th:field="*{isActive}">
-                                <option value="true">Hoạt động</option>
-                                <option value="false">Ngừng</option>
+                            <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</label>
+                            <select class="form-select" name="isActive">
+                                <option value="true"
+                                    th:selected="${serviceType?.isActive == null || serviceType?.isActive}">Hoạt động
+                                </option>
+                                <option value="false" th:selected="${serviceType?.isActive == false}">Ngừng</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Mô tả</label>
-                        <textarea class="form-control" th:field="*{description}" rows="2"
-                            placeholder="Mô tả dịch vụ..."></textarea>
+                        <label class="form-label"><i class="fas fa-align-left me-1"></i>Mô tả</label>
+                        <textarea class="form-control" name="description" rows="2" placeholder="Mô tả dịch vụ..."
+                            th:text="${serviceType?.description}"></textarea>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Giá/km (VNĐ) <span class="text-danger">*</span></label>
-                            <input type="number" step="100" class="form-control" th:field="*{pricePerKm}" required
-                                placeholder="VD: 5000">
+                            <label class="form-label"><i class="fas fa-money-bill me-1"></i>Giá/km (VNĐ) <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" step="100" class="form-control" name="pricePerKm"
+                                th:value="${serviceType?.pricePerKm}" required placeholder="VD: 5000">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tốc độ trung bình (km/h)</label>
-                            <input type="number" step="1" class="form-control" th:field="*{averageSpeedKmh}"
-                                placeholder="VD: 60">
+                            <label class="form-label"><i class="fas fa-tachometer-alt me-1"></i>Tốc độ trung bình
+                                (km/h)</label>
+                            <input type="number" step="1" class="form-control" name="averageSpeedKmh"
+                                th:value="${serviceType?.averageSpeedKmh}" placeholder="VD: 60">
                         </div>
                     </div>
 
+                    <hr>
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Lưu</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-1"></i>
+                            <span th:text="${isEdit ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                        </button>
                         <a href="/admin/servicetype" class="btn btn-outline-secondary">Hủy</a>
                     </div>
                 </form>

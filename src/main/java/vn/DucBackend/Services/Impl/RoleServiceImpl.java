@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ Role (Vai trò người dùng)
+ * Được sử dụng bởi: AdminPersonnelController, AdminSystemController
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

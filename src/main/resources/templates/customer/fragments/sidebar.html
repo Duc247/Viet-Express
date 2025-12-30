@@ -16,9 +16,7 @@
                     Xin chào, <span th:if="${session.customerName}" th:text="${session.customerName}"></span><span
                         th:unless="${session.customerName}" th:text="${session.username} ?: 'Khách hàng'"></span>
                 </h6>
-                <small class="text-muted d-block" th:if="${session.customerCode}"
-                    th:text="'Mã KH: ' + ${session.customerCode}">Mã KH: CUST-XXX</small>
-                <small class="text-muted" th:unless="${session.customerCode}">Khách hàng</small>
+                <small class="text-muted">Khách hàng</small>
                 <!-- Nút đăng xuất -->
                 <a href="/auth/logout" class="btn btn-outline-danger btn-sm mt-2">
                     <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất

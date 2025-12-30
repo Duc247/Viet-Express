@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ SystemLog (Nhật ký hệ thống)
+ * Được sử dụng bởi: AdminSystemController (Xem log hệ thống)
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
