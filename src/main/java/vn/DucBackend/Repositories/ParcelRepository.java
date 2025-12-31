@@ -34,4 +34,24 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long> {
     List<Parcel> findActiveParcelsByShipper(@Param("shipperId") Long shipperId);
 
     boolean existsByParcelCode(String parcelCode);
+
+    // Count parcels by status within a request
+    @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId AND p.status = 'DELIVERED'")
+    Long countDeliveredByRequestId(@Param("requestId") Long requestId);
+
+    @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId AND p.status = 'OUT_FOR_DELIVERY'")
+    Long countInDeliveryByRequestId(@Param("requestId") Long requestId);
+
+    @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId AND p.status NOT IN ('DELIVERED', 'OUT_FOR_DELIVERY')")
+    Long countPendingByRequestId(@Param("requestId") Long requestId);
+
+    // Search parcels
+    @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId AND " +
+            "(LOWER(p.parcelCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<Parcel> searchByRequestIdAndKeyword(@Param("requestId") Long requestId, @Param("keyword") String keyword);
+
+    @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId AND p.status = :status")
+    List<Parcel> findByRequestIdAndStatus(@Param("requestId") Long requestId,
+            @Param("status") Parcel.ParcelStatus status);
 }

@@ -48,20 +48,6 @@
                         <i class="fas fa-box-open me-2"></i> Đơn hàng của tôi
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/customer/tracking' ? 'active fw-bold text-primary' : ''}"
-                        href="/customer/tracking">
-                        <i class="fas fa-search-location me-2"></i> Tra cứu vận đơn
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/customer/payments' ? 'active fw-bold text-primary' : ''}"
-                        href="/customer/payments">
-                        <i class="fas fa-credit-card me-2"></i> Thanh toán
-                    </a>
-                </li>
             </ul>
         </div>
     </nav>

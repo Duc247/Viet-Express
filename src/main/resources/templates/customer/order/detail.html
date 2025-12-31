@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{customer/layout-customer}">
+
+<head>
+    <title>Chi tiết đơn hàng</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-invoice me-2"></i>Chi tiết đơn hàng</h2>
+            <a href="/customer/orders" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Quay
+                lại</a>
+        </div>
+
+        <!-- Thông tin đơn hàng -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Card 1: Thông tin chung -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin đơn hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Mã đơn hàng:</strong> <code th:text="${order.requestCode}">REQ-XXX</code></p>
+                                <p><strong>Trạng thái:</strong>
+                                    <span class="badge bg-warning" th:if="${order.status.name() == 'PENDING'}">Chờ xác
+                                        nhận</span>
+                                    <span class="badge bg-info" th:if="${order.status.name() == 'CONFIRMED'}">Đã xác
+                                        nhận</span>
+                                    <span class="badge bg-primary" th:if="${order.status.name() == 'IN_TRANSIT'}">Đang
+                                        vận chuyển</span>
+                                    <span class="badge bg-success" th:if="${order.status.name() == 'DELIVERED'}">Đã
+                                        giao</span>
+                                    <span class="badge bg-danger" th:if="${order.status.name() == 'CANCELLED'}">Đã
+                                        hủy</span>
+                                </p>
+                                <p><strong>Dịch vụ:</strong> <span th:text="${order.serviceType?.name ?: '-'}">Tiêu
+                                        chuẩn</span></p>
+                                <p><strong>Mô tả hàng:</strong> <span th:text="${order.parcelDescription ?: '-'}">iPhone
+                                        15</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Ngày tạo:</strong> <span
+                                        th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</span>
+                                </p>
+                                <p><strong>Dự kiến giao:</strong> <span
+                                        th:text="${order.estimatedDeliveryTime != null ? #temporals.format(order.estimatedDeliveryTime, 'dd/MM/yyyy') : '-'}">-</span>
+                                </p>
+                                <p><strong>Khoảng cách:</strong> <span th:text="${order.distanceKm + ' km'}">10
+                                        km</span></p>
+                            </div>
+                        </div>
+                        <!-- Mô tả chi tiết đơn hàng -->
+                        <div th:if="${order.description}" class="mt-3 p-3 bg-light rounded">
+                            <h6 class="text-muted small text-uppercase mb-2"><i class="fas fa-file-alt me-1"></i>Mô tả
+                                chi tiết</h6>
+                            <p class="mb-0" th:text="${order.description}">Mô tả đơn hàng...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Địa chỉ -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ giao nhận
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <h6 class="text-muted small text-uppercase mb-2">Người gửi</h6>
+                                <p class="mb-1"><strong th:text="${order.sender?.name ?: '-'}">Nguyễn Văn A</strong></p>
+                                <p class="mb-1 text-muted" th:text="${order.senderLocation?.addressText ?: '-'}">123
+                                    Đường ABC</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted small text-uppercase mb-2">Người nhận</h6>
+                                <p class="mb-1"><strong th:text="${order.receiverLocation?.name ?: '-'}">Trần Văn
+                                        B</strong></p>
+                                <p class="mb-1 text-muted" th:text="${order.receiverLocation?.addressText ?: '-'}">456
+                                    Đường XYZ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Kiện hàng (Summary) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-box me-2"></i>Kiện hàng</h6>
+                        <a th:href="@{/customer/orders/{id}/parcels(id=${order.id})}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-list me-1"></i>Xem chi tiết
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                                <div class="p-3 rounded bg-light">
+                                    <h3 class="mb-1 text-primary" th:text="${totalParcels}">0</h3>
+                                    <small class="text-muted">Tổng kiện</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                                <div class="p-3 rounded bg-success bg-opacity-10">
+                                    <h3 class="mb-1 text-success" th:text="${deliveredParcels}">0</h3>
+                                    <small class="text-muted">Đã giao</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded bg-warning bg-opacity-10">
+                                    <h3 class="mb-1 text-warning" th:text="${inDeliveryParcels}">0</h3>
+                                    <small class="text-muted">Đang giao</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded bg-secondary bg-opacity-10">
+                                    <h3 class="mb-1 text-secondary" th:text="${pendingParcels}">0</h3>
+                                    <small class="text-muted">Còn lại</small>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Progress bar -->
+                        <div class="mt-3" th:if="${totalParcels > 0}">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    th:style="'width: ' + ${(deliveredParcels * 100) / totalParcels} + '%'"></div>
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                    th:style="'width: ' + ${(inDeliveryParcels * 100) / totalParcels} + '%'"></div>
+                            </div>
+                            <small class="text-muted mt-1 d-block">
+                                Tiến độ: <span th:text="${deliveredParcels}">0</span>/<span
+                                    th:text="${totalParcels}">0</span> kiện đã giao
+                            </small>
+                        </div>
+                        <div th:if="${totalParcels == 0}" class="text-center text-muted py-2">
+                            Chưa có kiện hàng
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Chuyến vận chuyển (Summary) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-truck me-2"></i>Chuyến vận chuyển</h6>
+                        <a th:href="@{/customer/orders/{id}/trips(id=${order.id})}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-list me-1"></i>Xem chi tiết
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <!-- Completion percentage -->
+                        <div class="text-center mb-4" th:if="${totalTrips > 0}">
+                            <div class="position-relative d-inline-block">
+                                <div class="display-4 fw-bold text-primary" th:text="${completionPercentage + '%'}">0%
+                                </div>
+                                <small class="text-muted d-block">Hàng đã giao đến điểm B</small>
+                            </div>
+                        </div>
+
+                        <!-- Trip stats -->
+                        <div class="row text-center">
+                            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                                <div class="p-3 rounded bg-light">
+                                    <h4 class="mb-1 text-primary" th:text="${totalTrips}">0</h4>
+                                    <small class="text-muted">Tổng chuyến</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                                <div class="p-3 rounded bg-success bg-opacity-10">
+                                    <h4 class="mb-1 text-success" th:text="${completedTrips}">0</h4>
+                                    <small class="text-muted">Hoàn thành</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded bg-warning bg-opacity-10">
+                                    <h4 class="mb-1 text-warning" th:text="${inProgressTrips}">0</h4>
+                                    <small class="text-muted">Đang chạy</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded bg-secondary bg-opacity-10">
+                                    <h4 class="mb-1 text-secondary" th:text="${pendingTrips}">0</h4>
+                                    <small class="text-muted">Chờ xử lý</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress bar -->
+                        <div class="mt-3" th:if="${totalTrips > 0}">
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    th:style="'width: ' + ${(completedTrips * 100) / totalTrips} + '%'"
+                                    th:title="${'Hoàn thành: ' + completedTrips}"></div>
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                    th:style="'width: ' + ${(inProgressTrips * 100) / totalTrips} + '%'"
+                                    th:title="${'Đang chạy: ' + inProgressTrips}"></div>
+                            </div>
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-shipping-fast me-1"></i>
+                                <span th:text="${deliveredParcels}">0</span>/<span th:text="${totalParcels}">0</span>
+                                kiện đã giao đến điểm B
+                            </small>
+                        </div>
+
+                        <div th:if="${totalTrips == 0}" class="text-center text-muted py-3">
+                            <i class="fas fa-truck fa-2x mb-2 d-block opacity-50"></i>
+                            Chưa có chuyến vận chuyển nào
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Lịch sử vận chuyển (Tracking Timeline) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-history me-2"></i>Lịch sử vận chuyển</h6>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(parcelActions)}" class="text-center text-muted py-3">
+                            Chưa có lịch sử vận chuyển
+                        </div>
+                        <div th:unless="${#lists.isEmpty(parcelActions)}" class="timeline">
+                            <div th:each="action, iterStat : ${parcelActions}" class="timeline-item"
+                                th:classappend="${iterStat.first ? '' : 'mt-3'}">
+                                <div class="d-flex">
+                                    <div class="timeline-marker"
+                                        th:classappend="${action.actionType.actionCode == 'DELIVERED' ? 'bg-success' : 
+                                            (action.actionType.actionCode == 'IN_TRANSIT' ? 'bg-primary' : 
+                                            (action.actionType.actionCode == 'FAILED' ? 'bg-danger' : 'bg-secondary'))}">
+                                    </div>
+                                    <div class="ms-3 flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <strong th:text="${action.actionType.name}">Tạo đơn</strong>
+                                            <small class="text-muted"
+                                                th:text="${#temporals.format(action.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</small>
+                                        </div>
+                                        <p class="text-muted mb-0 small" th:if="${action.note}"
+                                            th:text="${action.note}">Ghi chú...</p>
+                                        <p class="text-muted mb-0 small" th:if="${action.toLocation}"
+                                            th:text="'Địa điểm: ' + ${action.toLocation.name}">Kho ABC</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .timeline-marker {
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        margin-top: 5px;
+                        flex-shrink: 0;
+                    }
+
+                    .timeline-item:not(:last-child) {
+                        border-left: 2px solid #dee2e6;
+                        margin-left: 5px;
+                        padding-left: 20px;
+                        padding-bottom: 15px;
+                    }
+
+                    .timeline-item:not(:last-child) .timeline-marker {
+                        margin-left: -26px;
+                    }
+                </style>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Card: Chi tiết thanh toán (Summary) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold text-primary"><i class="fas fa-money-bill-wave me-2"></i>Thanh toán</h6>
+                        <a th:href="@{/customer/orders/{id}/payments(id=${order.id})}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-list me-1"></i>Chi tiết
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <!-- Payment type stats -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="p-2 rounded bg-primary bg-opacity-10 text-center">
+                                    <i class="fas fa-shipping-fast text-primary"></i>
+                                    <div class="fw-bold" th:text="${shippingFeeCount}">0</div>
+                                    <small class="text-muted">Phí ship</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded bg-info bg-opacity-10 text-center">
+                                    <i class="fas fa-hand-holding-usd text-info"></i>
+                                    <div class="fw-bold" th:text="${codCount}">0</div>
+                                    <small class="text-muted">COD</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment status stats -->
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <span class="badge bg-success" th:text="${paidPayments}">0</span>
+                                    <small class="d-block text-muted">Đã TT</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <span class="badge bg-info" th:text="${partiallyPaidPayments}">0</span>
+                                    <small class="d-block text-muted">Một phần</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <span class="badge bg-warning" th:text="${unpaidPayments}">0</span>
+                                    <small class="d-block text-muted">Chưa TT</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Amount summary -->
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Tổng cần trả:</span>
+                                <strong class="text-danger"
+                                    th:text="${#numbers.formatDecimal(totalExpected, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Đã thanh toán:</span>
+                                <span class="text-success"
+                                    th:text="${#numbers.formatDecimal(totalPaid, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</span>
+                            </div>
+                        </div>
+
+                        <!-- Remaining amount -->
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded"
+                            th:classappend="${remainingAmount.compareTo(T(java.math.BigDecimal).ZERO) == 0 ? 'bg-success bg-opacity-25' : ''}"
+                            th:style="${remainingAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'background-color: #fff3cd;' : ''}">
+                            <span class="fw-bold">Còn lại:</span>
+                            <strong
+                                th:classappend="${remainingAmount.compareTo(T(java.math.BigDecimal).ZERO) == 0 ? 'text-success' : 'text-danger'}"
+                                class="fs-5"
+                                th:text="${#numbers.formatDecimal(remainingAmount, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</strong>
+                        </div>
+
+                        <!-- Payment status badge -->
+                        <div class="text-center mt-3">
+                            <span th:if="${remainingAmount.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
+                                class="badge bg-success fs-6">Đã thanh toán đủ</span>
+                            <span
+                                th:if="${remainingAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 && totalPaid.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                class="badge bg-info fs-6">Thanh toán một phần</span>
+                            <span
+                                th:if="${totalPaid.compareTo(T(java.math.BigDecimal).ZERO) == 0 && totalExpected.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                class="badge bg-warning fs-6">Chưa thanh toán</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Mã vận đơn -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-barcode me-2"></i>Mã vận đơn</h6>
+        </div>
+        <div class="card-body">
+            <div th:each="tc : ${trackingCodes}" class="mb-2">
+                <code class="fs-6" th:text="${tc.code}">TRK-XXXXXX</code>
+            </div>
+            <div th:if="${#lists.isEmpty(trackingCodes)}" class="text-muted">Chưa có mã vận đơn</div>
+        </div>
+    </div>
+
+    <!-- Card: Ghi chú -->
+    <div class="card shadow-sm" th:if="${order.note != null}">
+        <div class="card-header bg-white py-3">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-sticky-note me-2"></i>Ghi chú</h6>
+        </div>
+        <div class="card-body">
+            <p class="mb-0" th:text="${order.note}">Ghi chú...</p>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+</body>
+
+</html>

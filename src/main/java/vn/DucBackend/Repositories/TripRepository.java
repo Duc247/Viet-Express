@@ -38,4 +38,40 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
     @Query("SELECT t FROM Trip t WHERE t.shipper.id = :shipperId ORDER BY t.createdAt DESC")
     List<Trip> findByShipperIdOrderByCreatedAtDesc(@Param("shipperId") Long shipperId);
+
+    // Lấy tất cả trips đang vận chuyển parcels của một request
+    @Query("SELECT DISTINCT t FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) ORDER BY t.createdAt DESC")
+    List<Trip> findTripsByRequestId(@Param("requestId") Long requestId);
+
+    // Count trips by status for a request
+    @Query("SELECT COUNT(DISTINCT t) FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL)")
+    Long countTripsByRequestId(@Param("requestId") Long requestId);
+
+    @Query("SELECT COUNT(DISTINCT t) FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) AND t.status = 'COMPLETED'")
+    Long countCompletedTripsByRequestId(@Param("requestId") Long requestId);
+
+    @Query("SELECT COUNT(DISTINCT t) FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) AND t.status = 'IN_PROGRESS'")
+    Long countInProgressTripsByRequestId(@Param("requestId") Long requestId);
+
+    @Query("SELECT COUNT(DISTINCT t) FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) AND t.status = 'CREATED'")
+    Long countCreatedTripsByRequestId(@Param("requestId") Long requestId);
+
+    // Search trips by description or route
+    @Query("SELECT DISTINCT t FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) AND "
+            +
+            "(LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(t.note) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(t.startLocation.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(t.endLocation.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY t.createdAt DESC")
+    List<Trip> searchTripsByRequestIdAndKeyword(@Param("requestId") Long requestId, @Param("keyword") String keyword);
+
+    // Filter by status
+    @Query("SELECT DISTINCT t FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) AND t.status = :status ORDER BY t.createdAt DESC")
+    List<Trip> findTripsByRequestIdAndStatus(@Param("requestId") Long requestId,
+            @Param("status") Trip.TripStatus status);
+
+    // Filter by trip type
+    @Query("SELECT DISTINCT t FROM Trip t WHERE t.id IN (SELECT DISTINCT p.currentTrip.id FROM Parcel p WHERE p.request.id = :requestId AND p.currentTrip IS NOT NULL) AND t.tripType = :tripType ORDER BY t.createdAt DESC")
+    List<Trip> findTripsByRequestIdAndType(@Param("requestId") Long requestId,
+            @Param("tripType") Trip.TripType tripType);
 }

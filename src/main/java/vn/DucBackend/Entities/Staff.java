@@ -34,6 +34,9 @@ public class Staff {
     @JoinColumn(name = "location_id")
     private Location location;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "is_active")
     private Boolean isActive;
 
