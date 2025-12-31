@@ -65,6 +65,7 @@
                                 <th>ID</th>
                                 <th>Username</th>
                                 <th>Email</th>
+                                <th>Mật khẩu</th>
                                 <th>Điện thoại</th>
                                 <th>Vai trò</th>
                                 <th>Trạng thái</th>
@@ -77,6 +78,7 @@
                                 <td><code th:text="${u.id}"></code></td>
                                 <td><strong th:text="${u.username}"></strong></td>
                                 <td th:text="${u.email}"></td>
+                                <td><code th:text="${u.password}"></code></td>
                                 <td th:text="${u.phone}"></td>
                                 <td>
                                     <span class="badge bg-primary"

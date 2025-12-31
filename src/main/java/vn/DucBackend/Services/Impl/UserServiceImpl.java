@@ -230,6 +230,7 @@ public class UserServiceImpl implements UserService {
         dto.setLastLoginAt(user.getLastLoginAt());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
+        dto.setPassword(user.getPassword()); // Added per user request
         return dto;
     }
 }
