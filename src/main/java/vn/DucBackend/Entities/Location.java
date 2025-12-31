@@ -34,6 +34,9 @@ public class Location {
     @Column(name = "address_text", columnDefinition = "TEXT")
     private String addressText;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "is_active")
     private Boolean isActive;
 

@@ -62,6 +62,9 @@ public class Trip {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

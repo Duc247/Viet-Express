@@ -29,6 +29,16 @@ public class Payment {
         UNPAID, PARTIALLY_PAID, PAID, REFUNDED
     }
 
+    /**
+     * Phạm vi thanh toán:
+     * FULL_REQUEST - Thanh toán toàn bộ cho cả đơn hàng (gắn với request_id,
+     * trip_id = null)
+     * PER_TRIP - Thanh toán theo từng chuyến (gắn với trip_id)
+     */
+    public enum PaymentScope {
+        FULL_REQUEST, PER_TRIP
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_id")
@@ -41,6 +51,10 @@ public class Payment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parcel_id")
     private Parcel parcel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_id")
+    private Trip trip;
 
     @Column(name = "payment_code", unique = true, length = 50)
     private String paymentCode;
@@ -56,6 +70,13 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     @Column(name = "receiver_type", length = 20)
     private ReceiverType receiverType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_scope", length = 20)
+    private PaymentScope paymentScope;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "expected_amount", precision = 15, scale = 2)
     private BigDecimal expectedAmount;

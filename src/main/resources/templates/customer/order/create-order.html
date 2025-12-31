@@ -12,11 +12,24 @@
 
         <h2 class="h4 mb-4 fw-bold border-bottom pb-2">Tạo vận đơn mới</h2>
 
+        <!-- Error/Success Messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <form th:action="@{/customer/create-order}" method="post">
             <div class="row g-4">
 
                 <div class="col-lg-8">
 
+                    <!-- CARD 1: Thông tin địa điểm -->
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-white py-3">
                             <h6 class="m-0 fw-bold text-primary"><i class="fas fa-map-marker-alt me-2"></i>Thông tin địa
@@ -24,8 +37,21 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- Cột người gửi -->
                                 <div class="col-md-6 border-end">
                                     <h6 class="small text-muted text-uppercase fw-bold mb-3">1. Người gửi (Từ đâu?)</h6>
+
+                                    <!-- MÃ KHÁCH HÀNG NGƯỜI GỬI (MỚI) -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-primary">
+                                            <i class="fas fa-id-card me-1"></i>Mã khách hàng người gửi <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" name="senderCode" class="form-control border-primary"
+                                            placeholder="VD: CUST-20251230-001" required>
+                                        <div class="form-text small">Nhập mã khách hàng của người gửi</div>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Họ tên người gửi</label>
                                         <input type="text" name="senderName" class="form-control"
@@ -51,9 +77,22 @@
                                     </div>
                                 </div>
 
+                                <!-- Cột người nhận -->
                                 <div class="col-md-6">
                                     <h6 class="small text-muted text-uppercase fw-bold mb-3">2. Người nhận (Đến đâu?)
                                     </h6>
+
+                                    <!-- MÃ KHÁCH HÀNG NGƯỜI NHẬN (MỚI) -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-success">
+                                            <i class="fas fa-id-card me-1"></i>Mã khách hàng người nhận <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" name="receiverCode" class="form-control border-success"
+                                            placeholder="VD: CUST-20251230-002" required>
+                                        <div class="form-text small">Nhập mã khách hàng của người nhận</div>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Họ tên người nhận <span
                                                 class="text-danger">*</span></label>
@@ -77,6 +116,7 @@
                         </div>
                     </div>
 
+                    <!-- CARD 2: Thông tin hàng hóa & COD -->
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-white py-3">
                             <h6 class="m-0 fw-bold text-primary"><i class="fas fa-box me-2"></i>Thông tin hàng hóa & COD
@@ -135,6 +175,7 @@
 
                 </div>
 
+                <!-- Sidebar -->
                 <div class="col-lg-4">
 
                     <div class="card shadow-sm mb-4">
@@ -142,8 +183,9 @@
                             <h6 class="m-0 fw-bold text-primary"><i class="fas fa-truck me-2"></i>Gói vận chuyển</h6>
                         </div>
                         <div class="card-body">
-                            <div class="form-check mb-0 border rounded p-3 bg-light">
-                                <input class="form-check-input" type="radio" name="serviceType" id="srv1" checked>
+                            <div class="form-check mb-3 border rounded p-3 bg-light">
+                                <input class="form-check-input" type="radio" name="serviceType" id="srv1"
+                                    value="STANDARD" checked>
                                 <label class="form-check-label w-100" for="srv1">
                                     <div class="d-flex justify-content-between fw-bold">
                                         <span>Tiêu chuẩn</span>
@@ -152,7 +194,28 @@
                                     <small class="text-muted">Thời gian: 3-5 ngày</small>
                                 </label>
                             </div>
-
+                            <div class="form-check mb-3 border rounded p-3">
+                                <input class="form-check-input" type="radio" name="serviceType" id="srv2"
+                                    value="EXPRESS">
+                                <label class="form-check-label w-100" for="srv2">
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Giao nhanh</span>
+                                        <span class="text-warning">24-48h</span>
+                                    </div>
+                                    <small class="text-muted">Ưu tiên giao sớm</small>
+                                </label>
+                            </div>
+                            <div class="form-check mb-0 border rounded p-3">
+                                <input class="form-check-input" type="radio" name="serviceType" id="srv3"
+                                    value="SAME_DAY">
+                                <label class="form-check-label w-100" for="srv3">
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Giao trong ngày</span>
+                                        <span class="text-danger">Siêu tốc</span>
+                                    </div>
+                                    <small class="text-muted">Nội thành trong ngày</small>
+                                </label>
+                            </div>
                         </div>
                     </div>
 

@@ -42,6 +42,9 @@ public class Customer {
     @Column(name = "company_name")
     private String companyName;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "birthday")
     private LocalDateTime birthday;
 

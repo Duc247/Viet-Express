@@ -75,28 +75,30 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         ADMIN                                   │
-│            Quản trị hệ thống - Toàn quyền                       │
+│       Tiếp nhận Request từ Customer, giao việc cho Manager      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │     ┌──────────┐    ┌──────────┐    ┌──────────┐               │
 │     │ MANAGER  │    │  STAFF   │    │ SHIPPER  │               │
-│     │ Quản lý  │    │Nhân viên │    │Giao hàng │               │
+│     │Xác nhận  │    │Tạo Parcel│    │Giao hàng │               │
+│     │Tạo Trip  │    │Quản lý   │    │Thu COD   │               │
 │     └──────────┘    └──────────┘    └──────────┘               │
 │                                                                 │
 │                      ┌──────────┐                               │
 │                      │ CUSTOMER │                               │
-│                      │Khách hàng│                               │
+│                      │Tạo yêu   │                               │
+│                      │cầu gửi   │                               │
 │                      └──────────┘                               │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 | Vai trò | Mô tả | Chức năng chính |
 |---------|-------|-----------------|
-| 🔴 **ADMIN** | Quản trị viên hệ thống | Quản lý users, phân quyền, cấu hình hệ thống |
-| 🟠 **MANAGER** | Quản lý điều phối | Phân tuyến, phân công shipper, giám sát |
-| 🟡 **STAFF** | Nhân viên kho | Xử lý đơn hàng, nhập/xuất kho, tạo Trip |
-| 🟢 **SHIPPER** | Người giao hàng | Lấy hàng, giao hàng, thu COD |
-| 🔵 **CUSTOMER** | Khách hàng | Tạo đơn, theo dõi tracking |
+| 🔴 **ADMIN** | Quản trị viên hệ thống | Tiếp nhận Request, giao việc cho Manager, quản lý users, phân quyền |
+| 🟠 **MANAGER** | Quản lý điều phối | Xác nhận đơn hàng, xử lý đặt cọc, tạo Trip, phân công Shipper, tạo Payment |
+| 🟡 **STAFF** | Nhân viên kho | Tạo Parcel từ đơn đã xác nhận, quản lý kiện hàng trong kho |
+| 🟢 **SHIPPER** | Người giao hàng | Lấy hàng (PICKUP), vận chuyển (TRANSFER), giao hàng (DELIVERY), thu COD |
+| 🔵 **CUSTOMER** | Khách hàng | Tạo yêu cầu gửi hàng, đặt cọc, theo dõi tracking, thanh toán online |
 
 ---
 
@@ -264,26 +266,70 @@ mvn spring-boot:run
 
 ## 🔄 Luồng xử lý đơn hàng
 
+### Quy trình tổng quan
+
+```
+CUSTOMER          ADMIN           MANAGER          STAFF           SHIPPER
+    │                │                │               │               │
+    │ Tạo Request    │                │               │               │
+    ├───────────────▶│                │               │               │
+    │                │ Giao việc      │               │               │
+    │                ├───────────────▶│               │               │
+    │                │                │ Xác nhận      │               │
+    │◀───────────────┼────────────────┤ + Đặt cọc     │               │
+    │ Thanh toán cọc │                │               │               │
+    ├───────────────▶├───────────────▶│               │               │
+    │                │                │ Tạo Trip      │               │
+    │                │                ├──────────────▶│               │
+    │                │                │               │ Tạo Parcel    │
+    │                │                │               ├──────────────▶│
+    │                │                │               │               │ Lấy hàng
+    │                │                │               │               │ Vận chuyển
+    │                │                │               │               │ Giao hàng
+    │◀───────────────┼────────────────┼───────────────┼───────────────┤ Thu COD
+    │                │                │               │               │
+```
+
+### Trạng thái đơn hàng (CustomerRequest)
+
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
 │  PENDING │───▶│CONFIRMED │───▶│PICKUP    │───▶│IN_TRANSIT│
 │  Chờ XL  │    │ Đã XN    │    │ASSIGNED  │    │Đang VC   │
+│          │    │(Đặt cọc) │    │          │    │          │
 └──────────┘    └──────────┘    └──────────┘    └──────────┘
-                                                      │
-     ┌───────────────────────────────────────────────┘
-     │
-     ▼
+      │                                               │
+      │ (Từ chối)    ┌───────────────────────────────┘
+      ▼              ▼
 ┌──────────┐    ┌──────────┐    ┌──────────┐
-│PICKED_UP │───▶│OUT_FOR   │───▶│DELIVERED │  ✅ HOÀN THÀNH
-│ Đã lấy   │    │DELIVERY  │    │ Đã giao  │
+│CANCELLED │    │OUT_FOR   │───▶│DELIVERED │  ✅ HOÀN THÀNH
+│  Đã hủy  │    │DELIVERY  │    │ Đã giao  │
 └──────────┘    └──────────┘    └──────────┘
-     │
-     │ (Thất bại)
-     ▼
-┌──────────┐    ┌──────────┐
-│  FAILED  │───▶│ RETURNED │  ❌ HOÀN TRẢ
-│Giao thất │    │ Đã hoàn  │
-└──────────┘    └──────────┘
+                     │
+                     │ (Thất bại)
+                     ▼
+               ┌──────────┐    ┌──────────┐
+               │  FAILED  │───▶│ RETURNED │  ❌ HOÀN TRẢ
+               │Giao thất │    │ Đã hoàn  │
+               └──────────┘    └──────────┘
+```
+
+### Ví dụ luồng vận chuyển phức tạp
+
+```
+Đơn hàng: 55 thùng Durex (Customer A → Customer B)
+├── Phí ship: 5.000.000đ (SENDER hoặc RECEIVER trả)
+├── COD: 1.000.000đ (thu từ B, trả lại A)
+└── Đặt cọc: 3.000.000đ (A thanh toán trước)
+
+Luồng vận chuyển (xe chở tối đa 10 kiện):
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Điểm A    │────▶│    Kho C    │────▶│    Kho D    │────▶│   Điểm B    │
+│  (Sender)   │     │ (Trung chuyển)    │ (Trung chuyển)    │ (Receiver)  │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+  PICKUP × 6          TRANSFER            DELIVERY × 6
+  (10+10+10+10+       (55 parcel)         (10+10+10+10+
+   10+5 parcel)                            10+5 parcel)
 ```
 
 ---
