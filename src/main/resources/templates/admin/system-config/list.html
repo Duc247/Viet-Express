@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Cấu hình hệ thống</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-cogs"></i>Cấu hình hệ thống</h1>
+            <div>
+                <a href="/admin/system-config/create" class="btn btn-primary btn-sm me-2">
+                    <i class="fas fa-plus me-1"></i> Thêm cấu hình
+                </a>
+                <a href="/admin/system-config/init-defaults" class="btn btn-outline-secondary btn-sm"
+                    onclick="return confirm('Bạn có muốn khởi tạo lại các cấu hình mặc định?')">
+                    <i class="fas fa-sync me-1"></i> Khởi tạo mặc định
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Khóa</th>
+                                <th>Giá trị</th>
+                                <th>Nhóm</th>
+                                <th>Loại</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="config : ${allConfigs}">
+                                <td><code th:text="${config.id}"></code></td>
+                                <td><code th:text="${config.configKey}"></code></td>
+                                <td>
+                                    <span th:if="${config.configValue != null and config.configValue.length() > 50}"
+                                        th:text="${config.configValue.substring(0, 50) + '...'}"
+                                        th:title="${config.configValue}">
+                                    </span>
+                                    <span th:unless="${config.configValue != null and config.configValue.length() > 50}"
+                                        th:text="${config.configValue}">
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${config.configGroup}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" th:text="${config.configType}"></span>
+                                </td>
+                                <td th:text="${config.description != null ? config.description : '-'}"></td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${config.isActive}">
+                                        <i class="fas fa-check me-1"></i>Hoạt động
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${config.isActive}">
+                                        <i class="fas fa-pause me-1"></i>Ngừng
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/system-config/edit/{id}(id=${config.id})}"
+                                            class="btn btn-warning" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/admin/system-config/toggle/{id}(id=${config.id})}"
+                                            class="btn btn-secondary" title="Bật/Tắt">
+                                            <i class="fas fa-power-off"></i>
+                                        </a>
+                                        <a th:href="@{/admin/system-config/delete/{id}(id=${config.id})}"
+                                            class="btn btn-danger" title="Xoá"
+                                            onclick="return confirm('Bạn có chắc muốn xoá?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(allConfigs)}">
+                                <td colspan="8" class="empty-state">
+                                    <i class="fas fa-inbox d-block"></i>
+                                    <span>Chưa có dữ liệu. Nhấn "Khởi tạo mặc định" để tạo cấu hình.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

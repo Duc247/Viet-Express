@@ -150,6 +150,13 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/system-config') ? 'active' : ''}"
+                        href="/admin/system-config">
+                        <i class="fas fa-cogs"></i> Cấu hình hệ thống
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
                         th:classappend="${requestURI != null and requestURI.startsWith('/admin/actiontype') ? 'active' : ''}"
                         href="/admin/actiontype">
                         <i class="fas fa-bolt"></i> Loại thao tác
