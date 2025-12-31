@@ -69,29 +69,29 @@
                             <tr th:each="r : ${requests}">
                                 <td th:text="${r.id}"></td>
                                 <td><code th:text="${r.requestCode}"></code></td>
-                                <td th:text="${r.sender != null ? r.sender.name : '-'}"></td>
-                                <td th:text="${r.serviceType != null ? r.serviceType.name : '-'}"></td>
+                                <td th:text="${r.senderName != null ? r.senderName : '-'}"></td>
+                                <td th:text="${r.serviceTypeName != null ? r.serviceTypeName : '-'}"></td>
                                 <td th:text="${r.shippingFee != null ? r.shippingFee + 'đ' : '-'}"></td>
                                 <td th:text="${r.codAmount != null ? r.codAmount + 'đ' : '0đ'}"></td>
                                 <td>
-                                    <span class="badge bg-warning" th:if="${r.status.name() == 'PENDING'}">Chờ xác
+                                    <span class="badge bg-warning" th:if="${r.status == 'PENDING'}">Chờ xác
                                         nhận</span>
-                                    <span class="badge bg-info" th:if="${r.status.name() == 'CONFIRMED'}">Đã xác
+                                    <span class="badge bg-info" th:if="${r.status == 'CONFIRMED'}">Đã xác
                                         nhận</span>
-                                    <span class="badge bg-secondary"
-                                        th:if="${r.status.name() == 'PICKUP_ASSIGNED'}">Phân công lấy</span>
-                                    <span class="badge bg-primary" th:if="${r.status.name() == 'PICKED_UP'}">Đã lấy
+                                    <span class="badge bg-secondary" th:if="${r.status == 'PICKUP_ASSIGNED'}">Phân công
+                                        lấy</span>
+                                    <span class="badge bg-primary" th:if="${r.status == 'PICKED_UP'}">Đã lấy
                                         hàng</span>
-                                    <span class="badge bg-info" th:if="${r.status.name() == 'IN_WAREHOUSE'}">Trong
+                                    <span class="badge bg-info" th:if="${r.status == 'IN_WAREHOUSE'}">Trong
                                         kho</span>
-                                    <span class="badge bg-primary" th:if="${r.status.name() == 'IN_TRANSIT'}">Đang
+                                    <span class="badge bg-primary" th:if="${r.status == 'IN_TRANSIT'}">Đang
                                         VC</span>
-                                    <span class="badge bg-warning" th:if="${r.status.name() == 'OUT_FOR_DELIVERY'}">Đang
+                                    <span class="badge bg-warning" th:if="${r.status == 'OUT_FOR_DELIVERY'}">Đang
                                         giao</span>
-                                    <span class="badge bg-success" th:if="${r.status.name() == 'DELIVERED'}">Đã
+                                    <span class="badge bg-success" th:if="${r.status == 'DELIVERED'}">Đã
                                         giao</span>
-                                    <span class="badge bg-danger" th:if="${r.status.name() == 'FAILED'}">Thất bại</span>
-                                    <span class="badge bg-secondary" th:if="${r.status.name() == 'CANCELLED'}">Đã
+                                    <span class="badge bg-danger" th:if="${r.status == 'FAILED'}">Thất bại</span>
+                                    <span class="badge bg-secondary" th:if="${r.status == 'CANCELLED'}">Đã
                                         hủy</span>
                                 </td>
                                 <td th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></td>

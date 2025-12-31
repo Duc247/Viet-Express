@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Staff {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "staff_id")
@@ -33,9 +32,6 @@ public class Staff {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     private Location location;
-
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
 
     @Column(name = "is_active")
     private Boolean isActive;

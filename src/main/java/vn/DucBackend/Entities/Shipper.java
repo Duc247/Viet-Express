@@ -30,9 +30,6 @@ public class Shipper {
     @Column(name = "working_area")
     private String workingArea;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
     @Column(name = "is_available")
     private Boolean isAvailable;
 

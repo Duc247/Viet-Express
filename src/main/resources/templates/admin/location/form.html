@@ -35,13 +35,13 @@
                                     <select class="form-select" name="locationType" required>
                                         <option value="">-- Chọn loại --</option>
                                         <option value="WAREHOUSE"
-                                            th:selected="${location?.locationType?.name() == 'WAREHOUSE'}">Kho hàng
+                                            th:selected="${location?.locationType == 'WAREHOUSE'}">Kho hàng
                                         </option>
-                                        <option value="SENDER"
-                                            th:selected="${location?.locationType?.name() == 'SENDER'}">Địa chỉ người
+                                        <option value="SENDER" th:selected="${location?.locationType == 'SENDER'}">Địa
+                                            chỉ người
                                             gửi</option>
-                                        <option value="RECEIVER"
-                                            th:selected="${location?.locationType?.name() == 'RECEIVER'}">Địa chỉ người
+                                        <option value="RECEIVER" th:selected="${location?.locationType == 'RECEIVER'}">
+                                            Địa chỉ người
                                             nhận</option>
                                     </select>
                                 </div>

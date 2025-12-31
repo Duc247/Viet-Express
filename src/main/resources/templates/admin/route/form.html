@@ -30,7 +30,7 @@
                             <select class="form-select" name="fromLocationId" required>
                                 <option value="">-- Chọn điểm đi --</option>
                                 <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
-                                    th:selected="${route?.fromLocation?.id == loc.id}">
+                                    th:selected="${route?.fromLocationId == loc.id}">
                                 </option>
                             </select>
                         </div>
@@ -40,7 +40,7 @@
                             <select class="form-select" name="toLocationId" required>
                                 <option value="">-- Chọn điểm đến --</option>
                                 <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
-                                    th:selected="${route?.toLocation?.id == loc.id}">
+                                    th:selected="${route?.toLocationId == loc.id}">
                                 </option>
                             </select>
                         </div>

@@ -31,7 +31,7 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
                                 <th>Điểm đi</th>
@@ -47,11 +47,11 @@
                                 <td><code th:text="${r.id}"></code></td>
                                 <td>
                                     <i class="fas fa-map-marker-alt text-success me-1"></i>
-                                    <span th:text="${r.fromLocation?.name}"></span>
+                                    <span th:text="${r.fromLocationName}"></span>
                                 </td>
                                 <td>
                                     <i class="fas fa-flag-checkered text-danger me-1"></i>
-                                    <span th:text="${r.toLocation?.name}"></span>
+                                    <span th:text="${r.toLocationName}"></span>
                                 </td>
                                 <td>
                                     <span class="badge bg-info"

@@ -5,31 +5,61 @@ import java.util.Optional;
 
 import vn.DucBackend.DTO.StaffDTO;
 
+/**
+ * Service interface quản lý Staff (Nhân viên)
+ * 
+ * Repository sử dụng: StaffRepository, UserRepository, LocationRepository
+ * Controller sử dụng: AdminPersonnelController
+ */
 public interface StaffService {
 
-	// Methods for AdminPersonnelController
-	List<StaffDTO> findAllStaff();
+    // ==========================================
+    // Methods cho AdminPersonnelController
+    // ==========================================
 
-	Optional<StaffDTO> findStaffById(Long id);
+    /** Repository: staffRepository.findAll() */
+    List<StaffDTO> findAllStaff();
 
-	List<StaffDTO> searchStaff(String keyword);
+    /** Repository: staffRepository.findById() */
+    Optional<StaffDTO> findStaffById(Long id);
 
-	StaffDTO createStaff(StaffDTO dto);
+    /** Repository: staffRepository.searchByKeyword() */
+    List<StaffDTO> searchStaff(String keyword);
 
-	StaffDTO updateStaff(Long id, StaffDTO dto);
+    /**
+     * Repository: staffRepository.save(), userRepository.findById(),
+     * locationRepository.findById()
+     */
+    StaffDTO createStaff(StaffDTO dto);
 
-	void deleteStaff(Long id);
+    /**
+     * Repository: staffRepository.findById(), staffRepository.save(),
+     * userRepository.findById(), locationRepository.findById()
+     */
+    StaffDTO updateStaff(Long id, StaffDTO dto);
 
-	void toggleStaffStatus(Long id);
+    /** Repository: staffRepository.deleteById() */
+    void deleteStaff(Long id);
 
-	// Other methods
-	Optional<StaffDTO> findByUserId(Long userId);
+    /** Repository: staffRepository.findById(), staffRepository.save() */
+    void toggleStaffStatus(Long id);
 
-	List<StaffDTO> findByIsActiveTrue();
+    // ==========================================
+    // Methods khác
+    // ==========================================
 
-	List<StaffDTO> findByLocationId(Long locationId);
+    /** Repository: staffRepository.findByUserId() */
+    Optional<StaffDTO> findByUserId(Long userId);
 
-	List<StaffDTO> findActiveStaffByLocation(Long locationId);
+    /** Repository: staffRepository.findByIsActiveTrue() */
+    List<StaffDTO> findByIsActiveTrue();
 
-	boolean existsByUserId(Long userId);
+    /** Repository: staffRepository.findByLocationId() */
+    List<StaffDTO> findByLocationId(Long locationId);
+
+    /** Repository: staffRepository.findActiveStaffByLocation() */
+    List<StaffDTO> findActiveStaffByLocation(Long locationId);
+
+    /** Repository: staffRepository.existsByUserId() */
+    boolean existsByUserId(Long userId);
 }

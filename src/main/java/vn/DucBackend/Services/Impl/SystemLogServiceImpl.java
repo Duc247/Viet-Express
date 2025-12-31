@@ -112,6 +112,16 @@ public class SystemLogServiceImpl implements SystemLogService {
         logRepository.deleteAll(oldLogs);
     }
 
+    @Override
+    public void deleteLog(Long id) {
+        logRepository.deleteById(id);
+    }
+
+    @Override
+    public void clearAllLogs() {
+        logRepository.deleteAll();
+    }
+
     private SystemLogDTO createLog(SystemLog.LogLevel level, String moduleName, String actionType, Long actorId,
             String targetId, String details, String ipAddress, String userAgent) {
         SystemLog log = new SystemLog();

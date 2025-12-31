@@ -53,8 +53,8 @@ public class CustomerOrderCreateController {
 
     @PostMapping("/create-order")
     public String createOrder(
-            @RequestParam("senderCode") String senderCode,
-            @RequestParam("receiverCode") String receiverCode,
+            @RequestParam("senderId") Long senderId,
+            @RequestParam("receiverId") Long receiverId,
             @RequestParam("senderAddress") String senderAddress,
             @RequestParam("receiverName") String receiverName,
             @RequestParam("receiverPhone") String receiverPhone,
@@ -65,29 +65,29 @@ public class CustomerOrderCreateController {
             @RequestParam(value = "weight", required = false) BigDecimal weight,
             RedirectAttributes redirectAttributes) {
 
-        // Kiểm tra mã người gửi
-        if (senderCode == null || senderCode.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập mã khách hàng người gửi!");
+        // Kiểm tra ID người gửi
+        if (senderId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn khách hàng người gửi!");
             return "redirect:/customer/create-order";
         }
 
-        Optional<Customer> senderOpt = customerRepository.findByCustomerCode(senderCode.trim());
+        Optional<Customer> senderOpt = customerRepository.findById(senderId);
         if (senderOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Mã khách hàng người gửi không tồn tại: " + senderCode);
+                    "Khách hàng người gửi không tồn tại!");
             return "redirect:/customer/create-order";
         }
 
-        // Kiểm tra mã người nhận
-        if (receiverCode == null || receiverCode.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập mã khách hàng người nhận!");
+        // Kiểm tra ID người nhận
+        if (receiverId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn khách hàng người nhận!");
             return "redirect:/customer/create-order";
         }
 
-        Optional<Customer> receiverOpt = customerRepository.findByCustomerCode(receiverCode.trim());
+        Optional<Customer> receiverOpt = customerRepository.findById(receiverId);
         if (receiverOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Mã khách hàng người nhận không tồn tại: " + receiverCode);
+                    "Khách hàng người nhận không tồn tại!");
             return "redirect:/customer/create-order";
         }
 

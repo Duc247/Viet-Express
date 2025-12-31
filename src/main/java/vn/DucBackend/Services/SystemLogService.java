@@ -8,36 +8,42 @@ import java.util.Optional;
 
 public interface SystemLogService {
 
-    List<SystemLogDTO> findAllLogs();
+        List<SystemLogDTO> findAllLogs();
 
-    Optional<SystemLogDTO> findLogById(Long id);
+        Optional<SystemLogDTO> findLogById(Long id);
 
-    List<SystemLogDTO> findLogsByLevel(String logLevel);
+        List<SystemLogDTO> findLogsByLevel(String logLevel);
 
-    List<SystemLogDTO> findLogsByModule(String moduleName);
+        List<SystemLogDTO> findLogsByModule(String moduleName);
 
-    List<SystemLogDTO> findLogsByActor(Long actorId);
+        List<SystemLogDTO> findLogsByActor(Long actorId);
 
-    List<SystemLogDTO> findLogsByActionType(String actionType);
+        List<SystemLogDTO> findLogsByActionType(String actionType);
 
-    List<SystemLogDTO> findLogsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+        List<SystemLogDTO> findLogsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
-    List<SystemLogDTO> findLogsByTargetId(String targetId);
+        List<SystemLogDTO> findLogsByTargetId(String targetId);
 
-    List<SystemLogDTO> findErrorLogs();
+        List<SystemLogDTO> findErrorLogs();
 
-    List<SystemLogDTO> findWarningLogs();
+        List<SystemLogDTO> findWarningLogs();
 
-    List<SystemLogDTO> findLogsByIpAddress(String ipAddress);
+        List<SystemLogDTO> findLogsByIpAddress(String ipAddress);
 
-    SystemLogDTO logInfo(String moduleName, String actionType, Long actorId, String targetId, String details,
-            String ipAddress, String userAgent);
+        SystemLogDTO logInfo(String moduleName, String actionType, Long actorId, String targetId, String details,
+                        String ipAddress, String userAgent);
 
-    SystemLogDTO logWarning(String moduleName, String actionType, Long actorId, String targetId, String details,
-            String ipAddress, String userAgent);
+        SystemLogDTO logWarning(String moduleName, String actionType, Long actorId, String targetId, String details,
+                        String ipAddress, String userAgent);
 
-    SystemLogDTO logError(String moduleName, String actionType, Long actorId, String targetId, String details,
-            String ipAddress, String userAgent);
+        SystemLogDTO logError(String moduleName, String actionType, Long actorId, String targetId, String details,
+                        String ipAddress, String userAgent);
 
-    void deleteOldLogs(int daysToKeep);
+        void deleteOldLogs(int daysToKeep);
+
+        /** Repository: systemLogRepository.deleteById() */
+        void deleteLog(Long id);
+
+        /** Repository: systemLogRepository.deleteAll() */
+        void clearAllLogs();
 }

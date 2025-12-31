@@ -34,13 +34,13 @@
                             <label class="form-label"><i class="fas fa-car me-1"></i>Loại xe <span
                                     class="text-danger">*</span></label>
                             <select class="form-select" name="vehicleType" required>
-                                <option value="MOTORBIKE" th:selected="${vehicle?.vehicleType?.name() == 'MOTORBIKE'}">
+                                <option value="MOTORBIKE" th:selected="${vehicle?.vehicleType == 'MOTORBIKE'}">
                                     Xe máy</option>
-                                <option value="VAN" th:selected="${vehicle?.vehicleType?.name() == 'VAN'}">Xe tải nhỏ
+                                <option value="VAN" th:selected="${vehicle?.vehicleType == 'VAN'}">Xe tải nhỏ
                                 </option>
-                                <option value="TRUCK" th:selected="${vehicle?.vehicleType?.name() == 'TRUCK'}">Xe tải
+                                <option value="TRUCK" th:selected="${vehicle?.vehicleType == 'TRUCK'}">Xe tải
                                 </option>
-                                <option value="CONTAINER" th:selected="${vehicle?.vehicleType?.name() == 'CONTAINER'}">
+                                <option value="CONTAINER" th:selected="${vehicle?.vehicleType == 'CONTAINER'}">
                                     Container</option>
                             </select>
                         </div>
@@ -61,13 +61,13 @@
                             <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</label>
                             <select class="form-select" name="status">
                                 <option value="AVAILABLE"
-                                    th:selected="${vehicle?.status?.name() == 'AVAILABLE' || vehicle?.status == null}">
+                                    th:selected="${vehicle?.status == 'AVAILABLE' || vehicle?.status == null}">
                                     Sẵn sàng</option>
-                                <option value="IN_USE" th:selected="${vehicle?.status?.name() == 'IN_USE'}">Đang sử dụng
+                                <option value="IN_USE" th:selected="${vehicle?.status == 'IN_USE'}">Đang sử dụng
                                 </option>
-                                <option value="MAINTENANCE" th:selected="${vehicle?.status?.name() == 'MAINTENANCE'}">
+                                <option value="MAINTENANCE" th:selected="${vehicle?.status == 'MAINTENANCE'}">
                                     Bảo trì</option>
-                                <option value="INACTIVE" th:selected="${vehicle?.status?.name() == 'INACTIVE'}">Ngừng
+                                <option value="INACTIVE" th:selected="${vehicle?.status == 'INACTIVE'}">Ngừng
                                     hoạt động</option>
                             </select>
                         </div>
@@ -78,7 +78,7 @@
                         <select class="form-select" name="currentLocationId">
                             <option value="">-- Chưa xác định --</option>
                             <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
-                                th:selected="${vehicle?.currentLocation?.id == loc.id}"></option>
+                                th:selected="${vehicle?.currentLocationId == loc.id}"></option>
                         </select>
                     </div>
 

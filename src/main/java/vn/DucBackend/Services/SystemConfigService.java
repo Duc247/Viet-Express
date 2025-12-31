@@ -7,95 +7,78 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Service interface quản lý SystemConfig (Cấu hình hệ thống)
+ * 
+ * Repository sử dụng: SystemConfigRepository
+ * Controller sử dụng: AdminSystemController
+ */
 public interface SystemConfigService {
 
-    /**
-     * Lấy tất cả cấu hình
-     */
+    /** Repository: systemConfigRepository.findAll() */
     List<SystemConfig> findAll();
 
-    /**
-     * Lấy tất cả cấu hình đang active
-     */
+    /** Repository: systemConfigRepository.findByIsActiveTrue() */
     List<SystemConfig> findAllActive();
 
-    /**
-     * Lấy cấu hình theo ID
-     */
+    /** Repository: systemConfigRepository.findById() */
     Optional<SystemConfig> findById(Long id);
 
-    /**
-     * Lấy cấu hình theo key
-     */
+    /** Repository: systemConfigRepository.findByConfigKey() */
     Optional<SystemConfig> findByKey(String key);
 
-    /**
-     * Lấy giá trị cấu hình theo key
-     */
+    /** Repository: systemConfigRepository.findByConfigKey() - Lấy value */
     String getValue(String key);
 
     /**
-     * Lấy giá trị cấu hình theo key với default value
+     * Repository: systemConfigRepository.findByConfigKey() - Lấy value với default
      */
     String getValue(String key, String defaultValue);
 
-    /**
-     * Lấy tất cả cấu hình theo group
-     */
+    /** Repository: systemConfigRepository.findByConfigGroup() */
     List<SystemConfig> findByGroup(String group);
 
-    /**
-     * Lấy tất cả cấu hình public
-     */
+    /** Repository: systemConfigRepository.findByIsPublicTrue() */
     List<SystemConfig> findPublicConfigs();
 
-    /**
-     * Lưu hoặc cập nhật cấu hình
-     */
+    /** Repository: systemConfigRepository.save() */
     SystemConfig save(SystemConfig config);
 
-    /**
-     * Lưu hoặc cập nhật cấu hình từ DTO
-     */
+    /** Repository: systemConfigRepository.save() */
     SystemConfig save(SystemConfigDTO configDTO);
 
     /**
-     * Cập nhật giá trị cấu hình theo key
+     * Repository: systemConfigRepository.findByConfigKey(),
+     * systemConfigRepository.save()
      */
     SystemConfig updateValue(String key, String value);
 
     /**
-     * Cập nhật nhiều cấu hình cùng lúc
+     * Repository: systemConfigRepository.findByConfigKey(),
+     * systemConfigRepository.save()
      */
     void updateMultiple(Map<String, String> configs);
 
-    /**
-     * Xóa cấu hình
-     */
+    /** Repository: systemConfigRepository.deleteById() */
     void delete(Long id);
 
     /**
-     * Toggle trạng thái active
+     * Repository: systemConfigRepository.findById(), systemConfigRepository.save()
      */
     SystemConfig toggleActive(Long id);
 
     /**
-     * Khởi tạo các cấu hình mặc định
+     * Repository: systemConfigRepository.existsByConfigKey(),
+     * systemConfigRepository.save()
      */
     void initDefaultConfigs();
 
-    /**
-     * Lấy cấu hình theo group dưới dạng Map
-     */
+    /** Repository: systemConfigRepository.findByConfigGroup() */
     Map<String, String> getConfigMapByGroup(String group);
 
-    /**
-     * Chuyển đổi entity sang DTO
-     */
+    /** Chuyển đổi entity sang DTO */
     SystemConfigDTO toDTO(SystemConfig config);
 
-    /**
-     * Chuyển đổi DTO sang entity
-     */
+    /** Chuyển đổi DTO sang entity */
     SystemConfig toEntity(SystemConfigDTO dto);
 }

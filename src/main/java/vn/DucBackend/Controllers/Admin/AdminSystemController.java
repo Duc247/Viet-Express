@@ -8,13 +8,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import vn.DucBackend.DTO.*;
 import vn.DucBackend.Entities.SystemConfig;
-import vn.DucBackend.Services.SystemConfigService;
+import vn.DucBackend.Services.*;
 
 import java.util.*;
 
 /**
- * Admin System Controller - Quản lý cấu hình hệ thống và system logs
+ * Admin System Controller - Quản lý cấu hình hệ thống, vai trò, loại thao tác
+ * và system logs
+ * 
+ * Services sử dụng:
+ * - SystemConfigService: CRUD cấu hình hệ thống
+ * - RoleService: CRUD vai trò
+ * - ActionTypeService: CRUD loại thao tác
+ * - SystemLogService: Quản lý log hệ thống
  */
 @Controller
 @RequestMapping("/admin")
@@ -22,6 +30,12 @@ public class AdminSystemController {
 
     @Autowired
     private SystemConfigService systemConfigService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private ActionTypeService actionTypeService;
+    @Autowired
+    private SystemLogService systemLogService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -29,6 +43,7 @@ public class AdminSystemController {
 
     /**
      * Khởi tạo các cấu hình mặc định khi ứng dụng khởi động
+     * Service: systemConfigService.initDefaultConfigs()
      */
     @PostConstruct
     public void init() {
@@ -38,6 +53,11 @@ public class AdminSystemController {
     // ==========================================
     // SYSTEM CONFIG - List View
     // ==========================================
+
+    /**
+     * Danh sách cấu hình hệ thống (nhóm theo group)
+     * Service: systemConfigService.findAll()
+     */
     @GetMapping("/system-config")
     public String systemConfigList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
@@ -73,9 +93,10 @@ public class AdminSystemController {
         return "admin/system-config/list";
     }
 
-    // ==========================================
-    // SYSTEM CONFIG - Create Form
-    // ==========================================
+    /**
+     * Form tạo cấu hình mới
+     * Service: (khởi tạo entity SystemConfig mới)
+     */
     @GetMapping("/system-config/create")
     public String systemConfigCreateForm(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
@@ -86,9 +107,10 @@ public class AdminSystemController {
         return "admin/system-config/form";
     }
 
-    // ==========================================
-    // SYSTEM CONFIG - Edit Form
-    // ==========================================
+    /**
+     * Form chỉnh sửa cấu hình
+     * Service: systemConfigService.findById()
+     */
     @GetMapping("/system-config/edit/{id}")
     public String systemConfigEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
@@ -103,9 +125,10 @@ public class AdminSystemController {
         return "admin/system-config/form";
     }
 
-    // ==========================================
-    // SYSTEM CONFIG - Save
-    // ==========================================
+    /**
+     * Lưu cấu hình
+     * Service: systemConfigService.save()
+     */
     @PostMapping("/system-config/save")
     public String systemConfigSave(@ModelAttribute SystemConfig config, RedirectAttributes redirectAttributes) {
         try {
@@ -117,9 +140,10 @@ public class AdminSystemController {
         return "redirect:/admin/system-config";
     }
 
-    // ==========================================
-    // SYSTEM CONFIG - Delete
-    // ==========================================
+    /**
+     * Xóa cấu hình
+     * Service: systemConfigService.delete()
+     */
     @GetMapping("/system-config/delete/{id}")
     public String systemConfigDelete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -131,9 +155,10 @@ public class AdminSystemController {
         return "redirect:/admin/system-config";
     }
 
-    // ==========================================
-    // SYSTEM CONFIG - Toggle Active
-    // ==========================================
+    /**
+     * Bật/tắt trạng thái cấu hình
+     * Service: systemConfigService.toggleActive()
+     */
     @GetMapping("/system-config/toggle/{id}")
     public String systemConfigToggle(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -145,9 +170,10 @@ public class AdminSystemController {
         return "redirect:/admin/system-config";
     }
 
-    // ==========================================
-    // SYSTEM CONFIG - Init Defaults
-    // ==========================================
+    /**
+     * Khởi tạo lại các cấu hình mặc định
+     * Service: systemConfigService.initDefaultConfigs()
+     */
     @GetMapping("/system-config/init-defaults")
     public String initDefaultConfigs(RedirectAttributes redirectAttributes) {
         try {
@@ -215,36 +241,54 @@ public class AdminSystemController {
     // ==========================================
     // ROLE MANAGEMENT
     // ==========================================
-    @Autowired
-    private vn.DucBackend.Repositories.RoleRepository roleRepository;
 
+    /**
+     * Danh sách vai trò
+     * Service: roleService.findAllRoles()
+     */
     @GetMapping("/role")
     public String roleList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("roles", roleService.findAllRoles());
         return "admin/role/list";
     }
 
+    /**
+     * Form tạo vai trò mới
+     * Service: (khởi tạo DTO RoleDTO mới)
+     */
     @GetMapping("/role/create")
     public String roleCreateForm(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("role", new vn.DucBackend.Entities.Role());
+        model.addAttribute("role", new RoleDTO());
         model.addAttribute("isEdit", false);
         return "admin/role/form";
     }
 
+    /**
+     * Form chỉnh sửa vai trò
+     * Service: roleService.findRoleById()
+     */
     @GetMapping("/role/edit/{id}")
     public String roleEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("role", roleRepository.findById(id).orElse(null));
+        model.addAttribute("role", roleService.findRoleById(id).orElse(null));
         model.addAttribute("isEdit", true);
         return "admin/role/form";
     }
 
+    /**
+     * Lưu vai trò
+     * Service: roleService.createRole() hoặc roleService.updateRole()
+     */
     @PostMapping("/role/save")
-    public String roleSave(@ModelAttribute vn.DucBackend.Entities.Role role, RedirectAttributes redirectAttributes) {
+    public String roleSave(@ModelAttribute RoleDTO roleDTO, RedirectAttributes redirectAttributes) {
         try {
-            roleRepository.save(role);
+            if (roleDTO.getId() != null) {
+                roleService.updateRole(roleDTO.getId(), roleDTO);
+            } else {
+                roleService.createRole(roleDTO);
+            }
             redirectAttributes.addFlashAttribute("success", "Lưu vai trò thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -252,10 +296,14 @@ public class AdminSystemController {
         return "redirect:/admin/role";
     }
 
+    /**
+     * Xóa vai trò
+     * Service: roleService.deleteRole()
+     */
     @GetMapping("/role/delete/{id}")
     public String roleDelete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            roleRepository.deleteById(id);
+            roleService.deleteRole(id);
             redirectAttributes.addFlashAttribute("success", "Xóa vai trò thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -263,12 +311,14 @@ public class AdminSystemController {
         return "redirect:/admin/role";
     }
 
+    /**
+     * Bật/tắt trạng thái vai trò
+     * Service: roleService.toggleRoleStatus()
+     */
     @GetMapping("/role/toggle/{id}")
     public String roleToggle(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            vn.DucBackend.Entities.Role role = roleRepository.findById(id).orElseThrow();
-            role.setIsActive(!role.getIsActive());
-            roleRepository.save(role);
+            roleService.toggleRoleStatus(id);
             redirectAttributes.addFlashAttribute("success", "Đã thay đổi trạng thái!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -279,37 +329,55 @@ public class AdminSystemController {
     // ==========================================
     // ACTION TYPE MANAGEMENT
     // ==========================================
-    @Autowired
-    private vn.DucBackend.Repositories.ActionTypeRepository actionTypeRepository;
 
+    /**
+     * Danh sách loại thao tác
+     * Service: actionTypeService.findAll()
+     */
     @GetMapping("/actiontype")
     public String actionTypeList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("actionTypes", actionTypeRepository.findAllOrderByCode());
+        model.addAttribute("actionTypes", actionTypeService.findAll());
         return "admin/actiontype/list";
     }
 
+    /**
+     * Form tạo loại thao tác mới
+     * Service: (khởi tạo DTO ActionTypeDTO mới)
+     */
     @GetMapping("/actiontype/create")
     public String actionTypeCreateForm(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("actionType", new vn.DucBackend.Entities.ActionType());
+        model.addAttribute("actionType", new ActionTypeDTO());
         model.addAttribute("isEdit", false);
         return "admin/actiontype/form";
     }
 
+    /**
+     * Form chỉnh sửa loại thao tác
+     * Service: actionTypeService.findById()
+     */
     @GetMapping("/actiontype/edit/{id}")
     public String actionTypeEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("actionType", actionTypeRepository.findById(id).orElse(null));
+        model.addAttribute("actionType", actionTypeService.findById(id).orElse(null));
         model.addAttribute("isEdit", true);
         return "admin/actiontype/form";
     }
 
+    /**
+     * Lưu loại thao tác
+     * Service: actionTypeService.create() hoặc actionTypeService.update()
+     */
     @PostMapping("/actiontype/save")
-    public String actionTypeSave(@ModelAttribute vn.DucBackend.Entities.ActionType actionType,
+    public String actionTypeSave(@ModelAttribute ActionTypeDTO actionTypeDTO,
             RedirectAttributes redirectAttributes) {
         try {
-            actionTypeRepository.save(actionType);
+            if (actionTypeDTO.getId() != null) {
+                actionTypeService.update(actionTypeDTO.getId(), actionTypeDTO);
+            } else {
+                actionTypeService.create(actionTypeDTO);
+            }
             redirectAttributes.addFlashAttribute("success", "Lưu loại thao tác thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -317,10 +385,14 @@ public class AdminSystemController {
         return "redirect:/admin/actiontype";
     }
 
+    /**
+     * Xóa loại thao tác
+     * Service: actionTypeService.delete()
+     */
     @GetMapping("/actiontype/delete/{id}")
     public String actionTypeDelete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            actionTypeRepository.deleteById(id);
+            actionTypeService.delete(id);
             redirectAttributes.addFlashAttribute("success", "Xóa loại thao tác thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -331,29 +403,37 @@ public class AdminSystemController {
     // ==========================================
     // SYSTEM LOG MANAGEMENT
     // ==========================================
-    @Autowired
-    private vn.DucBackend.Repositories.SystemLogRepository systemLogRepository;
 
+    /**
+     * Danh sách log hệ thống (sắp xếp mới nhất trước)
+     * Service: systemLogService.findAllLogs()
+     */
     @GetMapping("/systemlog")
     public String systemLogList(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("systemLogs", systemLogRepository.findAll(
-                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC,
-                        "createdAt")));
+        model.addAttribute("systemLogs", systemLogService.findAllLogs());
         return "admin/systemlog/list";
     }
 
+    /**
+     * Xem chi tiết log
+     * Service: systemLogService.findLogById()
+     */
     @GetMapping("/systemlog/view/{id}")
     public String systemLogView(@PathVariable Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
-        model.addAttribute("log", systemLogRepository.findById(id).orElse(null));
+        model.addAttribute("log", systemLogService.findLogById(id).orElse(null));
         return "admin/systemlog/view";
     }
 
+    /**
+     * Xóa một log
+     * Service: systemLogService.deleteLog()
+     */
     @GetMapping("/systemlog/delete/{id}")
     public String systemLogDelete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            systemLogRepository.deleteById(id);
+            systemLogService.deleteLog(id);
             redirectAttributes.addFlashAttribute("success", "Xóa log thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -361,10 +441,14 @@ public class AdminSystemController {
         return "redirect:/admin/systemlog";
     }
 
+    /**
+     * Xóa tất cả log
+     * Service: systemLogService.clearAllLogs()
+     */
     @GetMapping("/systemlog/clear")
     public String systemLogClear(RedirectAttributes redirectAttributes) {
         try {
-            systemLogRepository.deleteAll();
+            systemLogService.clearAllLogs();
             redirectAttributes.addFlashAttribute("success", "Đã xóa tất cả log!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());

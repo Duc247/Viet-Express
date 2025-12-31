@@ -64,6 +64,14 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.deleteById(id);
     }
 
+    @Override
+    public void toggleRoleStatus(Long id) {
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        role.setIsActive(!role.getIsActive());
+        roleRepository.save(role);
+    }
+
     private RoleDTO toDTO(Role role) {
         RoleDTO dto = new RoleDTO();
         dto.setId(role.getId());

@@ -11,6 +11,18 @@ import vn.DucBackend.Services.SystemConfigService;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ SystemConfig (Cấu hình hệ thống)
+ * 
+ * Admin Controller sử dụng: AdminSystemController
+ * - findAll(): GET /admin/system-config
+ * - findById(): GET /admin/system-config/edit/{id}
+ * - save(): POST /admin/system-config/save
+ * - delete(): GET /admin/system-config/delete/{id}
+ * - toggleActive(): GET /admin/system-config/toggle/{id}
+ * - initDefaultConfigs(): @PostConstruct, GET
+ * /admin/system-config/init-defaults
+ */
 @Service
 @Transactional
 public class SystemConfigServiceImpl implements SystemConfigService {
@@ -18,6 +30,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @Autowired
     private SystemConfigRepository systemConfigRepository;
 
+    /**
+     * Lấy tất cả cấu hình
+     * Admin: AdminSystemController.systemConfigList() - GET /admin/system-config
+     */
     @Override
     public List<SystemConfig> findAll() {
         return systemConfigRepository.findAll();
@@ -28,6 +44,11 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         return systemConfigRepository.findByIsActiveTrue();
     }
 
+    /**
+     * Tìm cấu hình theo ID
+     * Admin: AdminSystemController.systemConfigEditForm() - GET
+     * /admin/system-config/edit/{id}
+     */
     @Override
     public Optional<SystemConfig> findById(Long id) {
         return systemConfigRepository.findById(id);
@@ -62,6 +83,11 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         return systemConfigRepository.findByIsPublicTrueAndIsActiveTrue();
     }
 
+    /**
+     * Lưu cấu hình (tạo mới hoặc cập nhật)
+     * Admin: AdminSystemController.systemConfigSave() - POST
+     * /admin/system-config/save
+     */
     @Override
     public SystemConfig save(SystemConfig config) {
         return systemConfigRepository.save(config);
@@ -91,11 +117,21 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         }
     }
 
+    /**
+     * Xóa cấu hình
+     * Admin: AdminSystemController.systemConfigDelete() - GET
+     * /admin/system-config/delete/{id}
+     */
     @Override
     public void delete(Long id) {
         systemConfigRepository.deleteById(id);
     }
 
+    /**
+     * Bật/tắt trạng thái cấu hình
+     * Admin: AdminSystemController.systemConfigToggle() - GET
+     * /admin/system-config/toggle/{id}
+     */
     @Override
     public SystemConfig toggleActive(Long id) {
         Optional<SystemConfig> optional = systemConfigRepository.findById(id);
@@ -107,6 +143,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         return null;
     }
 
+    /**
+     * Khởi tạo các cấu hình mặc định
+     * Admin: AdminSystemController.init() - @PostConstruct
+     * Admin: AdminSystemController.initDefaultConfigs() - GET
+     * /admin/system-config/init-defaults
+     */
     @Override
     public void initDefaultConfigs() {
         List<DefaultConfig> defaults = Arrays.asList(

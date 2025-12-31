@@ -30,18 +30,18 @@
                             <tr th:each="p : ${payments}">
                                 <td th:text="${p.id}"></td>
                                 <td><code th:text="${p.paymentCode}"></code></td>
-                                <td><code th:text="${p.request.requestCode}"></code></td>
+                                <td><code th:text="${p.requestCode}"></code></td>
                                 <td>
-                                    <span class="badge bg-info" th:if="${p.paymentType.name() == 'SHIPPING_FEE'}">Phí
+                                    <span class="badge bg-info" th:if="${p.paymentType == 'SHIPPING_FEE'}">Phí
                                         ship</span>
-                                    <span class="badge bg-warning" th:if="${p.paymentType.name() == 'COD'}">COD</span>
+                                    <span class="badge bg-warning" th:if="${p.paymentType == 'COD'}">COD</span>
                                 </td>
                                 <td th:text="${p.expectedAmount != null ? p.expectedAmount + 'đ' : '0đ'}"></td>
                                 <td th:text="${p.paidAmount != null ? p.paidAmount + 'đ' : '0đ'}"></td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${p.status.name() == 'PAID'}">Đã TT</span>
-                                    <span class="badge bg-danger" th:if="${p.status.name() == 'UNPAID'}">Chưa TT</span>
-                                    <span class="badge bg-warning" th:if="${p.status.name() == 'PARTIALLY_PAID'}">TT 1
+                                    <span class="badge bg-success" th:if="${p.status == 'PAID'}">Đã TT</span>
+                                    <span class="badge bg-danger" th:if="${p.status == 'UNPAID'}">Chưa TT</span>
+                                    <span class="badge bg-warning" th:if="${p.status == 'PARTIALLY_PAID'}">TT 1
                                         phần</span>
                                 </td>
                             </tr>

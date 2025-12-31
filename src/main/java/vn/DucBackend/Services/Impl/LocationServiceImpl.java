@@ -17,7 +17,12 @@ import java.util.stream.Collectors;
 
 /**
  * Service xử lý nghiệp vụ Location (Địa điểm/Chi nhánh) và Route (Tuyến đường)
- * Được sử dụng bởi: AdminPersonnelController, AdminResourceController
+ * 
+ * Admin Controller sử dụng:
+ * - AdminPersonnelController: Lấy danh sách locations cho form (user, shipper,
+ * staff)
+ * - AdminResourceController: CRUD Location (không dùng service, dùng trực tiếp
+ * repository)
  */
 @Service
 @RequiredArgsConstructor
@@ -27,6 +32,12 @@ public class LocationServiceImpl implements LocationService {
     private final LocationRepository locationRepository;
     private final RouteRepository routeRepository;
 
+    /**
+     * Lấy tất cả địa điểm
+     * Admin: AdminPersonnelController.userCreateForm(), shipperCreateForm(),
+     * staffCreateForm() - GET /admin/user/create, /admin/shipper/create,
+     * /admin/staff/create
+     */
     @Override
     public List<LocationDTO> findAllLocations() {
         return locationRepository.findAll().stream()
@@ -100,6 +111,9 @@ public class LocationServiceImpl implements LocationService {
         if (dto.getAddressText() != null) {
             location.setAddressText(dto.getAddressText());
         }
+        if (dto.getIsActive() != null) {
+            location.setIsActive(dto.getIsActive());
+        }
         return toLocationDTO(locationRepository.save(location));
     }
 
@@ -166,6 +180,14 @@ public class LocationServiceImpl implements LocationService {
     public RouteDTO updateRoute(Long id, RouteDTO dto) {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Route not found"));
+        if (dto.getFromLocationId() != null) {
+            route.setFromLocation(locationRepository.findById(dto.getFromLocationId())
+                    .orElseThrow(() -> new RuntimeException("From location not found")));
+        }
+        if (dto.getToLocationId() != null) {
+            route.setToLocation(locationRepository.findById(dto.getToLocationId())
+                    .orElseThrow(() -> new RuntimeException("To location not found")));
+        }
         if (dto.getDistanceKm() != null) {
             route.setDistanceKm(dto.getDistanceKm());
         }

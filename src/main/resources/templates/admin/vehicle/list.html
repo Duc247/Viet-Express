@@ -31,7 +31,7 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
                                 <th>Biển số</th>
@@ -48,33 +48,33 @@
                                 <td><code th:text="${v.id}"></code></td>
                                 <td><strong th:text="${v.licensePlate}"></strong></td>
                                 <td>
-                                    <span class="badge bg-primary" th:if="${v.vehicleType.name() == 'MOTORBIKE'}">
+                                    <span class="badge bg-primary" th:if="${v.vehicleType == 'MOTORBIKE'}">
                                         <i class="fas fa-motorcycle me-1"></i>Xe máy
                                     </span>
-                                    <span class="badge bg-info" th:if="${v.vehicleType.name() == 'VAN'}">
+                                    <span class="badge bg-info" th:if="${v.vehicleType == 'VAN'}">
                                         <i class="fas fa-shuttle-van me-1"></i>Xe tải nhỏ
                                     </span>
-                                    <span class="badge bg-warning" th:if="${v.vehicleType.name() == 'TRUCK'}">
+                                    <span class="badge bg-warning" th:if="${v.vehicleType == 'TRUCK'}">
                                         <i class="fas fa-truck me-1"></i>Xe tải
                                     </span>
-                                    <span class="badge bg-secondary" th:if="${v.vehicleType.name() == 'CONTAINER'}">
+                                    <span class="badge bg-secondary" th:if="${v.vehicleType == 'CONTAINER'}">
                                         <i class="fas fa-container-storage me-1"></i>Container
                                     </span>
                                 </td>
                                 <td th:text="${v.capacityWeight != null ? v.capacityWeight + ' kg' : '-'}"></td>
                                 <td th:text="${v.capacityVolume != null ? v.capacityVolume + ' m³' : '-'}"></td>
-                                <td th:text="${v.currentLocation?.name != null ? v.currentLocation?.name : '-'}"></td>
+                                <td th:text="${v.currentLocationName != null ? v.currentLocationName : '-'}"></td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${v.status.name() == 'AVAILABLE'}">
+                                    <span class="badge bg-success" th:if="${v.status == 'AVAILABLE'}">
                                         <i class="fas fa-check me-1"></i>Sẵn sàng
                                     </span>
-                                    <span class="badge bg-info" th:if="${v.status.name() == 'IN_USE'}">
+                                    <span class="badge bg-info" th:if="${v.status == 'IN_USE'}">
                                         <i class="fas fa-running me-1"></i>Đang dùng
                                     </span>
-                                    <span class="badge bg-warning" th:if="${v.status.name() == 'MAINTENANCE'}">
+                                    <span class="badge bg-warning" th:if="${v.status == 'MAINTENANCE'}">
                                         <i class="fas fa-wrench me-1"></i>Bảo trì
                                     </span>
-                                    <span class="badge bg-secondary" th:if="${v.status.name() == 'INACTIVE'}">
+                                    <span class="badge bg-secondary" th:if="${v.status == 'INACTIVE'}">
                                         <i class="fas fa-pause me-1"></i>Ngừng
                                     </span>
                                 </td>

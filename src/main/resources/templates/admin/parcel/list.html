@@ -33,17 +33,17 @@
                                 <td th:text="${p.description}"></td>
                                 <td th:text="${p.codAmount != null ? p.codAmount + 'đ' : '0đ'}"></td>
                                 <td th:text="${p.weightKg != null ? p.weightKg + ' kg' : '-'}"></td>
-                                <td th:text="${p.currentLocation != null ? p.currentLocation.name : '-'}"></td>
+                                <td th:text="${p.currentLocationName != null ? p.currentLocationName : '-'}"></td>
                                 <td>
-                                    <span class="badge bg-secondary" th:if="${p.status.name() == 'CREATED'}">Mới
+                                    <span class="badge bg-secondary" th:if="${p.status == 'CREATED'}">Mới
                                         tạo</span>
-                                    <span class="badge bg-info" th:if="${p.status.name() == 'IN_WAREHOUSE'}">Trong
+                                    <span class="badge bg-info" th:if="${p.status == 'IN_WAREHOUSE'}">Trong
                                         kho</span>
-                                    <span class="badge bg-primary" th:if="${p.status.name() == 'IN_TRANSIT'}">Đang vận
+                                    <span class="badge bg-primary" th:if="${p.status == 'IN_TRANSIT'}">Đang vận
                                         chuyển</span>
-                                    <span class="badge bg-success" th:if="${p.status.name() == 'DELIVERED'}">Đã
+                                    <span class="badge bg-success" th:if="${p.status == 'DELIVERED'}">Đã
                                         giao</span>
-                                    <span class="badge bg-warning" th:if="${p.status.name() == 'PICKED_UP'}">Đã
+                                    <span class="badge bg-warning" th:if="${p.status == 'PICKED_UP'}">Đã
                                         lấy</span>
                                 </td>
                             </tr>

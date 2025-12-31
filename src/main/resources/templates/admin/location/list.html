@@ -31,7 +31,7 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
                                 <th>Mã kho</th>
@@ -48,13 +48,13 @@
                                 <td><code th:text="${loc.warehouseCode != null ? loc.warehouseCode : '-'}"></code></td>
                                 <td><strong th:text="${loc.name}"></strong></td>
                                 <td>
-                                    <span class="badge bg-primary" th:if="${loc.locationType.name() == 'WAREHOUSE'}">
+                                    <span class="badge bg-primary" th:if="${loc.locationType == 'WAREHOUSE'}">
                                         <i class="fas fa-warehouse me-1"></i>Kho hàng
                                     </span>
-                                    <span class="badge bg-info" th:if="${loc.locationType.name() == 'SENDER'}">
+                                    <span class="badge bg-info" th:if="${loc.locationType == 'SENDER'}">
                                         <i class="fas fa-user me-1"></i>Người gửi
                                     </span>
-                                    <span class="badge bg-warning" th:if="${loc.locationType.name() == 'RECEIVER'}">
+                                    <span class="badge bg-warning" th:if="${loc.locationType == 'RECEIVER'}">
                                         <i class="fas fa-user-check me-1"></i>Người nhận
                                     </span>
                                 </td>
