@@ -21,10 +21,18 @@ public class Trip {
         CREATED, IN_PROGRESS, COMPLETED, CANCELLED
     }
 
+    public enum CapacityStatus {
+        EMPTY, AVAILABLE, FULL
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "trip_id")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private CustomerRequest request;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipper_id")
@@ -49,6 +57,10 @@ public class Trip {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private TripStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "capacity_status", length = 20)
+    private CapacityStatus capacityStatus;
 
     @Column(name = "started_at")
     private LocalDateTime startedAt;
@@ -77,6 +89,9 @@ public class Trip {
         updatedAt = LocalDateTime.now();
         if (status == null) {
             status = TripStatus.CREATED;
+        }
+        if (capacityStatus == null) {
+            capacityStatus = CapacityStatus.EMPTY;
         }
     }
 

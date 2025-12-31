@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{manager/layout-manager}">
+
+<head>
+    <title>Chi tiết yêu cầu - Manager</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1">
+                    <i class="fas fa-file-alt me-2"></i>Chi tiết yêu cầu
+                </h2>
+                <span class="badge bg-secondary fs-6" th:text="${order.requestCode}">REQ-XXX</span>
+            </div>
+            <a href="/manager/requests" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Cột trái: Thông tin đơn -->
+            <div class="col-lg-8">
+                <!-- Card: Thông tin chung -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin đơn hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Trạng thái:</strong>
+                                <span class="badge bg-secondary ms-2" th:if="${order.status.name() == 'PENDING'}">Chờ
+                                    người nhận XN</span>
+                                <span class="badge bg-info ms-2" th:if="${order.status.name() == 'RECEIVER_CONFIRMED'}">
+                                    <i class="fas fa-check me-1"></i>Sẵn sàng chốt đơn
+                                </span>
+                                <span class="badge bg-success ms-2" th:if="${order.status.name() == 'CONFIRMED'}">Đã
+                                    chốt đơn</span>
+                                <span class="badge bg-primary ms-2" th:if="${order.status.name() == 'IN_TRANSIT'}">Đang
+                                    vận chuyển</span>
+                                <span class="badge bg-success ms-2" th:if="${order.status.name() == 'DELIVERED'}">Đã
+                                    giao</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Ngày tạo:</strong>
+                                <span
+                                    th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-user me-1 text-success"></i>Người gửi:</strong>
+                                <p class="mb-0 ms-3" th:text="${order.sender?.name ?: 'N/A'}">Tên</p>
+                                <small class="text-muted ms-3" th:text="${order.sender?.phone}">SĐT</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-user me-1 text-primary"></i>Người nhận:</strong>
+                                <p class="mb-0 ms-3" th:text="${order.receiver?.name ?: 'Chưa có'}">Tên</p>
+                                <small class="text-muted ms-3" th:text="${order.receiver?.phone}">SĐT</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-map-marker-alt me-1 text-success"></i>Điểm lấy:</strong>
+                                <p class="mb-0 ms-3 small" th:text="${order.senderLocation?.name}">Địa chỉ</p>
+                                <small class="text-muted ms-3" th:text="${order.senderLocation?.addressText}"></small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-map-marker-alt me-1 text-danger"></i>Điểm giao:</strong>
+                                <p class="mb-0 ms-3 small" th:text="${order.receiverLocation?.name}">Địa chỉ</p>
+                                <small class="text-muted ms-3" th:text="${order.receiverLocation?.addressText}"></small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 mb-3">
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                data-bs-target="#updateLocationModal">
+                                <i class="fas fa-edit me-1"></i>Thay đổi địa điểm
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#createLocationModal">
+                                <i class="fas fa-plus me-1"></i>Tạo địa điểm mới
+                            </button>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <strong>Mô tả hàng:</strong>
+                                <p class="mb-0" th:text="${order.parcelDescription ?: '-'}">Mô tả</p>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <strong>Phí ship:</strong>
+                                <span class="text-primary fw-bold"
+                                    th:text="${#numbers.formatDecimal(order.shippingFee ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span>₫
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <strong>Thu hộ (COD):</strong>
+                                <span class="text-danger fw-bold"
+                                    th:text="${#numbers.formatDecimal(order.codAmount ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span>₫
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action buttons -->
+                    <div class="card-footer bg-light" th:if="${order.status.name() == 'PENDING'}">
+                        <form th:action="@{/manager/requests/{id}/confirm(id=${order.id})}" method="post"
+                            class="d-inline">
+                            <button type="submit" class="btn btn-success"
+                                onclick="return confirm('Bạn có chắc muốn chốt đơn này?');">
+                                <i class="fas fa-check me-1"></i>Chốt đơn
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Card: Giao việc cho Staff -->
+                <div class="card shadow-sm mb-4 border-warning">
+                    <div class="card-header bg-warning bg-opacity-25 py-3">
+                        <h6 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-user-cog me-2"></i>Giao việc tạo kiện hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Hiển thị staff đã được giao (nếu có) -->
+                        <div th:if="${order.assignedStaff != null}" class="alert alert-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Đã giao cho:</strong>
+                            <span th:text="${order.assignedStaff.fullName}">Staff Name</span>
+                            <small class="d-block text-muted mt-1">
+                                Giao lúc: <span
+                                    th:text="${#temporals.format(order.assignedAt, 'dd/MM/yyyy HH:mm')}">-</span>
+                            </small>
+                        </div>
+
+                        <!-- Form giao việc -->
+                        <form th:action="@{/manager/requests/{id}/assign-staff(id=${order.id})}" method="post">
+                            <div class="row align-items-end">
+                                <div class="col-md-8 mb-2">
+                                    <label class="form-label fw-bold">Chọn nhân viên:</label>
+                                    <select name="staffId" class="form-select" required>
+                                        <option value="">-- Chọn Staff --</option>
+                                        <option th:each="s : ${staffs}" th:value="${s.id}"
+                                            th:text="${s.fullName + ' (' + (s.location?.name ?: 'Chưa phân kho') + ')'}"
+                                            th:selected="${order.assignedStaff != null && order.assignedStaff.id == s.id}">
+                                            Staff
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="fas fa-paper-plane me-1"></i>Giao việc
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- Card: Kiện hàng - Summary -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-info">
+                            <i class="fas fa-boxes me-2"></i>Kiện hàng
+                        </h6>
+                        <a th:href="@{/manager/requests/{id}/parcels(id=${order.id})}"
+                            class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-eye me-1"></i>Chi tiết
+                        </a>
+                    </div>
+                    <div class="card-body py-3">
+                        <div class="row text-center" th:if="${#lists.size(parcels) > 0}">
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-light">
+                                    <h4 class="mb-0 text-primary" th:text="${#lists.size(parcels)}">0</h4>
+                                    <small class="text-muted">Tổng</small>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-success bg-opacity-10">
+                                    <h4 class="mb-0 text-success"
+                                        th:text="${#lists.size(parcels.?[status.name() == 'DELIVERED'])}">0</h4>
+                                    <small class="text-muted">Đã giao</small>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-warning bg-opacity-10">
+                                    <h4 class="mb-0 text-warning"
+                                        th:text="${#lists.size(parcels.?[status.name() == 'IN_TRANSIT' or status.name() == 'OUT_FOR_DELIVERY'])}">
+                                        0</h4>
+                                    <small class="text-muted">Đang VC</small>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-secondary bg-opacity-10">
+                                    <h4 class="mb-0 text-secondary"
+                                        th:text="${#lists.size(parcels.?[status.name() != 'DELIVERED' and status.name() != 'IN_TRANSIT' and status.name() != 'OUT_FOR_DELIVERY'])}">
+                                        0</h4>
+                                    <small class="text-muted">Còn lại</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.size(parcels) == 0}" class="text-center text-muted py-2">
+                            <i class="fas fa-inbox opacity-50 me-2"></i>Chưa có kiện hàng
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Chuyến vận chuyển - Summary -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-primary">
+                            <i class="fas fa-truck me-2"></i>Chuyến vận chuyển
+                        </h6>
+                        <a th:href="@{/manager/requests/{id}/trips(id=${order.id})}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>Chi tiết
+                        </a>
+                    </div>
+                    <div class="card-body py-3">
+                        <div class="row text-center" th:if="${#lists.size(trips) > 0}">
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-light">
+                                    <h4 class="mb-0 text-primary" th:text="${#lists.size(trips)}">0</h4>
+                                    <small class="text-muted">Tổng</small>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-success bg-opacity-10">
+                                    <h4 class="mb-0 text-success"
+                                        th:text="${#lists.size(trips.?[status.name() == 'COMPLETED'])}">0</h4>
+                                    <small class="text-muted">Hoàn thành</small>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-primary bg-opacity-10">
+                                    <h4 class="mb-0 text-info"
+                                        th:text="${#lists.size(trips.?[status.name() == 'IN_PROGRESS'])}">0</h4>
+                                    <small class="text-muted">Đang chạy</small>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded bg-secondary bg-opacity-10">
+                                    <h4 class="mb-0 text-secondary"
+                                        th:text="${#lists.size(trips.?[status.name() == 'CREATED'])}">0</h4>
+                                    <small class="text-muted">Chờ</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.size(trips) == 0}" class="text-center text-muted py-2">
+                            <i class="fas fa-road opacity-50 me-2"></i>Chưa có chuyến nào
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Thanh toán - Summary -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-success">
+                            <i class="fas fa-money-bill me-2"></i>Thanh toán
+                        </h6>
+                        <a th:href="@{/manager/requests/{id}/payments(id=${order.id})}"
+                            class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-eye me-1"></i>Chi tiết
+                        </a>
+                    </div>
+                    <div class="card-body py-3">
+                        <div class="row text-center" th:if="${#lists.size(payments) > 0}">
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-primary bg-opacity-10">
+                                    <h4 class="mb-0 text-primary"
+                                        th:text="${#lists.size(payments.?[paymentType.name() == 'SHIPPING_FEE'])}">0
+                                    </h4>
+                                    <small class="text-muted">Phí ship</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-warning bg-opacity-10">
+                                    <h4 class="mb-0 text-warning"
+                                        th:text="${#lists.size(payments.?[paymentType.name() == 'COD'])}">0</h4>
+                                    <small class="text-muted">COD</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-success bg-opacity-10">
+                                    <h4 class="mb-0 text-success"
+                                        th:text="${#lists.size(payments.?[status.name() == 'PAID'])}">0</h4>
+                                    <small class="text-muted">Đã TT</small>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tổng tiền -->
+                        <div th:if="${#lists.size(payments) > 0}" class="mt-3 text-center border-top pt-3">
+                            <span class="text-muted">Tổng cần thu:</span>
+                            <span class="fw-bold text-primary fs-5"
+                                th:text="${#numbers.formatDecimal(#aggregates.sum(payments.![expectedAmount ?: 0]), 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                            <span class="mx-2">|</span>
+                            <span class="text-muted">Đã nhận:</span>
+                            <span class="fw-bold text-success fs-5"
+                                th:text="${#numbers.formatDecimal(#aggregates.sum(payments.![paidAmount ?: 0]), 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                        </div>
+                        <div th:if="${#lists.size(payments) == 0}" class="text-center text-muted py-2">
+                            <i class="fas fa-wallet opacity-50 me-2"></i>Chưa có khoản thanh toán
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal"
+                            data-bs-target="#createPaymentModal">
+                            <i class="fas fa-plus me-1"></i>Tạo Payment mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Form tạo Trip -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 80px;">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-route me-2"></i>Tạo chuyến mới</h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/manager/trips/create}" method="post">
+                            <input type="hidden" name="requestId" th:value="${order.id}">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Loại chuyến</label>
+                                <select name="tripType" class="form-select" required>
+                                    <option value="PICKUP">🚚 Lấy hàng (PICKUP)</option>
+                                    <option value="TRANSFER">🔄 Trung chuyển (TRANSFER)</option>
+                                    <option value="DELIVERY">📦 Giao hàng (DELIVERY)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tài xế</label>
+                                <select name="shipperId" class="form-select" required>
+                                    <option value="">-- Chọn tài xế --</option>
+                                    <option th:each="s : ${shippers}" th:value="${s.id}"
+                                        th:text="${s.fullName + (s.isAvailable ? ' ✅' : ' (Bận)')}"
+                                        th:classappend="${s.isAvailable ? '' : 'text-muted'}">Tài xế</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Xe (tùy chọn)</label>
+                                <select name="vehicleId" class="form-select">
+                                    <option value="">-- Không chọn --</option>
+                                    <option th:each="v : ${vehicles}" th:value="${v.id}"
+                                        th:text="${v.licensePlate + ' (' + v.vehicleType + ')'}">Xe</option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label fw-bold">Điểm đi</label>
+                                    <select name="startLocationId" class="form-select" required>
+                                        <option value="">Chọn...</option>
+                                        <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}">
+                                            Địa điểm</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label fw-bold">Điểm đến</label>
+                                    <select name="endLocationId" class="form-select" required>
+                                        <option value="">Chọn...</option>
+                                        <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}">
+                                            Địa điểm</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Ghi chú</label>
+                                <textarea name="note" class="form-control" rows="2" placeholder="Ghi chú..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus me-1"></i>Tạo chuyến
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Tạo Payment -->
+        <div class="modal fade" id="createPaymentModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="fas fa-money-bill me-2"></i>Tạo Payment</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/manager/payments/create}" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="requestId" th:value="${order.id}">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Loại khoản tiền</label>
+                                    <select name="paymentType" class="form-select" required>
+                                        <option value="SHIPPING_FEE">💵 Phí vận chuyển</option>
+                                        <option value="COD">📦 Thu hộ COD</option>
+                                        <option value="DEPOSIT">💰 Tiền cọc</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Số tiền (VNĐ)</label>
+                                    <input type="number" name="expectedAmount" class="form-control" required min="0"
+                                        placeholder="500000">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Phạm vi thanh toán</label>
+                                    <select name="paymentScope" id="paymentScopeSelect" class="form-select" required
+                                        onchange="toggleTripSelect()">
+                                        <option value="FULL_REQUEST">📋 Toàn bộ đơn hàng</option>
+                                        <option value="PER_TRIP">🚚 Theo chuyến vận chuyển</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3" id="tripSelectContainer" style="display: none;">
+                                    <label class="form-label fw-bold">Chọn chuyến</label>
+                                    <select name="tripId" class="form-select">
+                                        <option value="">-- Chọn chuyến --</option>
+                                        <option th:each="t : ${trips}" th:value="${t.id}"
+                                            th:text="'#' + ${t.id} + ' - ' + ${t.tripType.name()} + ' (' + ${t.status.name()} + ')'">
+                                            Trip</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Người trả tiền</label>
+                                    <select name="payerType" class="form-select" required>
+                                        <option value="SENDER">👤 Người gửi</option>
+                                        <option value="RECEIVER">📬 Người nhận</option>
+                                        <option value="COMPANY">🏢 Công ty</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nhận tiền</label>
+                                    <select name="receiverType" class="form-select" required>
+                                        <option value="COMPANY">🏢 Công ty</option>
+                                        <option value="SENDER">👤 Người gửi (hoàn lại)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mô tả</label>
+                                <input type="text" name="description" class="form-control"
+                                    placeholder="Ghi chú về khoản thanh toán">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-success">Tạo Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+            function toggleTripSelect() {
+                var scope = document.getElementById('paymentScopeSelect').value;
+                var container = document.getElementById('tripSelectContainer');
+                container.style.display = (scope === 'PER_TRIP') ? 'block' : 'none';
+            }
+        </script>
+
+        <!-- Modal: Cập nhật địa điểm -->
+        <div class="modal fade" id="updateLocationModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-secondary text-white">
+                        <h5 class="modal-title"><i class="fas fa-map-marker-alt me-2"></i>Thay đổi địa điểm</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/manager/requests/{id}/update-locations(id=${order.id})}" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i
+                                        class="fas fa-map-marker-alt text-success me-1"></i>Điểm lấy hàng</label>
+                                <select name="senderLocationId" class="form-select">
+                                    <option value="">-- Không thay đổi --</option>
+                                    <option th:each="loc : ${locations}" th:value="${loc.id}"
+                                        th:text="${loc.name + ' - ' + (loc.addressText ?: '')}"
+                                        th:selected="${order.senderLocation?.id == loc.id}">Địa điểm</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"><i
+                                        class="fas fa-map-marker-alt text-danger me-1"></i>Điểm giao hàng</label>
+                                <select name="receiverLocationId" class="form-select">
+                                    <option value="">-- Không thay đổi --</option>
+                                    <option th:each="loc : ${locations}" th:value="${loc.id}"
+                                        th:text="${loc.name + ' - ' + (loc.addressText ?: '')}"
+                                        th:selected="${order.receiverLocation?.id == loc.id}">Địa điểm</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Tạo địa điểm mới -->
+        <div class="modal fade" id="createLocationModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Tạo địa điểm mới</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/manager/locations/create}" method="post">
+                        <input type="hidden" name="returnToRequestId" th:value="${order.id}">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tên địa điểm</label>
+                                <input type="text" name="name" class="form-control" required
+                                    placeholder="Ví dụ: Nhà anh Nam - Q7">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Địa chỉ đầy đủ</label>
+                                <input type="text" name="addressText" class="form-control" required
+                                    placeholder="Ví dụ: 123 Nguyễn Văn Linh, P.Tân Phú, Q7, TP.HCM">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Loại địa điểm</label>
+                                <select name="locationType" class="form-select" required>
+                                    <option value="SENDER">📤 Điểm gửi (SENDER)</option>
+                                    <option value="RECEIVER">📥 Điểm nhận (RECEIVER)</option>
+                                    <option value="WAREHOUSE">🏢 Kho (WAREHOUSE)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Tạo địa điểm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

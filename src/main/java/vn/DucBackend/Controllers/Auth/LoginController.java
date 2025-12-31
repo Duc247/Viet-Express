@@ -83,8 +83,10 @@ public class LoginController {
 
         String roleName = user.getRole().getRoleName();
 
-        // Chỉ cho phép CUSTOMER và STAFF đăng nhập
-        if (!roleName.equals("CUSTOMER") && !roleName.equals("STAFF")) {
+        // Cho phép các role: CUSTOMER, STAFF, MANAGER, ADMIN, SHIPPER
+        java.util.List<String> allowedRoles = java.util.Arrays.asList(
+                "CUSTOMER", "STAFF", "MANAGER", "ADMIN", "SHIPPER");
+        if (!allowedRoles.contains(roleName)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền đăng nhập vào hệ thống này!");
             return "redirect:/auth/login";
         }
@@ -121,6 +123,21 @@ public class LoginController {
             redirectAttributes.addFlashAttribute("successMessage",
                     "Đăng nhập thành công! Xin chào, " + user.getUsername());
             return "redirect:/staff/dashboard";
+
+        } else if (roleName.equals("MANAGER")) {
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đăng nhập thành công! Xin chào Manager " + user.getUsername());
+            return "redirect:/manager/dashboard";
+
+        } else if (roleName.equals("ADMIN")) {
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đăng nhập thành công! Xin chào Admin " + user.getUsername());
+            return "redirect:/admin/dashboard";
+
+        } else if (roleName.equals("SHIPPER")) {
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đăng nhập thành công! Xin chào Shipper " + user.getUsername());
+            return "redirect:/shipper/dashboard";
         }
 
         return "redirect:/auth/login";
@@ -145,6 +162,12 @@ public class LoginController {
                 return "redirect:/customer/dashboard";
             case "STAFF":
                 return "redirect:/staff/dashboard";
+            case "MANAGER":
+                return "redirect:/manager/dashboard";
+            case "ADMIN":
+                return "redirect:/admin/dashboard";
+            case "SHIPPER":
+                return "redirect:/shipper/dashboard";
             default:
                 return "redirect:/auth/login";
         }

@@ -39,77 +39,58 @@
                             <div class="row g-3">
                                 <!-- Cột người gửi -->
                                 <div class="col-md-6 border-end">
-                                    <h6 class="small text-muted text-uppercase fw-bold mb-3">1. Người gửi (Từ đâu?)</h6>
-
-                                    <!-- MÃ KHÁCH HÀNG NGƯỜI GỬI (MỚI) -->
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-primary">
-                                            <i class="fas fa-id-card me-1"></i>Mã khách hàng người gửi <span
-                                                class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" name="senderCode" class="form-control border-primary"
-                                            placeholder="VD: CUST-20251230-001" required>
-                                        <div class="form-text small">Nhập mã khách hàng của người gửi</div>
-                                    </div>
+                                    <h6 class="small text-muted text-uppercase fw-bold mb-3">1. Người gửi (Bạn)</h6>
 
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Họ tên người gửi</label>
-                                        <input type="text" name="senderName" class="form-control"
-                                            placeholder="VD: Nguyễn Văn B">
+                                        <input type="text" name="senderName" class="form-control bg-light"
+                                            th:value="${currentCustomer?.fullName ?: currentCustomer?.name ?: ''}"
+                                            readonly>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Số điện thoại</label>
-                                        <input type="text" name="senderPhone" class="form-control"
-                                            placeholder="09xx...">
+                                        <input type="text" name="senderPhone" class="form-control bg-light"
+                                            th:value="${currentCustomer?.phone ?: ''}" readonly>
+                                        <div class="form-text small text-success"><i
+                                                class="fas fa-check-circle me-1"></i>Thông tin người gửi lấy từ tài
+                                            khoản của bạn</div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Địa chỉ lấy hàng <span
                                                 class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <select class="form-select">
-                                                <option value="">-- Chọn từ danh bạ --</option>
-                                            </select>
-                                            <button class="btn btn-outline-secondary" type="button"><i
-                                                    class="fas fa-plus"></i></button>
-                                        </div>
-                                        <textarea name="senderAddress" class="form-control mt-2" rows="2"
-                                            placeholder="Hoặc nhập địa chỉ mới..." required></textarea>
+                                        <textarea name="senderAddress" class="form-control" rows="2"
+                                            placeholder="Nhập địa chỉ lấy hàng..."
+                                            th:text="${currentCustomer?.address ?: ''}" required></textarea>
                                     </div>
                                 </div>
 
-                                <!-- Cột người nhận -->
                                 <div class="col-md-6">
                                     <h6 class="small text-muted text-uppercase fw-bold mb-3">2. Người nhận (Đến đâu?)
                                     </h6>
 
-                                    <!-- MÃ KHÁCH HÀNG NGƯỜI NHẬN (MỚI) -->
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold text-success">
-                                            <i class="fas fa-id-card me-1"></i>Mã khách hàng người nhận <span
-                                                class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" name="receiverCode" class="form-control border-success"
-                                            placeholder="VD: CUST-20251230-002" required>
-                                        <div class="form-text small">Nhập mã khách hàng của người nhận</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold">Họ tên người nhận <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" name="receiverName" class="form-control"
-                                            placeholder="VD: Anh Nam" required>
+                                        <label class="form-label small fw-bold">Số điện thoại</label>
+                                        <div class="input-group">
+                                            <input type="text" id="receiverPhone" name="receiverPhone"
+                                                class="form-control" placeholder="09xx...">
+                                            <span class="input-group-text" id="receiverPhoneStatus">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                        <div class="form-text small text-danger"><i class="fas fa-asterisk me-1"></i>Bắt
+                                            buộc nhập</div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold">Số điện thoại <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" name="receiverPhone" class="form-control"
-                                            placeholder="09xx..." required>
+                                        <label class="form-label small fw-bold">Họ tên người nhận</label>
+                                        <input type="text" id="receiverName" name="receiverName"
+                                            class="form-control bg-light" placeholder="Tự động điền..." readonly>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold">Địa chỉ giao hàng <span
-                                                class="text-danger">*</span></label>
-                                        <textarea name="receiverAddress" class="form-control" rows="3"
-                                            placeholder="Số nhà, đường, phường, xã..." required></textarea>
+                                        <label class="form-label small fw-bold">Địa chỉ giao hàng</label>
+                                        <textarea id="receiverAddress" name="receiverAddress" class="form-control"
+                                            rows="2" placeholder="Nhập địa chỉ giao hàng..." required></textarea>
+                                        <div class="form-text small text-danger"><i class="fas fa-asterisk me-1"></i>Bắt
+                                            buộc nhập</div>
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +207,7 @@
                                     <i class="fas fa-paper-plane me-2"></i> TẠO ĐƠN HÀNG
                                 </button>
                                 <div class="text-center small opacity-75 mt-2">
-                                    Nhân viên sẽ gọi xác nhận sau 15 phút.
+                                    Người nhận sẽ cần xác nhận đơn hàng này.
                                 </div>
                             </div>
                         </div>
@@ -237,6 +218,52 @@
         </form>
 
     </div>
+
+    <!-- Script auto-fill receiver by phone -->
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Auto-fill receiver only (sender is fixed from session)
+                const receiverPhone = document.getElementById('receiverPhone');
+                const receiverName = document.getElementById('receiverName');
+                const receiverAddress = document.getElementById('receiverAddress');
+                const receiverStatus = document.getElementById('receiverPhoneStatus');
+
+                function lookupCustomer(phone, nameField, addressField, statusSpan) {
+                    if (!phone || phone.length < 10) return;
+
+                    statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                    fetch('/api/customers/by-phone?phone=' + encodeURIComponent(phone))
+                        .then(response => {
+                            if (response.ok) return response.json();
+                            throw new Error('Not found');
+                        })
+                        .then(data => {
+                            nameField.value = data.fullName || data.name || '';
+                            if (data.address && !addressField.value) {
+                                addressField.value = data.address;
+                            }
+                            statusSpan.innerHTML = '<i class="fas fa-check text-success"></i>';
+                        })
+                        .catch(error => {
+                            nameField.value = '';
+                            statusSpan.innerHTML = '<i class="fas fa-times text-danger"></i>';
+                        });
+                }
+
+                // Debounce for receiver lookup
+                let receiverTimeout;
+
+                receiverPhone.addEventListener('input', function () {
+                    clearTimeout(receiverTimeout);
+                    receiverTimeout = setTimeout(() => {
+                        lookupCustomer(this.value, receiverName, receiverAddress, receiverStatus);
+                    }, 500);
+                });
+            });
+        </script>
+    </th:block>
 </body>
 
 </html>

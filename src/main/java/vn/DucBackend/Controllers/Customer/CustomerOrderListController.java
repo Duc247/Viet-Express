@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Repositories.CustomerRequestRepository;
+import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.List;
 
@@ -40,38 +41,47 @@ public class CustomerOrderListController {
     public String orderList(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             Model model, HttpServletRequest request, HttpSession session) {
         addCommonAttributes(model, request);
 
         Long customerId = getCustomerIdFromSession(session);
-        if (customerId != null) {
-            List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
-
-            // Lọc theo keyword
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String searchKey = keyword.trim().toLowerCase();
-                orders = orders.stream()
-                        .filter(o -> (o.getRequestCode() != null
-                                && o.getRequestCode().toLowerCase().contains(searchKey))
-                                || (o.getParcelDescription() != null
-                                        && o.getParcelDescription().toLowerCase().contains(searchKey)))
-                        .toList();
-            }
-
-            // Lọc theo trạng thái
-            if (status != null && !status.trim().isEmpty()) {
-                orders = orders.stream()
-                        .filter(o -> o.getStatus().name().equals(status))
-                        .toList();
-            }
-
-            model.addAttribute("orders", orders);
-        } else {
-            model.addAttribute("orders", List.of());
+        if (customerId == null) {
+            return "redirect:/login";
         }
+
+        List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
+
+        // Lọc theo keyword
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String searchKey = keyword.trim().toLowerCase();
+            orders = orders.stream()
+                    .filter(o -> (o.getRequestCode() != null
+                            && o.getRequestCode().toLowerCase().contains(searchKey))
+                            || (o.getParcelDescription() != null
+                                    && o.getParcelDescription().toLowerCase().contains(searchKey)))
+                    .toList();
+        }
+
+        // Lọc theo trạng thái
+        if (status != null && !status.trim().isEmpty()) {
+            orders = orders.stream()
+                    .filter(o -> o.getStatus().name().equals(status))
+                    .toList();
+        }
+
+        // Pagination
+        var ordersPage = PaginationUtil.paginate(orders, page, PaginationUtil.DEFAULT_PAGE_SIZE);
+
+        model.addAttribute("orders", ordersPage.getContent());
+        model.addAttribute("totalCount", ordersPage.getTotalItems());
+        model.addAttribute("currentPage", ordersPage.getCurrentPage());
+        model.addAttribute("totalPages", ordersPage.getTotalPages());
+        model.addAttribute("pageSize", PaginationUtil.DEFAULT_PAGE_SIZE);
 
         model.addAttribute("searchKeyword", keyword);
         model.addAttribute("searchStatus", status);
+        model.addAttribute("customerId", customerId);
 
         return "customer/order/list";
     }
@@ -81,12 +91,12 @@ public class CustomerOrderListController {
         addCommonAttributes(model, request);
 
         Long customerId = getCustomerIdFromSession(session);
-        if (customerId != null) {
-            List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
-            model.addAttribute("orders", orders);
-        } else {
-            model.addAttribute("orders", List.of());
+        if (customerId == null) {
+            return "redirect:/login";
         }
+
+        List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
+        model.addAttribute("orders", orders);
 
         return "customer/order/history";
     }

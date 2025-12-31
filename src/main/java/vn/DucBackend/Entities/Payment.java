@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class Payment {
 
     public enum PaymentType {
-        SHIPPING_FEE, COD
+        SHIPPING_FEE, COD, DEPOSIT
     }
 
     public enum PayerType {

@@ -14,8 +14,9 @@ import java.time.LocalDateTime;
 public class CustomerRequest {
 
     public enum RequestStatus {
-        PENDING,
-        CONFIRMED,
+        PENDING, // Customer vừa tạo đơn, chờ receiver xác nhận
+        RECEIVER_CONFIRMED, // Receiver đã xác nhận, chờ Manager chốt đơn
+        CONFIRMED, // Manager đã chốt đơn (phải wait receiver xác nhận trước)
         PICKUP_ASSIGNED,
         PICKED_UP,
         IN_WAREHOUSE,
@@ -79,6 +80,14 @@ public class CustomerRequest {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    // Staff được giao xử lý đơn hàng này
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_staff_id")
+    private Staff assignedStaff;
+
+    @Column(name = "assigned_at")
+    private LocalDateTime assignedAt;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -47,6 +47,13 @@
                         <i class="fas fa-box me-2"></i> Quản lý kiện hàng
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                        th:classappend="${requestURI.startsWith('/staff/warehouse') ? 'active fw-bold text-primary' : ''}"
+                        href="/staff/warehouse">
+                        <i class="fas fa-warehouse me-2"></i> Kho
+                    </a>
+                </li>
             </ul>
         </div>
     </nav>

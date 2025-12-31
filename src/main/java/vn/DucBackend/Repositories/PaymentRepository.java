@@ -14,7 +14,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
         Optional<Payment> findByPaymentCode(String paymentCode);
 
-        List<Payment> findByRequestId(Long requestId);
+        @Query("SELECT p FROM Payment p WHERE p.request.id = :requestId")
+        List<Payment> findByRequestId(@Param("requestId") Long requestId);
 
         List<Payment> findByParcelId(Long parcelId);
 

@@ -76,34 +76,28 @@ INSERT INTO vehicles (vehicle_type, license_plate, capacity_weight, capacity_vol
 ('TRUCK', '30H-44444', 2000, 30, 'Isuzu QKR77, 2021, tải 2.4 tấn, chạy liên tỉnh', 'AVAILABLE', 3, NOW(), NOW()),
 ('CONTAINER', '51D-55555', 10000, 60, 'Container 20ft, Dongfeng 2019, chở hàng cồng kềnh', 'AVAILABLE', 4, NOW(), NOW());
 
--- 7. CUSTOMERS (with descriptions)
-INSERT INTO customers (customer_code, user_id, name, full_name, phone, email, address, company_name, description, created_at, updated_at) VALUES
-('CUST-20251230-001', 10, 'Nguyễn Văn A', 'Nguyễn Văn A', '0901234567', 'customerA@email.com', '12 Lý Thường Kiệt, Q10, HCM', 'Công ty Durex VN', 
+-- 7. SHIPPERS (Tài xế)
+INSERT INTO shippers (user_id, full_name, phone, working_area, is_available, current_location_id, is_active, created_at, updated_at) VALUES
+(6, 'Đinh Văn Tài', '0956789012', 'Khu vực HCM - Nội thành', true, 1, true, NOW(), NOW()),
+(7, 'Võ Thị Lan', '0967890123', 'Khu vực HCM - Ngoại thành', true, 2, true, NOW(), NOW()),
+(8, 'Bùi Văn Hùng', '0978901234', 'Khu vực HN', true, 3, true, NOW(), NOW()),
+(9, 'Lê Văn Minh', '0989012345', 'Khu vực Miền Trung', true, 4, true, NOW(), NOW());
+
+-- 8. CUSTOMERS (with descriptions)
+INSERT INTO customers (user_id, name, full_name, phone, email, address, company_name, gender, description, created_at, updated_at) VALUES
+(10, 'Nguyễn Văn A', 'Nguyễn Văn A', '0901234567', 'customerA@email.com', '12 Lý Thường Kiệt, Q10, HCM', 'Công ty Durex VN', 'Nam',
  'Khách hàng VIP, doanh nghiệp lớn, thường xuyên vận chuyển số lượng lớn, ưu tiên cao', NOW(), NOW()),
-('CUST-20251230-002', 11, 'Trần Thị B', 'Trần Thị B', '0912345678', 'customerB@email.com', '78 Nguyễn Trãi, Ba Đình, HN', 'Nhà phân phối HN', 
+(11, 'Trần Thị B', 'Trần Thị B', '0912345678', 'customerB@email.com', '78 Nguyễn Trãi, Ba Đình, HN', 'Nhà phân phối HN', 'Nữ',
  'Khách hàng doanh nghiệp, nhận hàng 24/7, có kho riêng', NOW(), NOW()),
-('CUST-20251230-003', 12, 'Lê Minh Tâm', 'Lê Minh Tâm', '0923456789', 'khach3@email.com', '789 Hai Bà Trưng, Q3, HCM', 'Công ty XYZ', 
+(12, 'Lê Minh Tâm', 'Lê Minh Tâm', '0923456789', 'khach3@email.com', '789 Hai Bà Trưng, Q3, HCM', 'Công ty XYZ', 'Nam',
  'Khách hàng cá nhân, mua lẻ, thanh toán online', NOW(), NOW());
 
--- 8. STAFF (with descriptions)
-INSERT INTO staff (staff_code, user_id, full_name, phone, email, location_id, description, is_active, created_at, updated_at) VALUES
-('STAFF-001', 4, 'Phạm Văn Nhân', '0934567890', 'staff1@logistics.vn', 1, 
- 'Nhân viên kho trưởng tại HCM, 5 năm kinh nghiệm, chuyên xử lý đơn hàng lớn', true, NOW(), NOW()),
-('STAFF-002', 5, 'Hoàng Thị Mai', '0945678901', 'staff2@logistics.vn', 3, 
- 'Nhân viên kho tại Hà Nội, 3 năm kinh nghiệm, giỏi sắp xếp hàng hóa', true, NOW(), NOW());
+-- 8. STAFF
+INSERT INTO staff (user_id, full_name, phone, email, location_id, is_active, created_at, updated_at) VALUES
+(4, 'Phạm Văn Nhân', '0934567890', 'staff1@logistics.vn', 1, true, NOW(), NOW()),
+(5, 'Hoàng Thị Mai', '0945678901', 'staff2@logistics.vn', 3, true, NOW(), NOW());
 
--- 9. SHIPPERS (with descriptions)
-INSERT INTO shippers (shipper_code, user_id, full_name, phone, working_area, description, is_available, current_location_id, is_active, created_at, updated_at) VALUES
-('SHIP-001', 6, 'Đinh Văn Tài', '0956789012', 'TP.HCM', 
- 'Tài xế 10 năm kinh nghiệm, bằng lái B2, chuyên chạy xe Van và Truck nội thành', true, 1, true, NOW(), NOW()),
-('SHIP-002', 7, 'Võ Thị Lan', '0967890123', 'TP.HCM', 
- 'Tài xế nữ 5 năm kinh nghiệm, bằng lái A2, chuyên giao hàng gấp nội thành bằng xe máy', true, 1, true, NOW(), NOW()),
-('SHIP-003', 8, 'Bùi Văn Hùng', '0978901234', 'Hà Nội', 
- 'Tài xế 15 năm kinh nghiệm, bằng lái C, chuyên chạy tuyến HN-HCM, quen đường cao tốc', true, 3, true, NOW(), NOW()),
-('SHIP-004', 9, 'Lê Văn Minh', '0989012345', 'Hà Nội', 
- 'Tài xế trẻ 3 năm kinh nghiệm, bằng lái B2, chuyên giao hàng nội thành Hà Nội', true, 3, true, NOW(), NOW());
-
--- 10. ACTION_TYPES
+-- 9. ACTION_TYPES
 INSERT INTO action_types (action_code, name, description, created_at, updated_at) VALUES
 ('CREATED', 'Tạo đơn', 'Đơn hàng mới được tạo bởi khách hàng', NOW(), NOW()),
 ('CONFIRMED', 'Xác nhận', 'Manager đã xác nhận đơn và thu tiền cọc', NOW(), NOW()),
@@ -129,7 +123,14 @@ INSERT INTO customer_requests (request_code, sender_id, receiver_id, sender_loca
 ('REQ-20251230-004', 2, NULL, 7, 6, 1, 1700, 'Điện thoại Samsung', 8500000, 15000000, DATE_ADD(NOW(), INTERVAL 2 DAY), 'CONFIRMED', 'Chờ lấy hàng', 
  'Đơn hàng điện thoại Samsung Galaxy S24 Ultra 512GB. Hàng giá trị cao, cần bảo hiểm. Người nhận trả phí ship. COD 15 triệu.', NOW(), NOW()),
 ('REQ-20251230-005', 1, 2, 5, 7, 1, 10, 'Thiết bị y tế', 2000000, 50000000, DATE_ADD(NOW(), INTERVAL 1 DAY), 'IN_TRANSIT', 'Hàng y tế khẩn cấp', 
- 'Vận chuyển thiết bị y tế từ kho thuốc đến bệnh viện. Yêu cầu xe chuyên dụng, nhiệt độ bảo quản lạnh. Phí ship thanh toán theo từng chặng, COD thu một lần.', NOW(), NOW());
+ 'Vận chuyển thiết bị y tế từ kho thuốc đến bệnh viện. Yêu cầu xe chuyên dụng, nhiệt độ bảo quản lạnh. Phí ship thanh toán theo từng chặng, COD thu một lần.', NOW(), NOW()),
+-- Thêm PENDING requests cho Manager test
+('REQ-20251231-001', 1, 2, 5, 7, 1, 1700, '10 thùng mỹ phẩm', 3000000, 2000000, DATE_ADD(NOW(), INTERVAL 4 DAY), 'PENDING', 'Chờ manager xử lý', 
+ 'Đơn hàng mỹ phẩm nhập khẩu từ HCM ra HN. Cần kiểm tra giấy tờ và xác nhận với khách. Chưa đặt cọc.', NOW(), NOW()),
+('REQ-20251231-002', 3, 1, 6, 5, 2, 50, 'Laptop Dell XPS 15', 500000, 35000000, DATE_ADD(NOW(), INTERVAL 3 DAY), 'PENDING', 'Đang chờ khách confirm giá', 
+ 'Đơn hàng laptop cao cấp. Khách yêu cầu bảo hiểm. Cần liên hệ xác nhận lại phí ship vì hàng giá trị cao.', NOW(), NOW()),
+('REQ-20251231-003', 2, 3, 7, 6, 1, 1750, 'Linh kiện điện tử', 4500000, 0, DATE_ADD(NOW(), INTERVAL 2 DAY), 'PENDING', 'Khách thanh toán trước', 
+ 'Đơn hàng linh kiện điện tử từ HN về HCM. Khách đã thanh toán 100% phí ship online. Không có COD.', NOW(), NOW());
 
 
 -- 12. TRACKING_CODES
@@ -364,5 +365,58 @@ INSERT INTO payment_transactions (payment_id, amount, transaction_type, payment_
 (9, 500000, 'IN', 'CASH', 'CASH-T13-RE5', 'SUCCESS', 10, DATE_SUB(NOW(), INTERVAL 5 HOUR), DATE_SUB(NOW(), INTERVAL 5 HOUR));
 
 -- =====================================================
--- DONE! Script v5.2 - Clean and Synced
+-- 22. ĐƠN HÀNG MỚI CHO CUSTOMER1 (Nguyễn Văn A - SĐT: 0901234567)
 -- =====================================================
+
+-- Request 6: Đơn hàng laptop từ customer1 gửi đến customer2
+INSERT INTO customer_requests (request_code, sender_id, receiver_id, sender_location_id, receiver_location_id, service_type_id, distance_km, parcel_description, shipping_fee, cod_amount, estimated_delivery_time, status, note, description, created_at, updated_at) VALUES
+('REQ-20251231-C1A', 1, 2, 5, 7, 1, 1725, 'Laptop Dell XPS 15 và phụ kiện', 2500000, 35000000, DATE_ADD(NOW(), INTERVAL 2 DAY), 'IN_TRANSIT', 'Hàng giá trị cao, cần bảo hiểm', 
+ 'Đơn hàng laptop Dell XPS 15 + dock + chuột + túi xách từ Công ty Durex VN (Customer1) gửi đến Nhà phân phối HN (Customer2). Thanh toán COD 35 triệu khi giao hàng.', NOW(), NOW());
+
+-- Tracking code cho đơn mới
+INSERT INTO tracking_codes (request_id, code, created_at) VALUES
+(6, 'TRK-20251231-LAPTOP', NOW());
+
+-- Trips cho đơn laptop (Request ID = 6)
+INSERT INTO trips (trip_type, shipper_id, vehicle_id, start_location_id, end_location_id, started_at, ended_at, cod_amount, status, note, description, created_at, updated_at) VALUES
+-- Trip 17: Pickup từ Công ty Durex → Kho Tân Bình
+('PICKUP', 1, 3, 5, 1, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR), 0, 'COMPLETED', 'Lấy laptop xong', 
+ 'Lấy laptop Dell XPS từ Công ty Durex VN. Shipper Đinh Văn Tài đã kiểm tra đầy đủ phụ kiện.', DATE_SUB(NOW(), INTERVAL 3 HOUR), NOW()),
+-- Trip 18: Transfer từ Kho Tân Bình → Kho Hoàng Mai
+('TRANSFER', 3, 5, 1, 3, DATE_SUB(NOW(), INTERVAL 2 HOUR), NULL, 0, 'IN_PROGRESS', 'Đang trên đường HCM-HN', 
+ 'Trung chuyển laptop từ kho Tân Bình đến kho Hoàng Mai. Xe tải Hino chạy cao tốc.', DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW()),
+-- Trip 19: Delivery từ Kho Hoàng Mai → Nhà phân phối HN (chưa bắt đầu)
+('DELIVERY', 4, 6, 3, 7, NULL, NULL, 35000000, 'CREATED', 'Chờ hàng về kho HN', 
+ 'Giao laptop đến nhà phân phối HN và thu COD 35 triệu.', NOW(), NOW());
+
+-- Parcels cho đơn laptop (Request ID = 6)
+INSERT INTO parcels (request_id, parcel_code, description, cod_amount, weight_kg, length_cm, width_cm, height_cm, current_location_id, current_shipper_id, current_trip_id, status, created_at, updated_at) VALUES
+(6, 'PCL-20251231-6-01', 'Laptop Dell XPS 15 9530 - Core i7 - 32GB RAM - 1TB SSD', 30000000, 2.5, 40, 30, 10, 1, 3, 18, 'IN_TRANSIT', NOW(), NOW()),
+(6, 'PCL-20251231-6-02', 'Dell Dock WD19TBS + Chuột Logitech MX Master 3', 3000000, 1.0, 30, 20, 15, 1, 3, 18, 'IN_TRANSIT', NOW(), NOW()),
+(6, 'PCL-20251231-6-03', 'Túi xách laptop Dell Premier 15.6 inch', 2000000, 0.5, 45, 35, 8, 1, 3, 18, 'IN_TRANSIT', NOW(), NOW());
+
+-- Payments cho đơn laptop (Request ID = 6)
+INSERT INTO payments (request_id, parcel_id, trip_id, payment_code, payment_type, payer_type, receiver_type, payment_scope, description, expected_amount, paid_amount, status, created_at, updated_at) VALUES
+-- Phí ship toàn bộ
+(6, NULL, NULL, 'PAY-006-SHIP-FULL', 'SHIPPING_FEE', 'SENDER', 'COMPANY', 'FULL_REQUEST', 'Phí vận chuyển toàn bộ đơn laptop Dell XPS từ HCM đến HN. Bao gồm PICKUP + TRANSFER + DELIVERY.', 2500000.00, 2500000.00, 'PAID', NOW(), NOW()),
+-- COD 35 triệu
+(6, NULL, NULL, 'PAY-006-COD-FULL', 'COD', 'RECEIVER', 'SENDER', 'FULL_REQUEST', 'Thu hộ COD tiền laptop và phụ kiện. Thu khi giao hàng thành công.', 35000000.00, 0.00, 'UNPAID', NOW(), NOW());
+
+-- Payment transactions cho đơn laptop
+INSERT INTO payment_transactions (payment_id, amount, transaction_type, payment_method, transaction_ref, status, performed_by_id, transaction_at, created_at) VALUES
+-- Thanh toán phí ship bằng chuyển khoản
+(12, 2500000, 'IN', 'BANK_TRANSFER', 'VCB-20251231-LAPTOP', 'SUCCESS', 10, NOW(), NOW());
+
+-- Parcel actions cho đơn laptop
+INSERT INTO parcel_actions (parcel_id, request_id, action_type_id, from_location_id, to_location_id, actor_user_id, note, created_at) VALUES
+-- Parcel 1 (Laptop)
+(61, 6, 1, NULL, NULL, 10, 'Customer Nguyễn Văn A tạo đơn gửi laptop Dell XPS', NOW()),
+(61, 6, 2, NULL, NULL, 2, 'Manager xác nhận đơn, thu phí ship 2.5 triệu', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(61, 6, 4, 5, 1, 6, 'Shipper Đinh Văn Tài lấy laptop từ Công ty Durex VN', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(61, 6, 5, NULL, 1, 4, 'Nhập kho Tân Bình, kiểm tra đầy đủ phụ kiện', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(61, 6, 6, 1, 3, 8, 'Xuất kho trung chuyển HCM → HN', DATE_SUB(NOW(), INTERVAL 2 HOUR));
+
+-- =====================================================
+-- DONE! Script v6.0 - Customer1 Complete Data
+-- =====================================================
+

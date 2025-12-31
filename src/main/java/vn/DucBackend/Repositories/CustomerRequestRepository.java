@@ -39,5 +39,8 @@ public interface CustomerRequestRepository extends JpaRepository<CustomerRequest
     @Query("SELECT COUNT(r) FROM CustomerRequest r WHERE r.status = :status")
     Long countByStatus(@Param("status") CustomerRequest.RequestStatus status);
 
+    // Tìm requests được giao cho staff
+    List<CustomerRequest> findByAssignedStaffId(Long staffId);
+
     boolean existsByRequestCode(String requestCode);
 }
