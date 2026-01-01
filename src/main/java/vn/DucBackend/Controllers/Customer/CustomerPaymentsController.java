@@ -63,6 +63,12 @@ public class CustomerPaymentsController {
         addCommonAttributes(model, request);
 
         Long customerId = getCustomerIdFromSession(session);
+
+        // Phải đăng nhập để xem chi tiết
+        if (customerId == null) {
+            return "redirect:/login";
+        }
+
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
 
         if (orderOpt.isEmpty()) {
@@ -72,11 +78,11 @@ public class CustomerPaymentsController {
 
         CustomerRequest order = orderOpt.get();
 
-        // Kiểm tra quyền xem
+        // Kiểm tra quyền xem - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
         boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
 
-        if (customerId != null && !isSender && !isReceiver) {
+        if (!isSender && !isReceiver) {
             model.addAttribute("errorMessage", "Bạn không có quyền xem đơn hàng này!");
             return "redirect:/customer/orders";
         }
@@ -167,6 +173,12 @@ public class CustomerPaymentsController {
             HttpSession session) {
 
         Long customerId = getCustomerIdFromSession(session);
+
+        // Phải đăng nhập để xem
+        if (customerId == null) {
+            return ResponseEntity.status(401).body("Vui lòng đăng nhập");
+        }
+
         Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
 
         if (paymentOpt.isEmpty()) {
@@ -176,11 +188,11 @@ public class CustomerPaymentsController {
         Payment payment = paymentOpt.get();
         CustomerRequest order = payment.getRequest();
 
-        // Kiểm tra quyền
+        // Kiểm tra quyền - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
         boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
 
-        if (customerId != null && !isSender && !isReceiver) {
+        if (!isSender && !isReceiver) {
             return ResponseEntity.status(403).body("Bạn không có quyền xem thông tin này");
         }
 

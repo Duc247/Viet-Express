@@ -18,6 +18,7 @@ public class CustomerDTO {
     private String address;
     private LocalDateTime birthday;
     private String companyName;
+    private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

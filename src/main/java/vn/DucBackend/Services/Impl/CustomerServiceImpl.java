@@ -89,14 +89,14 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setUser(userRepository.findById(dto.getUserId()).orElse(null));
         }
         customer.setName(dto.getName());
+        customer.setFullName(dto.getFullName() != null ? dto.getFullName() : dto.getName());
         customer.setPhone(dto.getPhone());
         customer.setEmail(dto.getEmail());
         customer.setCompanyName(dto.getCompanyName());
         customer.setGender(dto.getGender());
         customer.setAddress(dto.getAddress());
         customer.setBirthday(dto.getBirthday());
-        customer.setCreatedAt(dto.getCreatedAt());
-        customer.setUpdatedAt(dto.getUpdatedAt());
+        customer.setDescription(dto.getDescription());
         return toDTO(customerRepository.save(customer));
     }
 
@@ -129,7 +129,12 @@ public class CustomerServiceImpl implements CustomerService {
         if (dto.getBirthday() != null) {
             customer.setBirthday(dto.getBirthday());
         }
-        customer.setUpdatedAt(dto.getUpdatedAt());
+        if (dto.getFullName() != null) {
+            customer.setFullName(dto.getFullName());
+        }
+        if (dto.getDescription() != null) {
+            customer.setDescription(dto.getDescription());
+        }
         return toDTO(customerRepository.save(customer));
     }
 
@@ -151,9 +156,14 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setUsername(customer.getUser().getUsername());
         }
         dto.setName(customer.getName());
+        dto.setFullName(customer.getFullName());
         dto.setPhone(customer.getPhone());
         dto.setEmail(customer.getEmail());
+        dto.setAddress(customer.getAddress());
+        dto.setGender(customer.getGender());
+        dto.setBirthday(customer.getBirthday());
         dto.setCompanyName(customer.getCompanyName());
+        dto.setDescription(customer.getDescription());
         dto.setCreatedAt(customer.getCreatedAt());
         dto.setUpdatedAt(customer.getUpdatedAt());
         return dto;

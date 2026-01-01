@@ -55,6 +55,12 @@ public class CustomerParcelsController {
         addCommonAttributes(model, request);
 
         Long customerId = getCustomerIdFromSession(session);
+
+        // Phải đăng nhập để xem chi tiết
+        if (customerId == null) {
+            return "redirect:/login";
+        }
+
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
 
         if (orderOpt.isEmpty()) {
@@ -64,11 +70,11 @@ public class CustomerParcelsController {
 
         CustomerRequest order = orderOpt.get();
 
-        // Kiểm tra quyền xem
+        // Kiểm tra quyền xem - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
         boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
 
-        if (customerId != null && !isSender && !isReceiver) {
+        if (!isSender && !isReceiver) {
             model.addAttribute("errorMessage", "Bạn không có quyền xem đơn hàng này!");
             return "redirect:/customer/orders";
         }

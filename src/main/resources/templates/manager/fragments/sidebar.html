@@ -25,13 +25,6 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/manager/orders' ? 'active fw-bold text-primary' : ''}"
-                        href="/manager/orders">
-                        <i class="fas fa-truck-loading me-2"></i> Lên đơn hàng
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
                         th:classappend="${requestURI == '/manager/trip-planning' ? 'active fw-bold text-primary' : ''}"
                         href="/manager/trip-planning">
                         <i class="fas fa-th-large me-2"></i> Xếp hàng lên xe
@@ -45,9 +38,37 @@
             <ul class="nav flex-column mb-2">
                 <li class="nav-item">
                     <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/manager/locations' ? 'active fw-bold text-primary' : ''}"
+                        th:classappend="${#strings.startsWith(requestURI, '/manager/locations') ? 'active fw-bold text-primary' : ''}"
                         href="/manager/locations">
-                        <i class="fas fa-warehouse me-2"></i> Quản lý Kho bãi
+                        <i class="fas fa-warehouse me-2"></i> Kho bãi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                        th:classappend="${#strings.startsWith(requestURI, '/manager/parcels') ? 'active fw-bold text-primary' : ''}"
+                        href="/manager/parcels">
+                        <i class="fas fa-boxes me-2"></i> Kiện hàng
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                        th:classappend="${#strings.startsWith(requestURI, '/manager/trips') ? 'active fw-bold text-primary' : ''}"
+                        href="/manager/trips">
+                        <i class="fas fa-truck me-2"></i> Chuyến VC
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                        th:classappend="${#strings.startsWith(requestURI, '/manager/payments') ? 'active fw-bold text-primary' : ''}"
+                        href="/manager/payments">
+                        <i class="fas fa-money-bill-wave me-2"></i> Thanh toán
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                        th:classappend="${#strings.startsWith(requestURI, '/manager/shippers') ? 'active fw-bold text-primary' : ''}"
+                        href="/manager/shippers">
+                        <i class="fas fa-user-tie me-2"></i> Tài xế
                     </a>
                 </li>
             </ul>

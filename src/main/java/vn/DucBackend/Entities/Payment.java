@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class Payment {
 
     public enum PaymentType {
-        SHIPPING_FEE, COD
+        SHIPPING_FEE, COD, DEPOSIT
     }
 
     public enum PayerType {
@@ -26,7 +26,12 @@ public class Payment {
     }
 
     public enum PaymentStatus {
-        UNPAID, PARTIALLY_PAID, PAID, REFUNDED
+        UNPAID, // Chưa thu
+        PARTIALLY_PAID, // Đã thu một phần
+        PAID, // Đã thanh toán (cho phí ship)
+        COLLECTED_FROM_RECEIVER, // Đã thu COD từ người nhận (shipper đã thu)
+        PAID_TO_SENDER, // Đã trả COD cho người gửi (manager xác nhận)
+        REFUNDED // Đã hoàn tiền
     }
 
     /**
