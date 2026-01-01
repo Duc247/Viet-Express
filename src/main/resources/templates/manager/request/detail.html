@@ -33,6 +33,23 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
+        <!-- Nút Chốt đơn - Chỉ hiện khi RECEIVER_CONFIRMED -->
+        <div th:if="${order.status.name() == 'RECEIVER_CONFIRMED'}" class="card shadow-sm mb-4 border-success">
+            <div class="card-header bg-success bg-opacity-25 py-3">
+                <h6 class="mb-0 fw-bold text-success">
+                    <i class="fas fa-check-circle me-2"></i>Người nhận đã xác nhận - Sẵn sàng chốt đơn
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Người nhận đã xác nhận nhận hàng. Bạn có thể chốt đơn để tiến hành xử lý.</p>
+                <form th:action="@{/manager/requests/{id}/confirm(id=${order.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-check-double me-2"></i>Chốt đơn hàng
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <div class="row">
             <!-- Cột trái: Thông tin đơn -->
             <div class="col-lg-8">
