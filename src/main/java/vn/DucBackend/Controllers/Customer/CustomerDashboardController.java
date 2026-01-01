@@ -37,7 +37,7 @@ public class CustomerDashboardController {
     public String dashboard(Model model, HttpSession session) {
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         // 1. Lấy danh sách đơn hàng gần đây

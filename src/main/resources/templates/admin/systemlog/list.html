@@ -28,21 +28,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="log : ${logs}">
+                            <tr th:each="log : ${systemLogs}">
                                 <td th:text="${log.id}"></td>
                                 <td>
-                                    <span class="badge bg-info" th:if="${log.logLevel.name() == 'INFO'}">INFO</span>
-                                    <span class="badge bg-warning" th:if="${log.logLevel.name() == 'WARN'}">WARN</span>
-                                    <span class="badge bg-danger" th:if="${log.logLevel.name() == 'ERROR'}">ERROR</span>
+                                    <span class="badge bg-info" th:if="${log.logLevel == 'INFO'}">INFO</span>
+                                    <span class="badge bg-warning" th:if="${log.logLevel == 'WARN'}">WARN</span>
+                                    <span class="badge bg-danger" th:if="${log.logLevel == 'ERROR'}">ERROR</span>
                                 </td>
                                 <td th:text="${log.moduleName}"></td>
                                 <td th:text="${log.actionType}"></td>
-                                <td th:text="${log.actor != null ? log.actor.username : '-'}"></td>
+                                <td th:text="${log.actorUsername != null ? log.actorUsername : '-'}"></td>
                                 <td th:text="${log.targetId != null ? log.targetId : '-'}"></td>
                                 <td th:text="${log.ipAddress != null ? log.ipAddress : '-'}"></td>
-                                <td th:text="${#temporals.format(log.createdAt, 'dd/MM HH:mm')}"></td>
+                                <td
+                                    th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM HH:mm') : '-'}">
+                                </td>
                             </tr>
-                            <tr th:if="${#lists.isEmpty(logs)}">
+                            <tr th:if="${#lists.isEmpty(systemLogs)}">
                                 <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
                             </tr>
                         </tbody>

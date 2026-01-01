@@ -62,6 +62,38 @@ public class AdminOperationController {
         return "admin/request/list";
     }
 
+    /**
+     * Chi tiết yêu cầu khách hàng
+     * Service: customerRequestService.findRequestById()
+     */
+    @GetMapping("/request/{id}")
+    public String requestDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        CustomerRequestDTO requestDTO = customerRequestService.findRequestById(id).orElse(null);
+        if (requestDTO == null) {
+            return "redirect:/admin/request";
+        }
+        model.addAttribute("customerRequest", requestDTO);
+        return "admin/request/detail";
+    }
+
+    /**
+     * Form sửa yêu cầu khách hàng
+     * Service: customerRequestService.findRequestById(),
+     * locationService.findAllLocations()
+     */
+    @GetMapping("/request/{id}/edit")
+    public String requestEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        CustomerRequestDTO requestDTO = customerRequestService.findRequestById(id).orElse(null);
+        if (requestDTO == null) {
+            return "redirect:/admin/request";
+        }
+        model.addAttribute("customerRequest", requestDTO);
+        model.addAttribute("locations", locationService.findAllLocations());
+        return "admin/request/form";
+    }
+
     // ==========================================
     // PARCEL
     // ==========================================
@@ -113,6 +145,40 @@ public class AdminOperationController {
     public String tripForm(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("trip", new TripDTO());
+        model.addAttribute("locations", locationService.findAllLocations());
+        model.addAttribute("shippers", shipperService.findAllShippers());
+        model.addAttribute("vehicles", vehicleService.findAll());
+        return "admin/trip/form";
+    }
+
+    /**
+     * Chi tiết chuyến xe
+     * Service: tripService.findTripById()
+     */
+    @GetMapping("/trip/{id}")
+    public String tripDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        TripDTO tripDTO = tripService.findTripById(id).orElse(null);
+        if (tripDTO == null) {
+            return "redirect:/admin/trip";
+        }
+        model.addAttribute("trip", tripDTO);
+        return "admin/trip/detail";
+    }
+
+    /**
+     * Form sửa chuyến xe
+     * Service: tripService.findTripById(), locationService, shipperService,
+     * vehicleService
+     */
+    @GetMapping("/trip/{id}/edit")
+    public String tripEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        TripDTO tripDTO = tripService.findTripById(id).orElse(null);
+        if (tripDTO == null) {
+            return "redirect:/admin/trip";
+        }
+        model.addAttribute("trip", tripDTO);
         model.addAttribute("locations", locationService.findAllLocations());
         model.addAttribute("shippers", shipperService.findAllShippers());
         model.addAttribute("vehicles", vehicleService.findAll());

@@ -18,6 +18,7 @@ import vn.DucBackend.Repositories.CustomerRepository;
 import vn.DucBackend.Repositories.LocationRepository;
 import vn.DucBackend.Repositories.ServiceTypeRepository;
 import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Utils.LoggingHelper;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -41,6 +42,9 @@ public class CustomerOrderCreateController {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private LoggingHelper loggingHelper;
+
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
     }
@@ -58,7 +62,7 @@ public class CustomerOrderCreateController {
         // Kiểm tra session - phải đăng nhập mới được tạo đơn
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         addCommonAttributes(model, request);
@@ -87,6 +91,7 @@ public class CustomerOrderCreateController {
             @RequestParam(value = "distanceKm", required = false) BigDecimal distanceKm,
             @RequestParam(value = "note", required = false) String note,
             @RequestParam(value = "weight", required = false) BigDecimal weight,
+            HttpServletRequest request,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -94,7 +99,7 @@ public class CustomerOrderCreateController {
         Long sessionCustomerId = getCustomerIdFromSession(session);
         if (sessionCustomerId == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         // Validate số điện thoại người gửi
@@ -199,6 +204,9 @@ public class CustomerOrderCreateController {
             requestDTO.setDistanceKm(distanceKm);
 
             CustomerRequestDTO createdRequest = customerRequestService.createRequest(requestDTO);
+
+            // Ghi log tạo đơn thành công
+            loggingHelper.logOrderCreated(sender.getId(), createdRequest.getRequestCode(), request);
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Tạo đơn hàng thành công! Mã vận đơn: " + createdRequest.getRequestCode());

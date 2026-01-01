@@ -63,7 +63,7 @@ public class CustomerOrderDetailController {
 
         // Phải đăng nhập để xem chi tiết đơn hàng
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
@@ -158,7 +158,7 @@ public class CustomerOrderDetailController {
             RedirectAttributes redirectAttributes) {
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
@@ -197,7 +197,7 @@ public class CustomerOrderDetailController {
     public String rejectOrder(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
@@ -245,7 +245,7 @@ public class CustomerOrderDetailController {
 
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
@@ -289,7 +289,7 @@ public class CustomerOrderDetailController {
 
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
@@ -344,7 +344,7 @@ public class CustomerOrderDetailController {
 
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);

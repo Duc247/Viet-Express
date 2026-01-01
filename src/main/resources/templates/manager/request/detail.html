@@ -134,15 +134,19 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Action buttons -->
+                    <!-- Action buttons - Force confirm khi PENDING (chưa có receiver xác nhận) -->
                     <div class="card-footer bg-light" th:if="${order.status.name() == 'PENDING'}">
-                        <form th:action="@{/manager/requests/{id}/confirm(id=${order.id})}" method="post"
+                        <form th:action="@{/manager/requests/{id}/force-confirm(id=${order.id})}" method="post"
                             class="d-inline">
-                            <button type="submit" class="btn btn-success"
-                                onclick="return confirm('Bạn có chắc muốn chốt đơn này?');">
-                                <i class="fas fa-check me-1"></i>Chốt đơn
+                            <button type="submit" class="btn btn-warning"
+                                onclick="return confirm('Force chốt đơn mà không cần người nhận xác nhận?');">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Force Chốt đơn
                             </button>
                         </form>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle me-1"></i>Người nhận chưa xác nhận. Dùng "Force Chốt" để
+                            bypass.
+                        </small>
                     </div>
                 </div>
 
@@ -363,13 +367,14 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Tài xế</label>
-                                <select name="shipperId" class="form-select" required>
-                                    <option value="">-- Chọn tài xế --</option>
+                                <label class="form-label fw-bold">Tài xế (tùy chọn)</label>
+                                <select name="shipperId" class="form-select">
+                                    <option value="">-- Chưa gán --</option>
                                     <option th:each="s : ${shippers}" th:value="${s.id}"
                                         th:text="${s.fullName + (s.isAvailable ? ' ✅' : ' (Bận)')}"
                                         th:classappend="${s.isAvailable ? '' : 'text-muted'}">Tài xế</option>
                                 </select>
+                                <small class="text-muted">Có thể gán shipper sau khi tạo chuyến</small>
                             </div>
 
                             <div class="mb-3">

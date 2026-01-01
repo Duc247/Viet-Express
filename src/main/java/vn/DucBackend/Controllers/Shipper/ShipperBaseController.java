@@ -13,6 +13,7 @@ import vn.DucBackend.Services.LocationService;
 import vn.DucBackend.Services.ShipperService;
 import vn.DucBackend.Services.TripService;
 import vn.DucBackend.Services.UserService;
+import vn.DucBackend.Utils.LoggingHelper;
 
 /**
  * Base Controller cho tất cả Shipper Controllers
@@ -31,6 +32,9 @@ public abstract class ShipperBaseController {
 
     @Autowired
     protected LocationService locationService;
+
+    @Autowired
+    protected LoggingHelper loggingHelper;
 
     /**
      * Thêm các attributes chung vào Model

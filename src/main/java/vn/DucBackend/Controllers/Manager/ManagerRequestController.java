@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
+import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.Optional;
@@ -50,6 +51,9 @@ public class ManagerRequestController {
     private VehicleRepository vehicleRepository;
     @Autowired
     private StaffRepository staffRepository;
+
+    @Autowired
+    private LoggingHelper loggingHelper;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -116,7 +120,8 @@ public class ManagerRequestController {
 
     // Chốt đơn → CONFIRMED (chỉ khi receiver đã xác nhận RECEIVER_CONFIRMED)
     @PostMapping("/requests/{id}/confirm")
-    public String confirmRequest(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    public String confirmRequest(@PathVariable("id") Long id, HttpServletRequest httpRequest,
+            RedirectAttributes redirectAttributes) {
         Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
         if (requestOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
@@ -142,7 +147,39 @@ public class ManagerRequestController {
         // Cập nhật trạng thái qua Service → CONFIRMED (cả 2 đã xác nhận)
         customerRequestService.updateRequestStatus(id, "CONFIRMED");
 
+        // Ghi log duyệt đơn
+        loggingHelper.logOrderConfirmed(null, customerRequest.getRequestCode(), httpRequest);
+
         redirectAttributes.addFlashAttribute("successMessage", "Đã chốt đơn thành công!");
+        return "redirect:/manager/requests/" + id;
+    }
+
+    // Force Confirm - Cho phép Manager bypass receiver confirmation
+    @PostMapping("/requests/{id}/force-confirm")
+    public String forceConfirmRequest(@PathVariable("id") Long id, HttpServletRequest httpRequest,
+            RedirectAttributes redirectAttributes) {
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
+            return "redirect:/manager/requests";
+        }
+
+        CustomerRequest customerRequest = requestOpt.get();
+
+        // Kiểm tra có đủ location không
+        if (customerRequest.getSenderLocation() == null || customerRequest.getReceiverLocation() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Cần thiết lập cả điểm lấy hàng và điểm giao trước khi chốt đơn!");
+            return "redirect:/manager/requests/" + id;
+        }
+
+        // Force update → CONFIRMED (bỏ qua kiểm tra receiver)
+        customerRequestService.updateRequestStatus(id, "CONFIRMED");
+
+        // Ghi log duyệt đơn (force)
+        loggingHelper.logOrderConfirmed(null, customerRequest.getRequestCode() + " (Force)", httpRequest);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Đã force chốt đơn thành công!");
         return "redirect:/manager/requests/" + id;
     }
 

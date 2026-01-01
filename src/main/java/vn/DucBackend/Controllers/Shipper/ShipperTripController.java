@@ -75,8 +75,20 @@ public class ShipperTripController extends ShipperBaseController {
      */
     @PostMapping("/trip/{id}/status")
     public String updateTripStatus(@PathVariable("id") Long id, @RequestParam("status") String status,
-            Principal principal) {
+            HttpServletRequest request, Principal principal) {
+        ShipperDTO shipper = getCurrentShipper(principal);
+
         tripService.updateTripStatus(id, status);
+
+        // Ghi log cập nhật trạng thái
+        if (shipper != null) {
+            if ("IN_PROGRESS".equals(status)) {
+                loggingHelper.logTripStarted(shipper.getId(), id, request);
+            } else if ("COMPLETED".equals(status)) {
+                loggingHelper.logTripEnded(shipper.getId(), id, request);
+            }
+        }
+
         return "redirect:/shipper/trip/" + id;
     }
 }

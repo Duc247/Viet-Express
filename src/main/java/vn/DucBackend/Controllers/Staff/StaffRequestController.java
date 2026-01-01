@@ -66,7 +66,7 @@ public class StaffRequestController {
 
         Long staffId = getStaffIdFromSession(session);
         if (staffId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         // Lấy requests được giao cho staff này
@@ -114,7 +114,7 @@ public class StaffRequestController {
 
         Long staffId = getStaffIdFromSession(session);
         if (staffId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> reqOpt = customerRequestRepository.findById(requestId);

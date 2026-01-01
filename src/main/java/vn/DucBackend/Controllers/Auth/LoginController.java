@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.User;
 import vn.DucBackend.Entities.Customer;
@@ -16,6 +17,7 @@ import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Repositories.UserRepository;
 import vn.DucBackend.Repositories.CustomerRepository;
 import vn.DucBackend.Repositories.StaffRepository;
+import vn.DucBackend.Utils.LoggingHelper;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -35,6 +37,9 @@ public class LoginController {
 
     @Autowired
     private StaffRepository staffRepository;
+
+    @Autowired
+    private LoggingHelper loggingHelper;
 
     /**
      * Hiển thị trang đăng nhập
@@ -57,12 +62,14 @@ public class LoginController {
             @RequestParam("username") String username,
             @RequestParam("password") String password,
             HttpSession session,
+            HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
         // Tìm user theo username
         Optional<User> userOpt = userRepository.findByUsername(username);
 
         if (userOpt.isEmpty()) {
+            loggingHelper.logLoginFailed(null, username, "Username không tồn tại", request);
             redirectAttributes.addFlashAttribute("errorMessage", "Tên đăng nhập không tồn tại!");
             return "redirect:/auth/login";
         }
@@ -71,12 +78,14 @@ public class LoginController {
 
         // Kiểm tra mật khẩu (plain text - chưa mã hóa)
         if (!user.getPassword().equals(password)) {
+            loggingHelper.logLoginFailed(user.getId(), username, "Sai mật khẩu", request);
             redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu không đúng!");
             return "redirect:/auth/login";
         }
 
         // Kiểm tra tài khoản có active không
         if (!Boolean.TRUE.equals(user.getIsActive())) {
+            loggingHelper.logLoginFailed(user.getId(), username, "Tài khoản bị khóa", request);
             redirectAttributes.addFlashAttribute("errorMessage", "Tài khoản đã bị khóa!");
             return "redirect:/auth/login";
         }
@@ -94,6 +103,9 @@ public class LoginController {
         // Cập nhật thời gian đăng nhập
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
+
+        // Ghi log đăng nhập thành công
+        loggingHelper.logLoginSuccess(user.getId(), username, roleName, request);
 
         // Lưu thông tin vào session
         session.setAttribute("loggedInUser", user);
@@ -147,7 +159,11 @@ public class LoginController {
      * Đăng xuất
      */
     @GetMapping("/logout")
-    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+    public String logout(HttpSession session, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user != null) {
+            loggingHelper.logLogout(user.getId(), user.getUsername(), request);
+        }
         session.invalidate();
         redirectAttributes.addFlashAttribute("successMessage", "Đã đăng xuất thành công!");
         return "redirect:/auth/login";

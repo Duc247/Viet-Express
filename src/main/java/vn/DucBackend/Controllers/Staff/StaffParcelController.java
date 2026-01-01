@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.*;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
+import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.List;
@@ -36,6 +37,9 @@ public class StaffParcelController {
     private ActionTypeRepository actionTypeRepository;
     @Autowired
     private ParcelActionRepository parcelActionRepository;
+
+    @Autowired
+    private LoggingHelper loggingHelper;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -146,11 +150,11 @@ public class StaffParcelController {
     @PostMapping("/parcels/{id}/checkin")
     public String checkinParcel(@PathVariable("id") Long parcelId,
             @RequestParam(value = "note", required = false) String note,
-            HttpSession session, RedirectAttributes redirectAttributes) {
+            HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
 
         Long staffId = getStaffIdFromSession(session);
         if (staffId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<Parcel> parcelOpt = parcelRepository.findById(parcelId);
@@ -183,6 +187,9 @@ public class StaffParcelController {
                 getUserIdFromSession(session),
                 note != null ? note : "Nhập kho " + staff.getLocation().getName());
 
+        // Ghi log nhập kho
+        loggingHelper.logWarehouseReceive(staffId, parcel.getParcelCode(), staff.getLocation().getName(), request);
+
         redirectAttributes.addFlashAttribute("successMessage",
                 "Đã nhập kho kiện " + parcel.getParcelCode() + " thành công!");
         return "redirect:/staff/parcels";
@@ -194,11 +201,11 @@ public class StaffParcelController {
     @PostMapping("/parcels/{id}/checkout")
     public String checkoutParcel(@PathVariable("id") Long parcelId,
             @RequestParam(value = "note", required = false) String note,
-            HttpSession session, RedirectAttributes redirectAttributes) {
+            HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
 
         Long staffId = getStaffIdFromSession(session);
         if (staffId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<Parcel> parcelOpt = parcelRepository.findById(parcelId);
@@ -218,6 +225,9 @@ public class StaffParcelController {
                 fromLocation, null,
                 getUserIdFromSession(session),
                 note != null ? note : "Xuất kho để vận chuyển");
+
+        // Ghi log xuất kho
+        loggingHelper.logWarehouseDispatch(staffId, parcel.getParcelCode(), request);
 
         redirectAttributes.addFlashAttribute("successMessage",
                 "Đã xuất kho kiện " + parcel.getParcelCode() + " thành công!");
