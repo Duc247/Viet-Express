@@ -1,16 +1,33 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-    <header th:fragment="header" class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Driver App</a>
-        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+<!-- Shipper Header Fragment - Tết Theme -->
+<nav th:fragment="header" class="navbar navbar-expand-md navbar-dark fixed-top navbar-tet">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" th:href="@{/shipper/dashboard}">
+            <span class="me-2" style="font-size: 1.5rem;">🚚</span>
+            <span>
+                <strong>Driver App</strong>
+                <small class="d-block" style="font-size: 0.7rem; color: #ffd700;">Viet Express</small>
+            </span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="navbar-nav">
-            <div class="nav-item text-nowrap">
-                <a class="nav-link px-3" href="/auth/login">Đăng xuất <i class="fas fa-sign-out-alt ms-1"></i></a>
-            </div>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <span class="nav-link">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${username}">Driver</span>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn-tet-outline px-3 py-1 ms-2" th:href="@{/logout}"
+                        style="border-radius: 20px; border-color: #ffd700; color: #ffd700;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </li>
+            </ul>
         </div>
-    </header>
-</body>
-</html>
+    </div>
+</nav>

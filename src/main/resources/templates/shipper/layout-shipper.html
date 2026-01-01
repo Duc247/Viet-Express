@@ -7,6 +7,8 @@
     <title layout:title-pattern="$CONTENT_TITLE - Driver App">Driver</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Tết Theme CSS -->
+    <link th:href="@{/css/tet-theme.css}" rel="stylesheet">
 
     <style>
         .sidebar {
@@ -30,10 +32,75 @@
             flex-direction: column;
             min-height: calc(100vh - 56px);
         }
+
+        /* Override body background for Tết */
+        body {
+            background: linear-gradient(180deg, #fff8f0 0%, #fff4e6 100%);
+        }
     </style>
 </head>
 
 <body>
+    <!-- TẾT DECORATIONS -->
+    <div class="tet-decorations">
+        <!-- Hoa Mai - Emoji Based (Simple & Beautiful) -->
+        <div class="hoa-mai-emoji hoa-mai-1">🌸</div>
+        <div class="hoa-mai-emoji hoa-mai-2">🌼</div>
+        <div class="hoa-mai-emoji hoa-mai-3">🌸</div>
+
+        <!-- Đèn Lồng - SVG Based -->
+        <svg class="den-long den-long-1" viewBox="0 0 50 80" xmlns="http://www.w3.org/2000/svg">
+            <line x1="25" y1="0" x2="25" y2="10" stroke="#8B4513" stroke-width="2" />
+            <ellipse cx="25" cy="35" rx="20" ry="25" fill="#c41e3a" />
+            <ellipse cx="25" cy="35" rx="18" ry="23" fill="#ff4444" />
+            <rect x="10" y="8" width="30" height="6" rx="2" fill="#FFD700" />
+            <rect x="10" y="56" width="30" height="6" rx="2" fill="#FFD700" />
+            <path d="M25 62 L25 75 M20 75 L30 75 M22 75 L22 80 M28 75 L28 80" stroke="#FFD700" stroke-width="2"
+                fill="none" />
+            <text x="25" y="40" text-anchor="middle" fill="#FFD700" font-size="14" font-weight="bold">福</text>
+        </svg>
+
+        <svg class="den-long den-long-2" viewBox="0 0 50 80" xmlns="http://www.w3.org/2000/svg">
+            <line x1="25" y1="0" x2="25" y2="10" stroke="#8B4513" stroke-width="2" />
+            <ellipse cx="25" cy="35" rx="20" ry="25" fill="#c41e3a" />
+            <ellipse cx="25" cy="35" rx="18" ry="23" fill="#ff4444" />
+            <rect x="10" y="8" width="30" height="6" rx="2" fill="#FFD700" />
+            <rect x="10" y="56" width="30" height="6" rx="2" fill="#FFD700" />
+            <path d="M25 62 L25 75 M20 75 L30 75 M22 75 L22 80 M28 75 L28 80" stroke="#FFD700" stroke-width="2"
+                fill="none" />
+            <text x="25" y="40" text-anchor="middle" fill="#FFD700" font-size="14" font-weight="bold">春</text>
+        </svg>
+
+        <!-- Interactive Lì Xì (Red Envelope) - Click to shake and release money! -->
+        <div class="li-xi-container" id="liXiContainer">
+            <div class="li-xi" id="liXi" onclick="shakeLiXi()" title="Click để lắc lì xì!">
+                <div class="li-xi-body">
+                    <div class="li-xi-flap"></div>
+                    <div class="li-xi-circle">
+                        <span>福</span>
+                    </div>
+                </div>
+            </div>
+            <div class="money-container" id="moneyContainer"></div>
+        </div>
+
+        <!-- Falling Petals -->
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+    </div>
+
+
+
+    <!-- TẾT BANNER -->
+    <div class="tet-banner">
+        <span class="emoji">🧧</span>
+        Chúc Mừng Năm Mới 2026 - Happy New Year!
+        <span class="emoji">🎊</span>
+    </div>
+
     <div th:replace="~{shipper/fragments/header :: header}"></div>
     <div class="container-fluid">
         <div class="row">
@@ -47,6 +114,123 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Tết Fireworks Effect Script -->
+    <script>
+        // Random fireworks effect
+        function createFirework() {
+            const colors = ['#ffd700', '#ff6b6b', '#ff8c00', '#ff1493'];
+            const decorations = document.querySelector('.tet-decorations');
+            if (!decorations) return;
+
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = Math.random() * 100 + '%';
+            firework.style.top = Math.random() * 50 + '%';
+            firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+            firework.style.boxShadow = `0 0 10px ${firework.style.background}`;
+
+            decorations.appendChild(firework);
+
+            setTimeout(() => {
+                firework.remove();
+            }, 1500);
+        }
+
+        // Create fireworks every 3 seconds
+        setInterval(createFirework, 3000);
+
+        // Initial fireworks
+        setTimeout(createFirework, 500);
+        setTimeout(createFirework, 1000);
+
+        // Lì Xì Shake Function - releases money with coin sound!
+        function shakeLiXi() {
+            const liXi = document.getElementById('liXi');
+            const moneyContainer = document.getElementById('moneyContainer');
+
+            if (!liXi || liXi.classList.contains('shaking')) return;
+
+            // Play coin sound using Web Audio API
+            playCoinSound();
+
+            // Add shake animation
+            liXi.classList.add('shaking');
+
+            // Create money emojis
+            const moneyEmojis = ['💵', '💴', '💶', '💷', '💰', '🪙', '💎'];
+            const numMoney = 8;
+
+            for (let i = 0; i < numMoney; i++) {
+                setTimeout(() => {
+                    const money = document.createElement('div');
+                    money.className = 'money';
+                    money.textContent = moneyEmojis[Math.floor(Math.random() * moneyEmojis.length)];
+                    money.style.left = (Math.random() * 60 - 30) + 'px';
+                    money.style.animationDelay = (Math.random() * 0.3) + 's';
+                    moneyContainer.appendChild(money);
+
+                    // Remove after animation
+                    setTimeout(() => money.remove(), 2000);
+                }, i * 50);
+            }
+
+            // Remove shake class after animation
+            setTimeout(() => {
+                liXi.classList.remove('shaking');
+            }, 500);
+        }
+
+        // Web Audio API - Generate coin/gold sound
+        function playCoinSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Create multiple coin sounds for realistic effect
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        // Oscillator for metallic tone
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        // Coin-like frequency (high pitched metallic)
+                        oscillator.frequency.setValueAtTime(800 + Math.random() * 400, audioContext.currentTime);
+                        oscillator.type = 'sine';
+
+                        // Quick attack and decay for coin sound
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.15);
+
+                        // Add a second higher frequency for shimmer
+                        const oscillator2 = audioContext.createOscillator();
+                        const gainNode2 = audioContext.createGain();
+
+                        oscillator2.frequency.setValueAtTime(1200 + Math.random() * 600, audioContext.currentTime);
+                        oscillator2.type = 'triangle';
+
+                        gainNode2.gain.setValueAtTime(0.15, audioContext.currentTime);
+                        gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                        oscillator2.connect(gainNode2);
+                        gainNode2.connect(audioContext.destination);
+
+                        oscillator2.start(audioContext.currentTime);
+                        oscillator2.stop(audioContext.currentTime + 0.1);
+                    }, i * 80);
+                }
+            } catch (e) {
+                console.log('Audio not supported:', e);
+            }
+        }
+    </script>
+
+
     <th:block layout:fragment="js"></th:block>
 </body>
 

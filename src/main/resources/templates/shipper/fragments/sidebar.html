@@ -1,50 +1,78 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<body>
-    <nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse py-3 border-end"
-        style="min-height: 100vh;">
-        <div class="position-sticky pt-3">
-
-            <div class="text-center mb-4 pb-3 border-bottom">
-                <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-                    style="width: 60px; height: 60px; font-size: 24px;">
-                    <i class="fas fa-truck-moving"></i>
-                </div>
-                <h6 class="fw-bold mb-0">Xin chào, Tài xế</h6>
-                <small class="text-muted">-- Biển số --</small>
+<!-- Shipper Sidebar Fragment - Tết Theme -->
+<nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse sidebar-tet">
+    <div class="position-sticky pt-3">
+        <!-- Shipper Avatar Section -->
+        <div class="text-center mb-4 py-3">
+            <div class="avatar-circle mx-auto mb-2"
+                style="width: 80px; height: 80px; background: linear-gradient(135deg, #ffd700, #ffb700); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700;">
+                <i class="fas fa-user-tie fa-2x" style="color: #8b0000;"></i>
             </div>
-
-            <h6 class="sidebar-heading px-3 mt-2 mb-1 text-muted text-uppercase">
-                <span>Công việc</span>
-            </h6>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/shipper/dashboard' ? 'active fw-bold text-primary' : ''}"
-                        href="/shipper/dashboard">
-                        <i class="fas fa-home me-2"></i> Tổng quan
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/shipper/trips' ? 'active fw-bold text-primary' : ''}"
-                        href="/shipper/trips">
-                        <i class="fas fa-clipboard-list me-2"></i> Chuyến xe (Trips)
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/shipper/history' ? 'active fw-bold text-primary' : ''}"
-                        href="/shipper/history">
-                        <i class="fas fa-history me-2"></i> Lịch sử chạy
-                    </a>
-                </li>
-            </ul>
+            <h6 class="text-warning mb-0" th:text="${currentShipper != null ? currentShipper.fullName : 'Bác tài'}">Bác
+                tài</h6>
+            <small class="text-light opacity-75">
+                <i class="fas fa-circle text-success me-1" style="font-size: 0.6rem;"></i>
+                Đang hoạt động
+            </small>
         </div>
-    </nav>
-</body>
 
-</html>
+        <hr class="my-2" style="border-color: rgba(255,215,0,0.3);">
+
+        <!-- Navigation -->
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/dashboard') ? 'active' : ''}"
+                    th:href="@{/shipper/dashboard}">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Tổng quan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/trips') ? 'active' : ''}"
+                    th:href="@{/shipper/trips}">
+                    <i class="fas fa-truck-moving me-2"></i>
+                    Chuyến xe
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/history') ? 'active' : ''}"
+                    th:href="@{/shipper/history}">
+                    <i class="fas fa-history me-2"></i>
+                    Lịch sử
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/location') ? 'active' : ''}"
+                    th:href="@{/shipper/location}">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Vị trí
+                </a>
+            </li>
+        </ul>
+
+        <hr class="my-3" style="border-color: rgba(255,215,0,0.3);">
+
+        <!-- Tết Greeting -->
+        <div class="text-center px-3 py-2">
+            <div
+                style="background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,183,0,0.1)); border-radius: 10px; padding: 15px; border: 1px dashed #ffd700;">
+                <div style="font-size: 2rem;">🧧</div>
+                <small class="text-warning d-block mt-2" style="line-height: 1.4;">
+                    Chúc Xuân Bính Ngọ<br>
+                    An Khang Thịnh Vượng!
+                </small>
+            </div>
+        </div>
+
+        <hr class="my-3" style="border-color: rgba(255,215,0,0.3);">
+
+        <!-- Logout -->
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-danger" th:href="@{/logout}">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
