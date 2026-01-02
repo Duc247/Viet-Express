@@ -170,6 +170,18 @@
                     </a>
                 </li>
             </ul>
+
+            <!-- Đăng xuất -->
+            <hr>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <form th:action="@{/auth/logout}" method="post" class="m-0">
+                        <button type="submit" class="nav-link text-danger btn btn-link p-0 w-100 text-start">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </nav>
 </body>

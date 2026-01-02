@@ -13,17 +13,18 @@ INSERT INTO roles (role_name, description, is_active, created_at, updated_at) VA
 ('CUSTOMER', 'Khách hàng', true, NOW(), NOW());
 
 -- 2. USERS (Tài khoản) - FK: role_id
-INSERT INTO users (username, password, role_id, is_active, created_at, updated_at) VALUES
-('admin', '123456', 1, true, NOW(), NOW()),
-('manager1', '123456', 2, true, NOW(), NOW()),
-('staff1', '123456', 3, true, NOW(), NOW()),
-('staff2', '123456', 3, true, NOW(), NOW()),
-('shipper1', '123456', 4, true, NOW(), NOW()),
-('shipper2', '123456', 4, true, NOW(), NOW()),
-('shipper3', '123456', 4, true, NOW(), NOW()),
-('customer1', '123456', 5, true, NOW(), NOW()),
-('customer2', '123456', 5, true, NOW(), NOW()),
-('customer3', '123456', 5, true, NOW(), NOW());
+-- Password đã mã hóa BCrypt: '123456' -> '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.'
+INSERT INTO users (username, password, email, phone, full_name, role_id, is_active, created_at, updated_at) VALUES
+('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'admin@logistics.vn', '0900000001', 'Administrator', 1, true, NOW(), NOW()),
+('manager1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'manager1@logistics.vn', '0900000002', 'Nguyễn Quản Lý', 2, true, NOW(), NOW()),
+('staff1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'staff1@logistics.vn', '0934567890', 'Phạm Văn Nhân', 3, true, NOW(), NOW()),
+('staff2', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'staff2@logistics.vn', '0945678901', 'Hoàng Thị Mai', 3, true, NOW(), NOW()),
+('shipper1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'shipper1@logistics.vn', '0956789012', 'Đinh Văn Tài', 4, true, NOW(), NOW()),
+('shipper2', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'shipper2@logistics.vn', '0967890123', 'Võ Thị Lan', 4, true, NOW(), NOW()),
+('shipper3', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'shipper3@logistics.vn', '0978901234', 'Bùi Văn Hùng', 4, true, NOW(), NOW()),
+('customer1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'khach1@email.com', '0901234567', 'Nguyễn Văn Khách', 5, true, NOW(), NOW()),
+('customer2', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'khach2@email.com', '0912345678', 'Trần Thị Hà', 5, true, NOW(), NOW()),
+('customer3', '$2a$10$N9qo8uLOickgx2ZMRZoMy.GlFkLB9MWaKwvvqLy0dHfZyKblVEvG.', 'khach3@email.com', '0923456789', 'Lê Minh Tâm', 5, true, NOW(), NOW());
 
 -- 3. LOCATIONS (Địa điểm / Kho)
 INSERT INTO locations (location_type, warehouse_code, name, address_text, is_active, created_at, updated_at) VALUES
@@ -62,10 +63,10 @@ INSERT INTO vehicles (vehicle_type, license_plate, capacity_weight, capacity_vol
 ('CONTAINER', '51D-33333', 10000.00, 60.00, 4, 'AVAILABLE', NOW(), NOW());
 
 -- 7. CUSTOMERS (Khách hàng) - FK: user_id
-INSERT INTO customers (user_id, name, phone, email, company_name, created_at, updated_at) VALUES
-(8, 'Nguyễn Văn Khách', '0901234567', 'khach1@email.com', NULL, NOW(), NOW()),
-(9, 'Trần Thị Hà', '0912345678', 'khach2@email.com', 'Công ty ABC', NOW(), NOW()),
-(10, 'Lê Minh Tâm', '0923456789', 'khach3@email.com', 'Công ty XYZ', NOW(), NOW());
+INSERT INTO customers (user_id, name, full_name, phone, email, address, company_name, created_at, updated_at) VALUES
+(8, 'Nguyễn Văn Khách', 'Nguyễn Văn Khách', '0901234567', 'khach1@email.com', '123 Nguyễn Huệ, Q.1, TP.HCM', NULL, NOW(), NOW()),
+(9, 'Trần Thị Hà', 'Trần Thị Hà', '0912345678', 'khach2@email.com', '456 Lê Lợi, Q.1, TP.HCM', 'Công ty ABC', NOW(), NOW()),
+(10, 'Lê Minh Tâm', 'Lê Minh Tâm', '0923456789', 'khach3@email.com', '789 Trần Hưng Đạo, Q.5, TP.HCM', 'Công ty XYZ', NOW(), NOW());
 
 -- 8. STAFF (Nhân viên kho) - FK: user_id, location_id
 INSERT INTO staff (user_id, full_name, phone, email, location_id, is_active, created_at, updated_at) VALUES
