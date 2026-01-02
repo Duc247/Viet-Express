@@ -24,7 +24,7 @@ public class WebController {
         return "public/home";
     }
 
-    @GetMapping("/about")
+    @GetMapping({ "/about", "/public/about" })
     public String aboutPage() {
         return "public/about";
     }
