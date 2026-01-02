@@ -5,8 +5,8 @@ USE logisticsdb;
 -- Bao gồm: Ví dụ đơn hàng 55 thùng Durex với đầy đủ trips, payments và descriptions
 -- =====================================================
 
--- 1. ROLES
-INSERT INTO roles (role_name, description, is_active, created_at, updated_at) VALUES
+-- 1. ROLES (INSERT IGNORE để bỏ qua nếu role đã tồn tại)
+INSERT IGNORE INTO roles (role_name, description, is_active, created_at, updated_at) VALUES
 ('ADMIN', 'Quản trị viên - Toàn quyền quản lý hệ thống', true, NOW(), NOW()),
 ('MANAGER', 'Quản lý kho - Xác nhận đơn, tạo trip, phân công', true, NOW(), NOW()),
 ('STAFF', 'Nhân viên kho - Tạo parcel, quản lý hàng hóa', true, NOW(), NOW()),
