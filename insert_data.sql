@@ -1,8 +1,8 @@
 USE logisticsdb;
 -- =====================================================
--- LOGISTICS DB - INSERT DATA SCRIPT (v5.0 - With Descriptions)
+-- LOGISTICS DB - INSERT DATA SCRIPT (v5.1 - Modified: BEER Edition)
 -- Chạy sau khi ứng dụng tạo bảng (ddl-auto=update)
--- Bao gồm: Ví dụ đơn hàng 55 thùng Durex với đầy đủ trips, payments và descriptions
+-- Bao gồm: Ví dụ đơn hàng 55 thùng BIA với đầy đủ trips, payments và descriptions
 -- =====================================================
 
 -- 1. ROLES
@@ -40,13 +40,13 @@ INSERT INTO locations (location_type, warehouse_code, name, address_text, descri
 ('WAREHOUSE', 'WH-DN-01', 'Kho Đà Nẵng', '321 Nguyễn Văn Linh, Hải Châu, ĐN', 
  'Kho miền Trung, diện tích 1500m2, gần sân bay, thuận tiện vận chuyển liên tỉnh', true, NOW(), NOW()),
 -- Sender locations
-('SENDER', NULL, 'Điểm A - Công ty Durex VN', '12 Lý Thường Kiệt, Q10, HCM', 
- 'Nhà máy sản xuất Durex, địa điểm lấy hàng, có bãi đậu xe lớn, giờ làm việc 7h-17h', true, NOW(), NOW()),
+('SENDER', NULL, 'Điểm A - Kho Bia Sài Gòn', '12 Lý Thường Kiệt, Q10, HCM', 
+ 'Tổng kho phân phối Bia Sài Gòn, địa điểm lấy hàng, xe container vào được, giờ làm việc 7h-17h', true, NOW(), NOW()),
 ('SENDER', NULL, 'Địa chỉ gửi 2', '56 Trần Hưng Đạo, Q1, HCM', 
  'Văn phòng công ty, lấy hàng tài liệu và hàng nhỏ', true, NOW(), NOW()),
 -- Receiver locations
-('RECEIVER', NULL, 'Điểm B - Nhà phân phối HN', '78 Nguyễn Trãi, Ba Đình, HN', 
- 'Kho nhà phân phối tại Hà Nội, nhận hàng 24/7, có thang máy tải hàng', true, NOW(), NOW()),
+('RECEIVER', NULL, 'Điểm B - Đại lý Bia HN', '78 Nguyễn Trãi, Ba Đình, HN', 
+ 'Đại lý phân phối bia nước ngọt tại Hà Nội, nhận hàng 24/7, có kho lạnh', true, NOW(), NOW()),
 ('RECEIVER', NULL, 'Địa chỉ nhận 2', '90 Hai Bà Trưng, Hoàn Kiếm, HN', 
  'Văn phòng làm việc, chỉ nhận hàng trong giờ hành chính', true, NOW(), NOW());
 
@@ -72,7 +72,7 @@ INSERT INTO vehicles (vehicle_type, license_plate, capacity_weight, capacity_vol
 ('MOTORBIKE', '59A-67890', 30, 0.5, 'Yamaha Exciter 155, 2023, chạy tài liệu gấp', 'AVAILABLE', 1, NOW(), NOW()),
 ('VAN', '51B-11111', 500, 10, 'Ford Transit 2021, 16 chỗ cải tạo thành xe tải, chở tối đa 10 thùng trung', 'AVAILABLE', 1, NOW(), NOW()),
 ('VAN', '51B-22222', 500, 10, 'Hyundai Solati 2022, xe tải nhỏ chở hàng nội thành', 'AVAILABLE', 1, NOW(), NOW()),
-('TRUCK', '51C-33333', 2000, 30, 'Hino 300 Series, 2020, tải trọng 3.5 tấn, chạy liên tỉnh, chở được 55 thùng', 'AVAILABLE', 3, NOW(), NOW()),
+('TRUCK', '51C-33333', 2000, 30, 'Hino 300 Series, 2020, tải trọng 3.5 tấn, chạy liên tỉnh, chở được 55 thùng bia', 'AVAILABLE', 3, NOW(), NOW()),
 ('TRUCK', '30H-44444', 2000, 30, 'Isuzu QKR77, 2021, tải 2.4 tấn, chạy liên tỉnh', 'AVAILABLE', 3, NOW(), NOW()),
 ('CONTAINER', '51D-55555', 10000, 60, 'Container 20ft, Dongfeng 2019, chở hàng cồng kềnh', 'AVAILABLE', 4, NOW(), NOW());
 
@@ -85,9 +85,9 @@ INSERT INTO shippers (user_id, full_name, phone, working_area, is_available, cur
 
 -- 8. CUSTOMERS (with descriptions)
 INSERT INTO customers (user_id, name, full_name, phone, email, address, company_name, gender, description, created_at, updated_at) VALUES
-(10, 'Nguyễn Văn A', 'Nguyễn Văn A', '0901234567', 'customerA@email.com', '12 Lý Thường Kiệt, Q10, HCM', 'Công ty Durex VN', 'Nam',
+(10, 'Nguyễn Văn A', 'Nguyễn Văn A', '0901234567', 'customerA@email.com', '12 Lý Thường Kiệt, Q10, HCM', 'Tổng Công ty Bia SG', 'Nam',
  'Khách hàng VIP, doanh nghiệp lớn, thường xuyên vận chuyển số lượng lớn, ưu tiên cao', NOW(), NOW()),
-(11, 'Trần Thị B', 'Trần Thị B', '0912345678', 'customerB@email.com', '78 Nguyễn Trãi, Ba Đình, HN', 'Nhà phân phối HN', 'Nữ',
+(11, 'Trần Thị B', 'Trần Thị B', '0912345678', 'customerB@email.com', '78 Nguyễn Trãi, Ba Đình, HN', 'Đại lý Bia HN', 'Nữ',
  'Khách hàng doanh nghiệp, nhận hàng 24/7, có kho riêng', NOW(), NOW()),
 (12, 'Lê Minh Tâm', 'Lê Minh Tâm', '0923456789', 'khach3@email.com', '789 Hai Bà Trưng, Q3, HCM', 'Công ty XYZ', 'Nam',
  'Khách hàng cá nhân, mua lẻ, thanh toán online', NOW(), NOW());
@@ -114,8 +114,8 @@ INSERT INTO action_types (action_code, name, description, created_at, updated_at
 -- 11. CUSTOMER_REQUESTS (with descriptions)
 -- =====================================================
 INSERT INTO customer_requests (request_code, sender_id, receiver_id, sender_location_id, receiver_location_id, service_type_id, distance_km, parcel_description, shipping_fee, cod_amount, estimated_delivery_time, status, note, description, created_at, updated_at) VALUES
-('REQ-20251230-001', 1, 2, 5, 7, 1, 1725, '55 thùng Durex', 5000000, 1000000, DATE_ADD(NOW(), INTERVAL 3 DAY), 'IN_TRANSIT', 'Hàng dễ vỡ cần cẩn thận', 
- 'Đơn hàng vận chuyển 55 thùng Durex từ HCM đến HN. Khách VIP đã đặt cọc 3 triệu. Yêu cầu giao đúng hẹn, thu COD 1 triệu. Luồng: Điểm A → Kho C → Kho D → Điểm B. Cần 6 chuyến PICKUP, 1 TRANSFER, 6 DELIVERY.', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+('REQ-20251230-001', 1, 2, 5, 7, 1, 1725, '55 thùng Bia Heineken', 5000000, 1000000, DATE_ADD(NOW(), INTERVAL 3 DAY), 'IN_TRANSIT', 'Hàng dễ vỡ cần cẩn thận', 
+ 'Đơn hàng vận chuyển 55 thùng Bia Heineken từ HCM đến HN. Khách VIP đã đặt cọc 3 triệu. Yêu cầu giao đúng hẹn, thu COD 1 triệu. Luồng: Điểm A → Kho C → Kho D → Điểm B. Cần 6 chuyến PICKUP, 1 TRANSFER, 6 DELIVERY.', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 ('REQ-20251230-002', 3, NULL, 6, 8, 2, 1700, 'Quần áo mùa đông', 3400000, 500000, DATE_ADD(NOW(), INTERVAL 5 DAY), 'PENDING', 'Chờ Customer xác nhận', 
  'Đơn hàng quần áo mùa đông gồm áo khoác và quần jeans. Chờ khách xác nhận thông tin và đặt cọc trước khi xử lý. Dịch vụ tiêu chuẩn 3-5 ngày.', NOW(), NOW()),
 ('REQ-20251230-003', 1, NULL, 5, 8, 4, 15, 'Tài liệu hợp đồng', 150000, 0, DATE_ADD(NOW(), INTERVAL 1 DAY), 'DELIVERED', 'Đã giao thành công', 
@@ -135,7 +135,7 @@ INSERT INTO customer_requests (request_code, sender_id, receiver_id, sender_loca
 
 -- 12. TRACKING_CODES
 INSERT INTO tracking_codes (request_id, code, created_at) VALUES
-(1, 'TRK-20251230-DUREX55', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(1, 'TRK-20251230-BIA55', DATE_SUB(NOW(), INTERVAL 2 DAY)),
 (2, 'TRK-20251230-CLOTHES', NOW()),
 (3, 'TRK-20251230-DOCS01', DATE_SUB(NOW(), INTERVAL 1 DAY)),
 (4, 'TRK-20251230-PHONE01', NOW()),
@@ -147,9 +147,9 @@ INSERT INTO tracking_codes (request_id, code, created_at) VALUES
 INSERT INTO trips (trip_type, shipper_id, vehicle_id, start_location_id, end_location_id, started_at, ended_at, cod_amount, status, note, description, created_at, updated_at) VALUES
 -- PICKUP trips: Điểm A -> Kho C (6 chuyến lấy hàng 55 thùng)
 ('PICKUP', 1, 3, 5, 1, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 47 HOUR), 0, 'COMPLETED', 'Chuyến 1/6', 
- 'Chuyến lấy hàng đầu tiên cho đơn 55 thùng Durex. Shipper Đinh Văn Tài lái xe Van Ford Transit đến Công ty Durex VN lấy 10 thùng. Thời gian dự kiến 30 phút.', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+ 'Chuyến lấy hàng đầu tiên cho đơn 55 thùng Bia. Shipper Đinh Văn Tài lái xe Van Ford Transit đến Kho Bia SG lấy 10 thùng. Thời gian dự kiến 30 phút.', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 ('PICKUP', 1, 3, 5, 1, DATE_SUB(NOW(), INTERVAL 46 HOUR), DATE_SUB(NOW(), INTERVAL 45 HOUR), 0, 'COMPLETED', 'Chuyến 2/6', 
- 'Chuyến lấy hàng thứ 2. Tiếp tục lấy 10 thùng Durex từ điểm A về kho Tân Bình.', DATE_SUB(NOW(), INTERVAL 46 HOUR), NOW()),
+ 'Chuyến lấy hàng thứ 2. Tiếp tục lấy 10 thùng Bia từ điểm A về kho Tân Bình.', DATE_SUB(NOW(), INTERVAL 46 HOUR), NOW()),
 ('PICKUP', 2, 4, 5, 1, DATE_SUB(NOW(), INTERVAL 44 HOUR), DATE_SUB(NOW(), INTERVAL 43 HOUR), 0, 'COMPLETED', 'Chuyến 3/6', 
  'Chuyến lấy hàng thứ 3. Shipper Võ Thị Lan hỗ trợ lấy 10 thùng bằng xe Hyundai Solati.', DATE_SUB(NOW(), INTERVAL 44 HOUR), NOW()),
 ('PICKUP', 2, 4, 5, 1, DATE_SUB(NOW(), INTERVAL 42 HOUR), DATE_SUB(NOW(), INTERVAL 41 HOUR), 0, 'COMPLETED', 'Chuyến 4/6', 
@@ -161,11 +161,11 @@ INSERT INTO trips (trip_type, shipper_id, vehicle_id, start_location_id, end_loc
 
 -- TRANSFER trip: Kho C -> Kho D (1 chuyến xe tải lớn 55 thùng)
 ('TRANSFER', 1, 5, 1, 3, DATE_SUB(NOW(), INTERVAL 36 HOUR), DATE_SUB(NOW(), INTERVAL 12 HOUR), 0, 'COMPLETED', 'Trung chuyển HCM->HN', 
- 'Chuyến trung chuyển liên tỉnh 55 thùng từ kho Tân Bình HCM đến kho Hoàng Mai HN. Sử dụng xe tải Hino 3.5 tấn. Đi qua cao tốc, chạy đêm để tránh kẹt xe. Thời gian 24 tiếng.', DATE_SUB(NOW(), INTERVAL 36 HOUR), NOW()),
+ 'Chuyến trung chuyển liên tỉnh 55 thùng bia từ kho Tân Bình HCM đến kho Hoàng Mai HN. Sử dụng xe tải Hino 3.5 tấn. Đi qua cao tốc, chạy đêm để tránh kẹt xe. Thời gian 24 tiếng.', DATE_SUB(NOW(), INTERVAL 36 HOUR), NOW()),
 
 -- DELIVERY trips: Kho D -> Điểm B (6 chuyến giao hàng)
 ('DELIVERY', 3, 6, 3, 7, DATE_SUB(NOW(), INTERVAL 10 HOUR), DATE_SUB(NOW(), INTERVAL 9 HOUR), 0, 'COMPLETED', 'Giao chuyến 1/6', 
- 'Chuyến giao hàng đầu tiên tại HN. Shipper Bùi Văn Hùng giao 10 thùng đến nhà phân phối. Người nhận ký nhận đầy đủ.', DATE_SUB(NOW(), INTERVAL 10 HOUR), NOW()),
+ 'Chuyến giao hàng đầu tiên tại HN. Shipper Bùi Văn Hùng giao 10 thùng đến đại lý bia. Người nhận ký nhận đầy đủ.', DATE_SUB(NOW(), INTERVAL 10 HOUR), NOW()),
 ('DELIVERY', 3, 6, 3, 7, DATE_SUB(NOW(), INTERVAL 8 HOUR), DATE_SUB(NOW(), INTERVAL 7 HOUR), 0, 'COMPLETED', 'Giao chuyến 2/6', 
  'Chuyến giao hàng thứ 2. Tiếp tục giao 10 thùng, tổng đã giao 20 thùng.', DATE_SUB(NOW(), INTERVAL 8 HOUR), NOW()),
 ('DELIVERY', 4, 6, 3, 7, DATE_SUB(NOW(), INTERVAL 6 HOUR), DATE_SUB(NOW(), INTERVAL 5 HOUR), 0, 'COMPLETED', 'Giao chuyến 3/6', 
@@ -175,7 +175,7 @@ INSERT INTO trips (trip_type, shipper_id, vehicle_id, start_location_id, end_loc
 ('DELIVERY', 3, 6, 3, 7, DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW(), 0, 'IN_PROGRESS', 'Đang giao chuyến 5/6', 
  'Chuyến giao hàng thứ 5 đang thực hiện. Shipper đang trên đường giao 10 thùng.', DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW()),
 ('DELIVERY', 4, 6, 3, 7, NULL, NULL, 1000000, 'CREATED', 'Chờ giao chuyến 6/6 + THU COD', 
- 'Chuyến giao hàng cuối cùng. Giao 5 thùng còn lại và thu COD 1 triệu từ nhà phân phối. Cần xác nhận trước khi xuất phát.', NOW(), NOW()),
+ 'Chuyến giao hàng cuối cùng. Giao 5 thùng còn lại và thu COD 1 triệu từ đại lý. Cần xác nhận trước khi xuất phát.', NOW(), NOW()),
 
 -- Request 3: Đơn giao trong ngày (đã hoàn thành)
 ('PICKUP', 1, 1, 5, 1, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 23 HOUR), 0, 'COMPLETED', 'Lấy tài liệu gấp', 
@@ -197,70 +197,70 @@ INSERT INTO trips (trip_type, shipper_id, vehicle_id, start_location_id, end_loc
 
 
 -- =====================================================
--- 14. PARCELS - 55 thùng Durex + các đơn khác
+-- 14. PARCELS - 55 thùng Bia + các đơn khác
 -- =====================================================
 INSERT INTO parcels (request_id, parcel_code, description, cod_amount, weight_kg, length_cm, width_cm, height_cm, current_location_id, current_shipper_id, current_trip_id, status, created_at, updated_at) VALUES
 -- Thùng 1-10 (Đã giao)
-(1, 'PCL-20251230-1-01', 'Thùng Durex 01 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-02', 'Thùng Durex 02 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-03', 'Thùng Durex 03 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-04', 'Thùng Durex 04 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-05', 'Thùng Durex 05 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-06', 'Thùng Durex 06 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-07', 'Thùng Durex 07 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-08', 'Thùng Durex 08 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-09', 'Thùng Durex 09 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-10', 'Thùng Durex 10 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-01', 'Thùng Bia 01 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-02', 'Thùng Bia 02 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-03', 'Thùng Bia 03 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-04', 'Thùng Bia 04 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-05', 'Thùng Bia 05 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-06', 'Thùng Bia 06 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-07', 'Thùng Bia 07 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-08', 'Thùng Bia 08 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-09', 'Thùng Bia 09 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-10', 'Thùng Bia 10 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 -- Thùng 11-20 (Đã giao)
-(1, 'PCL-20251230-1-11', 'Thùng Durex 11 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-12', 'Thùng Durex 12 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-13', 'Thùng Durex 13 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-14', 'Thùng Durex 14 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-15', 'Thùng Durex 15 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-16', 'Thùng Durex 16 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-17', 'Thùng Durex 17 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-18', 'Thùng Durex 18 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-19', 'Thùng Durex 19 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-20', 'Thùng Durex 20 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-11', 'Thùng Bia 11 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-12', 'Thùng Bia 12 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-13', 'Thùng Bia 13 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-14', 'Thùng Bia 14 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-15', 'Thùng Bia 15 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-16', 'Thùng Bia 16 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-17', 'Thùng Bia 17 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-18', 'Thùng Bia 18 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-19', 'Thùng Bia 19 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-20', 'Thùng Bia 20 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 -- Thùng 21-30 (Đã giao)
-(1, 'PCL-20251230-1-21', 'Thùng Durex 21 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-22', 'Thùng Durex 22 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-23', 'Thùng Durex 23 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-24', 'Thùng Durex 24 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-25', 'Thùng Durex 25 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-26', 'Thùng Durex 26 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-27', 'Thùng Durex 27 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-28', 'Thùng Durex 28 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-29', 'Thùng Durex 29 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-30', 'Thùng Durex 30 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-21', 'Thùng Bia 21 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-22', 'Thùng Bia 22 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-23', 'Thùng Bia 23 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-24', 'Thùng Bia 24 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-25', 'Thùng Bia 25 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-26', 'Thùng Bia 26 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-27', 'Thùng Bia 27 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-28', 'Thùng Bia 28 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-29', 'Thùng Bia 29 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-30', 'Thùng Bia 30 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 -- Thùng 31-40 (Đã giao)
-(1, 'PCL-20251230-1-31', 'Thùng Durex 31 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-32', 'Thùng Durex 32 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-33', 'Thùng Durex 33 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-34', 'Thùng Durex 34 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-35', 'Thùng Durex 35 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-36', 'Thùng Durex 36 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-37', 'Thùng Durex 37 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-38', 'Thùng Durex 38 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-39', 'Thùng Durex 39 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-40', 'Thùng Durex 40 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-31', 'Thùng Bia 31 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-32', 'Thùng Bia 32 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-33', 'Thùng Bia 33 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-34', 'Thùng Bia 34 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-35', 'Thùng Bia 35 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-36', 'Thùng Bia 36 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-37', 'Thùng Bia 37 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-38', 'Thùng Bia 38 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-39', 'Thùng Bia 39 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-40', 'Thùng Bia 40 - Thùng 24 lon', 0, 5, 40, 30, 30, 7, NULL, NULL, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 -- Thùng 41-50 (Đang giao - trip 12)
-(1, 'PCL-20251230-1-41', 'Thùng Durex 41 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-42', 'Thùng Durex 42 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-43', 'Thùng Durex 43 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-44', 'Thùng Durex 44 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-45', 'Thùng Durex 45 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-46', 'Thùng Durex 46 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-47', 'Thùng Durex 47 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-48', 'Thùng Durex 48 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-49', 'Thùng Durex 49 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-50', 'Thùng Durex 50 - Hộp 144 chiếc', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-41', 'Thùng Bia 41 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-42', 'Thùng Bia 42 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-43', 'Thùng Bia 43 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-44', 'Thùng Bia 44 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-45', 'Thùng Bia 45 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-46', 'Thùng Bia 46 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-47', 'Thùng Bia 47 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-48', 'Thùng Bia 48 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-49', 'Thùng Bia 49 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-50', 'Thùng Bia 50 - Thùng 24 lon', 0, 5, 40, 30, 30, 3, 3, 12, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 -- Thùng 51-55 (Chờ giao - trip 13)
-(1, 'PCL-20251230-1-51', 'Thùng Durex 51 - Hộp 144 chiếc (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-52', 'Thùng Durex 52 - Hộp 144 chiếc (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-53', 'Thùng Durex 53 - Hộp 144 chiếc (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-54', 'Thùng Durex 54 - Hộp 144 chiếc (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, 'PCL-20251230-1-55', 'Thùng Durex 55 - Hộp 144 chiếc + THU COD', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-51', 'Thùng Bia 51 - Thùng 24 lon (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-52', 'Thùng Bia 52 - Thùng 24 lon (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-53', 'Thùng Bia 53 - Thùng 24 lon (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-54', 'Thùng Bia 54 - Thùng 24 lon (Chia COD)', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, 'PCL-20251230-1-55', 'Thùng Bia 55 - Thùng 24 lon + THU COD', 200000, 5, 40, 30, 30, 3, 4, 13, 'IN_TRANSIT', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 
 -- Request 2: Quần áo
 (2, 'PCL-20251230-2-01', 'Áo khoác mùa đông cao cấp', 250000, 1.5, 50, 40, 15, 1, NULL, NULL, 'CREATED', NOW(), NOW()),
@@ -280,13 +280,13 @@ INSERT INTO parcels (request_id, parcel_code, description, cod_amount, weight_kg
 -- =====================================================
 INSERT INTO parcel_actions (parcel_id, request_id, action_type_id, from_location_id, to_location_id, actor_user_id, note, created_at) VALUES
 -- Request 1: Actions cho thùng đầu tiên
-(1, 1, 1, NULL, NULL, 10, 'Customer A tạo đơn 55 thùng Durex', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(1, 1, 1, NULL, NULL, 10, 'Customer A tạo đơn 55 thùng Bia Heineken', DATE_SUB(NOW(), INTERVAL 2 DAY)),
 (1, 1, 2, NULL, NULL, 2, 'Manager xác nhận, thu cọc 3 triệu qua VCB', DATE_SUB(NOW(), INTERVAL 47 HOUR)),
 (1, 1, 4, 5, 1, 6, 'Shipper Đinh Văn Tài lấy thùng 1-10 từ điểm A', DATE_SUB(NOW(), INTERVAL 46 HOUR)),
 (1, 1, 5, NULL, 1, 4, 'Nhập kho Tân Bình, kiểm tra chất lượng OK', DATE_SUB(NOW(), INTERVAL 45 HOUR)),
 (1, 1, 6, 1, 3, 6, 'Trung chuyển HCM->HN bằng xe tải Hino, chạy đêm', DATE_SUB(NOW(), INTERVAL 36 HOUR)),
 (1, 1, 5, NULL, 3, 5, 'Nhập kho Hoàng Mai HN, xếp hàng chờ giao', DATE_SUB(NOW(), INTERVAL 12 HOUR)),
-(1, 1, 7, 3, 7, 8, 'Xuất kho giao cho nhà phân phối', DATE_SUB(NOW(), INTERVAL 10 HOUR)),
+(1, 1, 7, 3, 7, 8, 'Xuất kho giao cho đại lý bia', DATE_SUB(NOW(), INTERVAL 10 HOUR)),
 (1, 1, 8, NULL, 7, 8, 'Giao thành công thùng 1, ký nhận đầy đủ', DATE_SUB(NOW(), INTERVAL 9 HOUR)),
 
 -- Request 3: Đơn đã hoàn thành
@@ -302,10 +302,10 @@ INSERT INTO parcel_actions (parcel_id, request_id, action_type_id, from_location
 
 -- 18. CASE_STUDIES
 INSERT INTO case_studies (request_id, service_type_id, title, slug, client_name_display, challenge, solution, result, thumbnail_url, is_featured, is_published, created_at, updated_at) VALUES
-(1, 1, 'Vận chuyển 55 thùng hàng liên tỉnh', 'van-chuyen-55-thung-lien-tinh', 'Công ty Durex VN', 
- 'Cần vận chuyển 55 thùng hàng từ HCM ra Hà Nội trong 3 ngày, đảm bảo an toàn và thu COD.', 
+(1, 1, 'Vận chuyển 55 thùng bia liên tỉnh', 'van-chuyen-55-thung-bia-lien-tinh', 'Tổng Công ty Bia SG', 
+ 'Cần vận chuyển 55 thùng bia từ HCM ra Hà Nội trong 3 ngày, đảm bảo an toàn và thu COD.', 
  'Sử dụng dịch vụ Express với hệ thống tracking real-time, phân chia thành 6 chuyến PICKUP, 1 chuyến TRANSFER lớn và 6 chuyến DELIVERY.', 
- 'Giao thành công 100% trong 2.5 ngày, thu COD đầy đủ, khách hàng hài lòng.', '/images/casestudy-durex.jpg', true, true, NOW(), NOW()),
+ 'Giao thành công 100% trong 2.5 ngày, thu COD đầy đủ, khách hàng hài lòng.', '/images/casestudy-beer.jpg', true, true, NOW(), NOW()),
 (3, 4, 'Giao tài liệu gấp trong ngày', 'giao-tai-lieu-gap-trong-ngay', 'Công ty ABC', 
  'Cần gửi hồ sơ trong ngày để kịp deadline ký hợp đồng quan trọng.', 
  'Dịch vụ SAME_DAY với shipper chuyên dụng, GPS tracking realtime, ưu tiên xử lý.', 
@@ -314,10 +314,10 @@ INSERT INTO case_studies (request_id, service_type_id, title, slug, client_name_
 -- 19. SYSTEM_LOGS
 INSERT INTO system_logs (log_level, module_name, action_type, actor_id, target_id, log_details, ip_address, user_agent, created_at) VALUES
 ('INFO', 'AUTH', 'LOGIN', 1, NULL, 'Admin đăng nhập vào hệ thống', '192.168.1.1', 'Chrome', NOW()),
-('INFO', 'ORDER', 'CREATE', 10, '1', 'Customer A tạo đơn 55 thùng Durex', '192.168.1.100', 'Chrome', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+('INFO', 'ORDER', 'CREATE', 10, '1', 'Customer A tạo đơn 55 thùng Bia Heineken', '192.168.1.100', 'Chrome', DATE_SUB(NOW(), INTERVAL 2 DAY)),
 ('INFO', 'ORDER', 'CONFIRM', 2, '1', 'Manager Trần Văn Quản xác nhận đơn', '192.168.1.50', 'Chrome', DATE_SUB(NOW(), INTERVAL 47 HOUR)),
 ('INFO', 'PAYMENT', 'DEPOSIT', 10, '1', 'Khách đặt cọc 3,000,000đ qua VCB', '192.168.1.100', 'Chrome', DATE_SUB(NOW(), INTERVAL 47 HOUR)),
-('INFO', 'TRIP', 'CREATE', 2, '1', 'Tạo 6 chuyến PICKUP cho đơn Durex', '192.168.1.50', 'Chrome', DATE_SUB(NOW(), INTERVAL 46 HOUR)),
+('INFO', 'TRIP', 'CREATE', 2, '1', 'Tạo 6 chuyến PICKUP cho đơn Bia', '192.168.1.50', 'Chrome', DATE_SUB(NOW(), INTERVAL 46 HOUR)),
 ('INFO', 'TRIP', 'CREATE', 2, '7', 'Tạo chuyến TRANSFER HCM->HN', '192.168.1.50', 'Chrome', DATE_SUB(NOW(), INTERVAL 36 HOUR)),
 ('INFO', 'TRIP', 'COMPLETE', 6, '7', 'Hoàn thành trung chuyển 55 thùng', '10.0.0.6', 'Mobile', DATE_SUB(NOW(), INTERVAL 12 HOUR)),
 ('INFO', 'PAYMENT', 'SUCCESS', 4, '5', 'Thanh toán đơn tài liệu qua VNPAY', '192.168.1.60', 'Chrome', DATE_SUB(NOW(), INTERVAL 20 HOUR)),
@@ -327,9 +327,9 @@ INSERT INTO system_logs (log_level, module_name, action_type, actor_id, target_i
 -- 20. PAYMENTS (with trip_id and payment_scope)
 -- =====================================================
 INSERT INTO payments (request_id, parcel_id, trip_id, payment_code, payment_type, payer_type, receiver_type, payment_scope, description, expected_amount, paid_amount, status, created_at, updated_at) VALUES
--- Request 1: Thanh toán TOÀN BỘ cho cả đơn Durex (FULL_REQUEST) - TUÂN THỦ NGUYÊN TẮC: Đã Full thì không Per Trip
-(1, NULL, NULL, 'PAY-001-SHIP-FULL', 'SHIPPING_FEE', 'SENDER', 'COMPANY', 'FULL_REQUEST', 'Phí vận chuyển TOÀN BỘ đơn 55 thùng Durex từ HCM đến HN. Bao gồm 6 chuyến PICKUP + 1 TRANSFER + 6 DELIVERY.', 5000000.00, 3000000.00, 'PARTIALLY_PAID', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
-(1, NULL, NULL, 'PAY-001-COD-FULL', 'COD', 'RECEIVER', 'SENDER', 'FULL_REQUEST', 'Thu hộ COD TOÀN BỘ tiền hàng 55 thùng Durex. Thu một lần khi giao hàng hoàn tất.', 1000000.00, 0.00, 'UNPAID', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+-- Request 1: Thanh toán TOÀN BỘ cho cả đơn Bia (FULL_REQUEST) - TUÂN THỦ NGUYÊN TẮC: Đã Full thì không Per Trip
+(1, NULL, NULL, 'PAY-001-SHIP-FULL', 'SHIPPING_FEE', 'SENDER', 'COMPANY', 'FULL_REQUEST', 'Phí vận chuyển TOÀN BỘ đơn 55 thùng Bia từ HCM đến HN. Bao gồm 6 chuyến PICKUP + 1 TRANSFER + 6 DELIVERY.', 5000000.00, 3000000.00, 'PARTIALLY_PAID', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
+(1, NULL, NULL, 'PAY-001-COD-FULL', 'COD', 'RECEIVER', 'SENDER', 'FULL_REQUEST', 'Thu hộ COD TOÀN BỘ tiền hàng 55 thùng Bia. Thu một lần khi giao hàng hoàn tất.', 1000000.00, 0.00, 'UNPAID', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW()),
 
 -- Request 2: Đơn chờ xử lý
 (2, NULL, NULL, 'PAY-002-SHIP-1', 'SHIPPING_FEE', 'SENDER', 'COMPANY', 'FULL_REQUEST', 'Phí vận chuyển toàn bộ quần áo mùa đông. Chờ khách xác nhận.', 3400000.00, 0.00, 'UNPAID', NOW(), NOW()),
@@ -371,7 +371,7 @@ INSERT INTO payment_transactions (payment_id, amount, transaction_type, payment_
 -- Request 6: Đơn hàng laptop từ customer1 gửi đến customer2
 INSERT INTO customer_requests (request_code, sender_id, receiver_id, sender_location_id, receiver_location_id, service_type_id, distance_km, parcel_description, shipping_fee, cod_amount, estimated_delivery_time, status, note, description, created_at, updated_at) VALUES
 ('REQ-20251231-C1A', 1, 2, 5, 7, 1, 1725, 'Laptop Dell XPS 15 và phụ kiện', 2500000, 35000000, DATE_ADD(NOW(), INTERVAL 2 DAY), 'IN_TRANSIT', 'Hàng giá trị cao, cần bảo hiểm', 
- 'Đơn hàng laptop Dell XPS 15 + dock + chuột + túi xách từ Công ty Durex VN (Customer1) gửi đến Nhà phân phối HN (Customer2). Thanh toán COD 35 triệu khi giao hàng.', NOW(), NOW());
+ 'Đơn hàng laptop Dell XPS 15 + dock + chuột + túi xách từ Tổng Công ty Bia SG (Customer1) gửi đến Đại lý Bia HN (Customer2). Thanh toán COD 35 triệu khi giao hàng.', NOW(), NOW());
 
 -- Tracking code cho đơn mới
 INSERT INTO tracking_codes (request_id, code, created_at) VALUES
@@ -379,15 +379,15 @@ INSERT INTO tracking_codes (request_id, code, created_at) VALUES
 
 -- Trips cho đơn laptop (Request ID = 6)
 INSERT INTO trips (trip_type, shipper_id, vehicle_id, start_location_id, end_location_id, started_at, ended_at, cod_amount, status, note, description, created_at, updated_at) VALUES
--- Trip 17: Pickup từ Công ty Durex → Kho Tân Bình
+-- Trip 17: Pickup từ Công ty Bia → Kho Tân Bình
 ('PICKUP', 1, 3, 5, 1, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR), 0, 'COMPLETED', 'Lấy laptop xong', 
- 'Lấy laptop Dell XPS từ Công ty Durex VN. Shipper Đinh Văn Tài đã kiểm tra đầy đủ phụ kiện.', DATE_SUB(NOW(), INTERVAL 3 HOUR), NOW()),
+ 'Lấy laptop Dell XPS từ Tổng Công ty Bia SG. Shipper Đinh Văn Tài đã kiểm tra đầy đủ phụ kiện.', DATE_SUB(NOW(), INTERVAL 3 HOUR), NOW()),
 -- Trip 18: Transfer từ Kho Tân Bình → Kho Hoàng Mai
 ('TRANSFER', 3, 5, 1, 3, DATE_SUB(NOW(), INTERVAL 2 HOUR), NULL, 0, 'IN_PROGRESS', 'Đang trên đường HCM-HN', 
  'Trung chuyển laptop từ kho Tân Bình đến kho Hoàng Mai. Xe tải Hino chạy cao tốc.', DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW()),
 -- Trip 19: Delivery từ Kho Hoàng Mai → Nhà phân phối HN (chưa bắt đầu)
 ('DELIVERY', 4, 6, 3, 7, NULL, NULL, 35000000, 'CREATED', 'Chờ hàng về kho HN', 
- 'Giao laptop đến nhà phân phối HN và thu COD 35 triệu.', NOW(), NOW());
+ 'Giao laptop đến đại lý bia HN và thu COD 35 triệu.', NOW(), NOW());
 
 -- Parcels cho đơn laptop (Request ID = 6)
 INSERT INTO parcels (request_id, parcel_code, description, cod_amount, weight_kg, length_cm, width_cm, height_cm, current_location_id, current_shipper_id, current_trip_id, status, created_at, updated_at) VALUES
@@ -412,11 +412,10 @@ INSERT INTO parcel_actions (parcel_id, request_id, action_type_id, from_location
 -- Parcel 1 (Laptop)
 (61, 6, 1, NULL, NULL, 10, 'Customer Nguyễn Văn A tạo đơn gửi laptop Dell XPS', NOW()),
 (61, 6, 2, NULL, NULL, 2, 'Manager xác nhận đơn, thu phí ship 2.5 triệu', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
-(61, 6, 4, 5, 1, 6, 'Shipper Đinh Văn Tài lấy laptop từ Công ty Durex VN', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(61, 6, 4, 5, 1, 6, 'Shipper Đinh Văn Tài lấy laptop từ Tổng Công ty Bia SG', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
 (61, 6, 5, NULL, 1, 4, 'Nhập kho Tân Bình, kiểm tra đầy đủ phụ kiện', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
 (61, 6, 6, 1, 3, 8, 'Xuất kho trung chuyển HCM → HN', DATE_SUB(NOW(), INTERVAL 2 HOUR));
 
 -- =====================================================
 -- DONE! Script v6.0 - Customer1 Complete Data
 -- =====================================================
-

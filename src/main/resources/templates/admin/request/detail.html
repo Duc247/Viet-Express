@@ -18,6 +18,16 @@
             </div>
         </div>
 
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <div class="row">
             <div class="col-md-8">
                 <!-- Thông tin đơn hàng -->
@@ -154,6 +164,53 @@
                         <p th:unless="${customerRequest.assignedStaffId != null}" class="text-muted">Chưa gán</p>
                         <small th:if="${customerRequest.assignedAt != null}" class="text-muted"
                             th:text="'Gán lúc: ' + ${#temporals.format(customerRequest.assignedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                    </div>
+                </div>
+
+                <!-- Manager phụ trách -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-user-tie me-2"></i>Manager phụ trách
+                    </div>
+                    <div class="card-body">
+                        <!-- Hiển thị Manager đã được giao -->
+                        <div th:if="${customerRequest.assignedManagerId != null}" class="mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success text-white rounded-circle p-2 me-2">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div>
+                                    <strong th:text="${customerRequest.assignedManagerName}">Manager Name</strong>
+                                    <br />
+                                    <small class="text-muted"
+                                        th:text="'Giao lúc: ' + ${#temporals.format(customerRequest.managerAssignedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form giao/đổi Manager -->
+                        <form th:action="@{/admin/request/{id}/assign-manager(id=${customerRequest.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <span th:if="${customerRequest.assignedManagerId == null}">Chọn Manager phụ
+                                        trách:</span>
+                                    <span th:if="${customerRequest.assignedManagerId != null}">Đổi sang Manager
+                                        khác:</span>
+                                </label>
+                                <select name="managerId" class="form-select" required>
+                                    <option value="">-- Chọn Manager --</option>
+                                    <option th:each="mgr : ${managers}" th:value="${mgr.id}"
+                                        th:text="${mgr.fullName + ' (' + mgr.username + ')'}"
+                                        th:selected="${customerRequest.assignedManagerId == mgr.id}">
+                                    </option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-user-plus me-1"></i>
+                                <span th:if="${customerRequest.assignedManagerId == null}">Giao việc</span>
+                                <span th:if="${customerRequest.assignedManagerId != null}">Đổi Manager</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
 

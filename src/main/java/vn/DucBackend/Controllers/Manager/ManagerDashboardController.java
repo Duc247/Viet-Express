@@ -1,12 +1,15 @@
 package vn.DucBackend.Controllers.Manager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
+import vn.DucBackend.Entities.User;
 import vn.DucBackend.Services.*;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
+import vn.DucBackend.Repositories.UserRepository;
 
 /**
  * Manager Dashboard Controller - Xử lý trang dashboard cho Manager
@@ -27,9 +30,8 @@ public class ManagerDashboardController {
     @Autowired
     private LocationService locationService;
 
-    // Repository giữ lại cho template data (Thymeleaf cần Entity)
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private UserRepository userRepository;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -39,11 +41,36 @@ public class ManagerDashboardController {
     // DASHBOARD
     // ==========================================
     @GetMapping({ "", "/", "/dashboard" })
-    public String dashboard(Model model, HttpServletRequest request) {
+    public String dashboard(Model model, HttpServletRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
         addCommonAttributes(model, request);
 
-        // Sử dụng Services cho counting
-        model.addAttribute("requestCount", customerRequestService.findAllRequests().size());
+        // Lấy user hiện tại
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+
+        if (currentUser != null) {
+            Long managerId = currentUser.getId();
+
+            // Đếm số đơn được gán cho manager này
+            var assignedRequests = customerRequestService.findByAssignedManager(managerId);
+            model.addAttribute("requestCount", assignedRequests.size());
+
+            // Đếm số đơn MỚI được giao (trong 24h)
+            Long newAssignments = customerRequestService.countNewAssignmentsForManager(managerId);
+            model.addAttribute("newAssignmentCount", newAssignments);
+
+            // Thông báo đơn mới
+            if (newAssignments > 0) {
+                model.addAttribute("hasNewAssignments", true);
+                model.addAttribute("newAssignmentMessage",
+                        "Bạn có " + newAssignments + " đơn hàng mới được giao trong 24h qua!");
+            }
+        } else {
+            model.addAttribute("requestCount", 0);
+            model.addAttribute("newAssignmentCount", 0);
+        }
+
+        // Các thống kê chung
         model.addAttribute("parcelCount", parcelService.findAllParcels().size());
         model.addAttribute("tripCount", tripService.findAllTrips().size());
         model.addAttribute("paymentCount", paymentService.findAllPayments().size());
@@ -53,13 +80,10 @@ public class ManagerDashboardController {
     }
 
     // ==========================================
-    // QUẢN LÝ ĐƠN HÀNG (alias)
+    // QUẢN LÝ ĐƠN HÀNG (alias) - REDIRECT TO REQUESTS
     // ==========================================
     @GetMapping("/orders")
-    public String orderList(Model model, HttpServletRequest request) {
-        addCommonAttributes(model, request);
-        // Giữ Repository cho template vì cần Entity objects
-        model.addAttribute("requests", customerRequestRepository.findAll());
-        return "manager/request/requests";
+    public String orderList() {
+        return "redirect:/manager/requests";
     }
 }

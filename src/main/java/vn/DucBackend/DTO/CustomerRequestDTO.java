@@ -31,4 +31,14 @@ public class CustomerRequestDTO {
     private String note;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Staff được giao
+    private Long assignedStaffId;
+    private String assignedStaffName;
+    private LocalDateTime assignedAt;
+
+    // Manager được giao
+    private Long assignedManagerId;
+    private String assignedManagerName;
+    private LocalDateTime managerAssignedAt;
 }

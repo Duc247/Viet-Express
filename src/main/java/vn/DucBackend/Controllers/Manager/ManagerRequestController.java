@@ -1,6 +1,8 @@
 package vn.DucBackend.Controllers.Manager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -51,6 +54,8 @@ public class ManagerRequestController {
     private VehicleRepository vehicleRepository;
     @Autowired
     private StaffRepository staffRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private LoggingHelper loggingHelper;
@@ -60,12 +65,27 @@ public class ManagerRequestController {
     }
 
     // ==========================================
-    // QUẢN LÝ YÊU CẦU
+    // QUẢN LÝ YÊU CẦU - CHỈ HIỂN ĐƠN ĐƯỢC GÁN CHO MANAGER NÀY
     // ==========================================
     @GetMapping("/requests")
-    public String requestList(Model model, HttpServletRequest request) {
+    public String requestList(Model model, HttpServletRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
         addCommonAttributes(model, request);
-        model.addAttribute("requests", customerRequestRepository.findAll());
+
+        // Lấy user hiện tại
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+
+        if (currentUser != null) {
+            // Chỉ lấy đơn hàng được gán cho manager này
+            List<CustomerRequest> assignedRequests = customerRequestRepository
+                    .findByAssignedManagerId(currentUser.getId());
+            model.addAttribute("requests", assignedRequests);
+            model.addAttribute("totalRequests", assignedRequests.size());
+        } else {
+            model.addAttribute("requests", java.util.Collections.emptyList());
+            model.addAttribute("totalRequests", 0);
+        }
+
         return "manager/request/requests";
     }
 

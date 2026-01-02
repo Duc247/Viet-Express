@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Entities.ServiceType;
+import vn.DucBackend.Entities.User;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.CustomerRequestService;
 
@@ -26,6 +27,7 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
     private final CustomerRepository customerRepository;
     private final LocationRepository locationRepository;
     private final ServiceTypeRepository serviceTypeRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<CustomerRequestDTO> findAllRequests() {
@@ -173,6 +175,40 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         return LocalDateTime.now().plusDays(3);
     }
 
+    // ==========================================
+    // MANAGER ASSIGNMENT IMPLEMENTATION
+    // ==========================================
+
+    @Override
+    public CustomerRequestDTO assignManager(Long requestId, Long managerId) {
+        CustomerRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found: " + requestId));
+        User manager = userRepository.findById(managerId)
+                .orElseThrow(() -> new RuntimeException("Manager not found: " + managerId));
+
+        // Kiểm tra user có role MANAGER không
+        if (!"MANAGER".equals(manager.getRole().getRoleName())) {
+            throw new RuntimeException("User is not a Manager: " + manager.getUsername());
+        }
+
+        request.setAssignedManager(manager);
+        request.setManagerAssignedAt(LocalDateTime.now());
+        return toDTO(requestRepository.save(request));
+    }
+
+    @Override
+    public List<CustomerRequestDTO> findByAssignedManager(Long managerId) {
+        return requestRepository.findByAssignedManager(managerId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countNewAssignmentsForManager(Long managerId) {
+        LocalDateTime since = LocalDateTime.now().minusHours(24);
+        return requestRepository.countNewAssignmentsForManager(managerId, since);
+    }
+
     private CustomerRequestDTO toDTO(CustomerRequest request) {
         CustomerRequestDTO dto = new CustomerRequestDTO();
         dto.setId(request.getId());
@@ -202,6 +238,21 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         dto.setNote(request.getNote());
         dto.setCreatedAt(request.getCreatedAt());
         dto.setUpdatedAt(request.getUpdatedAt());
+
+        // Staff được giao
+        if (request.getAssignedStaff() != null) {
+            dto.setAssignedStaffId(request.getAssignedStaff().getId());
+            dto.setAssignedStaffName(request.getAssignedStaff().getFullName());
+            dto.setAssignedAt(request.getAssignedAt());
+        }
+
+        // Manager được giao
+        if (request.getAssignedManager() != null) {
+            dto.setAssignedManagerId(request.getAssignedManager().getId());
+            dto.setAssignedManagerName(request.getAssignedManager().getFullName());
+            dto.setManagerAssignedAt(request.getManagerAssignedAt());
+        }
+
         return dto;
     }
 }
