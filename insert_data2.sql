@@ -10,17 +10,6 @@ USE logisticsdb;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- =====================================================
--- 1. USERS BỔ SUNG (mỗi role thêm 1 tài khoản)
--- Password: 123456 (plain text, KHÔNG hash)
--- =====================================================
-INSERT IGNORE INTO users (username, password, full_name, email, phone, role_id, is_active, created_at, updated_at) VALUES
-('admin2', '123456', 'Admin Phụ', 'admin2@logistics.vn', '0900000010', 1, true, NOW(), NOW()),
-('manager2', '123456', 'Nguyễn Thị Quản Lý', 'manager2@logistics.vn', '0900000020', 2, true, NOW(), NOW()),
-('staff2', '123456', 'Hoàng Thị Mai', 'staff2@logistics.vn', '0945678901', 3, true, NOW(), NOW()),
-('customer2', '123456', 'Trần Thị Bình', 'customer2@email.com', '0912345678', 5, true, NOW(), NOW()),
-('shipper2', '123456', 'Võ Thị Lan', 'shipper2@logistics.vn', '0967890123', 4, true, NOW(), NOW());
-
--- =====================================================
 -- 2. LOCATIONS (Địa điểm/Kho)
 -- =====================================================
 INSERT IGNORE INTO locations (location_type, warehouse_code, name, address_text, description, is_active, created_at, updated_at) VALUES
@@ -111,9 +100,15 @@ WHERE u.username = 'shipper2' AND NOT EXISTS (SELECT 1 FROM shippers s WHERE s.u
 INSERT IGNORE INTO customer_requests (request_code, sender_id, receiver_id, sender_location_id, receiver_location_id, service_type_id, distance_km, parcel_description, shipping_fee, cod_amount, estimated_delivery_time, status, note, description, created_at, updated_at) VALUES
 ('REQ-20260102-001', 1, 2, 5, 7, 1, 1725, '10 thùng Bia Heineken', 2000000, 5000000, DATE_ADD(NOW(), INTERVAL 3 DAY), 'PENDING', 'Hàng dễ vỡ', 'Đơn vận chuyển bia từ HCM đến HN', NOW(), NOW()),
 ('REQ-20260102-002', 1, NULL, 5, 8, 2, 1700, 'Quần áo mùa đông', 3400000, 500000, DATE_ADD(NOW(), INTERVAL 5 DAY), 'PENDING', 'Chờ xác nhận', 'Đơn quần áo mùa đông', NOW(), NOW()),
-('REQ-20260102-003', 1, NULL, 5, 7, 4, 15, 'Tài liệu hợp đồng', 150000, 0, DATE_ADD(NOW(), INTERVAL 1 DAY), 'CONFIRMED', 'Giao gấp trong ngày', 'Đơn tài liệu SAME DAY', NOW(), NOW()),
+('REQ-20260102-003', 1, NULL, 5, 7, 4, 15, 'Tài liệu hợp đồng', 150000, 0, DATE_ADD(NOW(), INTERVAL 1 DAY), 'DELIVERED', 'Giao gấp trong ngày', 'Đơn tài liệu SAME DAY - ĐÃ HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
 ('REQ-20260102-004', 2, 1, 7, 5, 1, 1700, 'Laptop Dell XPS 15', 8500000, 35000000, DATE_ADD(NOW(), INTERVAL 2 DAY), 'CONFIRMED', 'Hàng giá trị cao', 'Đơn laptop từ HN về HCM', NOW(), NOW()),
-('REQ-20260102-005', 1, 2, 5, 7, 1, 1725, 'Điện thoại Samsung', 1500000, 15000000, DATE_ADD(NOW(), INTERVAL 2 DAY), 'IN_TRANSIT', 'Cần bảo hiểm', 'Đơn điện thoại Samsung', NOW(), NOW());
+('REQ-20260102-005', 1, 2, 5, 7, 1, 1725, 'Điện thoại Samsung', 1500000, 15000000, DATE_ADD(NOW(), INTERVAL 2 DAY), 'DELIVERED', 'Đã giao thành công', 'Đơn điện thoại Samsung - ĐÃ HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+-- Thêm các đơn hàng DELIVERED để tạo Case Study
+('REQ-20260102-006', 1, 2, 5, 7, 2, 1750, 'Máy in Canon + mực', 3500000, 12000000, DATE_SUB(NOW(), INTERVAL 7 DAY), 'DELIVERED', 'Giao hàng an toàn', 'Đơn máy in văn phòng - HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY)),
+('REQ-20260102-007', 2, 1, 7, 5, 1, 1700, 'Đồ nội thất IKEA', 5000000, 25000000, DATE_SUB(NOW(), INTERVAL 14 DAY), 'DELIVERED', 'Khách hàng rất hài lòng', 'Đơn nội thất từ HN về HCM - HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(NOW(), INTERVAL 14 DAY)),
+('REQ-20260102-008', 1, 2, 5, 7, 4, 10, 'Hồ sơ pháp lý quan trọng', 200000, 0, DATE_SUB(NOW(), INTERVAL 2 DAY), 'DELIVERED', 'Giao đúng deadline', 'Đơn hồ sơ SAME DAY - HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+('REQ-20260102-009', 1, NULL, 5, 8, 3, 800, 'Linh kiện máy tính', 1600000, 8000000, DATE_SUB(NOW(), INTERVAL 21 DAY), 'DELIVERED', 'Đóng gói chống sốc', 'Đơn linh kiện IT - HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 25 DAY), DATE_SUB(NOW(), INTERVAL 21 DAY)),
+('REQ-20260102-010', 2, 1, 7, 5, 1, 1700, 'Mỹ phẩm cao cấp', 2500000, 50000000, DATE_SUB(NOW(), INTERVAL 30 DAY), 'DELIVERED', 'Hàng giá trị cao, bảo hiểm', 'Đơn mỹ phẩm nhập khẩu - HOÀN THÀNH', DATE_SUB(NOW(), INTERVAL 35 DAY), DATE_SUB(NOW(), INTERVAL 30 DAY));
 
 -- =====================================================
 -- 11. TRACKING_CODES (Mã vận đơn)
@@ -203,15 +198,15 @@ INSERT IGNORE INTO parcel_actions (parcel_id, request_id, action_type_id, from_l
 -- =====================================================
 INSERT IGNORE INTO case_studies (request_id, service_type_id, title, slug, client_name_display, challenge, solution, result, thumbnail_url, is_featured, is_published, created_at, updated_at) VALUES
 (3, 4, 'Giao tài liệu hợp đồng trong 4 giờ', 'giao-tai-lieu-hop-dong-4-gio', 'Công ty Luật ABC', 
- 'Khách hàng cần gửi hồ sơ hợp đồng trong ngày để kịp deadline ký kết quan trọng.',
- 'Sử dụng dịch vụ SAME_DAY với shipper chuyên dụng, GPS tracking realtime.',
- 'Giao thành công trong 4 tiếng, khách hàng ký hợp đồng kịp thời hạn.',
- '/images/case-docs.jpg', true, true, NOW(), NOW()),
-(5, 1, 'Vận chuyển điện thoại liên tỉnh an toàn', 'van-chuyen-dien-thoai-lien-tinh', 'Shop Điện Thoại XYZ',
- 'Vận chuyển lô hàng điện thoại giá trị cao từ HCM ra Hà Nội, yêu cầu bảo hiểm.',
- 'Dịch vụ Express với bảo hiểm 100%, đóng gói chống sốc, tracking realtime.',
- 'Giao hàng thành công, không hư hỏng, thu COD đầy đủ.',
- '/images/case-phone.jpg', true, true, NOW(), NOW());
+ 'Khách hàng là công ty luật hàng đầu tại TP.HCM cần gửi gấp bộ hồ sơ hợp đồng M&A trị giá hàng triệu đô trong vòng 4 giờ để kịp deadline ký kết với đối tác nước ngoài. Hồ sơ bao gồm nhiều văn bản pháp lý quan trọng, yêu cầu bảo mật tuyệt đối và không được phép thất lạc.',
+ 'Chúng tôi triển khai dịch vụ SAME_DAY Premium với shipper chuyên dụng được đào tạo bảo mật. Áp dụng GPS tracking realtime để khách hàng theo dõi lộ trình 24/7. Shipper được trang bị túi chống thấm, chống sốc và có cam kết bảo hiểm 100% giá trị tài liệu. Đội ngũ điều phối theo dõi sát sao từng bước di chuyển.',
+ 'Giao hàng thành công chỉ trong 3 tiếng 45 phút - sớm hơn 15 phút so với cam kết! Khách hàng ký hợp đồng kịp thời hạn, thương vụ M&A được hoàn tất suôn sẻ. Công ty Luật ABC đã trở thành khách hàng thường xuyên của chúng tôi.',
+ '/images/case-study/case-study1.jpeg', true, true, NOW(), NOW()),
+(5, 1, 'Vận chuyển điện thoại liên tỉnh an toàn', 'van-chuyen-dien-thoai-lien-tinh', 'Shop Điện Thoại Galaxy Store',
+ 'Shop điện thoại lớn tại Quận 1, TP.HCM cần vận chuyển lô hàng 50 chiếc iPhone 15 Pro Max (tổng giá trị khoảng 1.5 tỷ đồng) ra chi nhánh Hà Nội trong 24 giờ. Yêu cầu bảo hiểm đầy đủ, đóng gói chống sốc chuyên nghiệp và tracking realtime.',
+ 'Sử dụng dịch vụ Express Liên Tỉnh với gói bảo hiểm Premium 100% giá trị hàng hóa. Đội ngũ kỹ thuật đóng gói chuyên nghiệp với foam chống sốc 3 lớp, hộp carton cứng và niêm phong an toàn. Vận chuyển bằng xe tải có điều hòa, temperature control. GPS tracking 24/7 và cập nhật trạng thái mỗi 30 phút qua SMS/App.',
+ 'Lô hàng được giao thành công trong 18 tiếng (sớm hơn 6 tiếng so với cam kết). Tất cả 50 chiếc điện thoại nguyên vẹn 100%, không một vết xước. Thu hộ COD 1.5 tỷ đầy đủ và chuyển khoản trong ngày. Galaxy Store đã ký hợp đồng vận chuyển dài hạn với chúng tôi.',
+ '/images/case-study/case-study2.jpg', true, true, NOW(), NOW());
 
 -- =====================================================
 -- 18. SYSTEM_LOGS (Nhật ký hệ thống)

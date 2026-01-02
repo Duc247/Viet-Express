@@ -35,26 +35,22 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Khách hàng</label>
                             <input type="text" class="form-control" th:field="*{clientNameDisplay}"
                                 placeholder="Tên khách hàng hiển thị">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Loại dịch vụ</label>
-                            <select class="form-select" th:field="*{serviceType}">
-                                <option value="">-- Chọn dịch vụ --</option>
-                                <option th:each="st : ${serviceTypes}" th:value="${st.id}" th:text="${st.name}">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Đơn hàng liên quan <span class="text-muted">(Service Type lấy từ
+                                    đơn hàng)</span></label>
+                            <select class="form-select" th:field="*{requestId}">
+                                <option value="">-- Chọn đơn hàng đã hoàn thành --</option>
+                                <option th:each="req : ${requests}" th:value="${req.id}"
+                                    th:text="${req.requestCode + ' - ' + req.serviceTypeName}"
+                                    th:selected="${caseStudy.requestId == req.id}">
                                 </option>
                             </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Đơn hàng liên quan</label>
-                            <select class="form-select" th:field="*{request}">
-                                <option value="">-- Chọn đơn hàng --</option>
-                                <option th:each="req : ${requests}" th:value="${req.id}" th:text="${req.requestCode}">
-                                </option>
-                            </select>
+                            <small class="text-muted">Chỉ hiển thị đơn hàng đã giao thành công</small>
                         </div>
                     </div>
 

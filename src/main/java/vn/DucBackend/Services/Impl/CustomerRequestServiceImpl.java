@@ -213,13 +213,27 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         CustomerRequestDTO dto = new CustomerRequestDTO();
         dto.setId(request.getId());
         dto.setRequestCode(request.getRequestCode());
-        dto.setSenderId(request.getSender().getId());
-        dto.setSenderName(request.getSender().getName());
-        dto.setSenderPhone(request.getSender().getPhone());
-        if (request.getReceiver() != null) {
-            dto.setReceiverId(request.getReceiver().getId());
-            dto.setReceiverName(request.getReceiver().getName());
-            dto.setReceiverPhone(request.getReceiver().getPhone());
+
+        // Safe handling for sender - may be deleted from DB
+        try {
+            if (request.getSender() != null) {
+                dto.setSenderId(request.getSender().getId());
+                dto.setSenderName(request.getSender().getName());
+                dto.setSenderPhone(request.getSender().getPhone());
+            }
+        } catch (Exception e) {
+            dto.setSenderName("[Đã xóa]");
+        }
+
+        // Safe handling for receiver - may be deleted from DB
+        try {
+            if (request.getReceiver() != null) {
+                dto.setReceiverId(request.getReceiver().getId());
+                dto.setReceiverName(request.getReceiver().getName());
+                dto.setReceiverPhone(request.getReceiver().getPhone());
+            }
+        } catch (Exception e) {
+            dto.setReceiverName("[Đã xóa]");
         }
         dto.setSenderLocationId(request.getSenderLocation().getId());
         dto.setSenderLocationName(request.getSenderLocation().getName());
