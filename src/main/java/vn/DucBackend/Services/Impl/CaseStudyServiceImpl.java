@@ -7,7 +7,6 @@ import vn.DucBackend.DTO.CaseStudyDTO;
 import vn.DucBackend.Entities.CaseStudy;
 import vn.DucBackend.Repositories.CaseStudyRepository;
 import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.ServiceTypeRepository;
 import vn.DucBackend.Services.CaseStudyService;
 
 import java.text.Normalizer;
@@ -23,7 +22,6 @@ public class CaseStudyServiceImpl implements CaseStudyService {
 
     private final CaseStudyRepository caseStudyRepository;
     private final CustomerRequestRepository requestRepository;
-    private final ServiceTypeRepository serviceTypeRepository;
 
     @Override
     public List<CaseStudyDTO> findAllCaseStudies() {

@@ -14,6 +14,8 @@ public interface ServiceTypeRepository extends JpaRepository<ServiceType, Long> 
 
     Optional<ServiceType> findByCode(String code);
 
+    Optional<ServiceType> findBySlug(String slug);
+
     List<ServiceType> findByIsActiveTrue();
 
     @Query("SELECT s FROM ServiceType s WHERE s.isActive = true ORDER BY s.pricePerKm ASC")

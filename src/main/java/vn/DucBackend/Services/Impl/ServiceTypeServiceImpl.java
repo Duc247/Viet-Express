@@ -50,15 +50,38 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
     }
 
     @Override
+    public Optional<ServiceTypeDTO> findBySlug(String slug) {
+        return serviceTypeRepository.findBySlug(slug).map(this::toDTO);
+    }
+
+    @Override
     public ServiceTypeDTO create(ServiceTypeDTO dto) {
         ServiceType serviceType = new ServiceType();
         serviceType.setCode(dto.getCode());
+        serviceType.setSlug(
+                dto.getSlug() != null && !dto.getSlug().isEmpty() ? dto.getSlug() : generateSlug(dto.getName()));
         serviceType.setName(dto.getName());
+        serviceType.setIcon(dto.getIcon());
         serviceType.setDescription(dto.getDescription());
+        serviceType.setLongDescription(dto.getLongDescription());
+        serviceType.setImageUrl(dto.getImageUrl());
         serviceType.setPricePerKm(dto.getPricePerKm());
         serviceType.setAverageSpeedKmh(dto.getAverageSpeedKmh());
         serviceType.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
         return toDTO(serviceTypeRepository.save(serviceType));
+    }
+
+    // Generate slug from name
+    private String generateSlug(String name) {
+        if (name == null)
+            return "";
+        String normalized = java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
     }
 
     @Override
@@ -69,11 +92,23 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         if (dto.getCode() != null) {
             serviceType.setCode(dto.getCode());
         }
+        if (dto.getSlug() != null && !dto.getSlug().isEmpty()) {
+            serviceType.setSlug(dto.getSlug());
+        }
         if (dto.getName() != null) {
             serviceType.setName(dto.getName());
         }
+        if (dto.getIcon() != null) {
+            serviceType.setIcon(dto.getIcon());
+        }
         if (dto.getDescription() != null) {
             serviceType.setDescription(dto.getDescription());
+        }
+        if (dto.getLongDescription() != null) {
+            serviceType.setLongDescription(dto.getLongDescription());
+        }
+        if (dto.getImageUrl() != null) {
+            serviceType.setImageUrl(dto.getImageUrl());
         }
         if (dto.getPricePerKm() != null) {
             serviceType.setPricePerKm(dto.getPricePerKm());
@@ -105,8 +140,12 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         ServiceTypeDTO dto = new ServiceTypeDTO();
         dto.setId(serviceType.getId());
         dto.setCode(serviceType.getCode());
+        dto.setSlug(serviceType.getSlug());
         dto.setName(serviceType.getName());
+        dto.setIcon(serviceType.getIcon());
         dto.setDescription(serviceType.getDescription());
+        dto.setLongDescription(serviceType.getLongDescription());
+        dto.setImageUrl(serviceType.getImageUrl());
         dto.setPricePerKm(serviceType.getPricePerKm());
         dto.setAverageSpeedKmh(serviceType.getAverageSpeedKmh());
         dto.setIsActive(serviceType.getIsActive());

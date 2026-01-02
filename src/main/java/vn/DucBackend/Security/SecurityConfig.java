@@ -142,6 +142,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/error", "/error/**").permitAll()
                                                 .requestMatchers("/h2-console/**").permitAll() // Dev only
                                                 .requestMatchers("/public/**").permitAll() // Public pages
+                                                .requestMatchers("/services/**").permitAll() // Public services
                                                 .requestMatchers("/casestudy/**").permitAll() // Public case study
                                                                                               // detail
                                                 .requestMatchers("/tracking", "/request").permitAll() // Public tracking

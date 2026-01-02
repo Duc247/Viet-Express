@@ -38,6 +38,12 @@ public interface ServiceTypeService {
     Optional<ServiceTypeDTO> findByCode(String code);
 
     /**
+     * Lấy loại dịch vụ theo slug (cho trang public)
+     * Repository: serviceTypeRepository.findBySlug()
+     */
+    Optional<ServiceTypeDTO> findBySlug(String slug);
+
+    /**
      * Tạo mới loại dịch vụ
      * Repository: serviceTypeRepository.save()
      */

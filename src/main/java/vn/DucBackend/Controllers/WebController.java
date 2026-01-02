@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import vn.DucBackend.DTO.CaseStudyDTO;
+import vn.DucBackend.DTO.ServiceTypeDTO;
 import vn.DucBackend.Services.CaseStudyService;
+import vn.DucBackend.Services.ServiceTypeService;
 
 /**
  * Web Controller - Chỉ xử lý các trang PUBLIC (không cần đăng nhập)
@@ -25,6 +27,9 @@ public class WebController {
     @Autowired
     private CaseStudyService caseStudyService;
 
+    @Autowired
+    private ServiceTypeService serviceTypeService;
+
     // ==========================================
     // TRANG CHỦ & GIỚI THIỆU
     // ==========================================
@@ -38,6 +43,26 @@ public class WebController {
     @GetMapping({ "/about", "/public/about" })
     public String aboutPage() {
         return "public/about";
+    }
+
+    // ==========================================
+    // DỊCH VỤ (PUBLIC - KHÔNG CẦN ĐĂNG NHẬP)
+    // ==========================================
+    @GetMapping("/services")
+    public String servicesPage(Model model) {
+        model.addAttribute("services", serviceTypeService.findActive());
+        return "public/services";
+    }
+
+    @GetMapping("/services/{slug}")
+    public String serviceDetail(@PathVariable String slug, Model model) {
+        ServiceTypeDTO service = serviceTypeService.findBySlug(slug).orElse(null);
+        if (service == null || !Boolean.TRUE.equals(service.getIsActive())) {
+            return "redirect:/services";
+        }
+        model.addAttribute("service", service);
+        model.addAttribute("allServices", serviceTypeService.findActive());
+        return "public/service-detail";
     }
 
     // ==========================================

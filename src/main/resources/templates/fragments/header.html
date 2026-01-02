@@ -3,14 +3,14 @@
 <nav th:fragment="header" class="navbar navbar-expand-lg navbar-dark navbar-public sticky-top">
   <div class="container">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-        <div class="brand-icon me-2">
-            <i class="fas fa-truck-fast"></i>
-        </div>
-        <span>Logistics</span>
+      <div class="brand-icon me-2">
+        <i class="fas fa-truck-fast"></i>
+      </div>
+      <span>Logistics</span>
     </a>
 
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+      <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
@@ -23,10 +23,13 @@
           <a class="nav-link" th:href="@{/public/about}"><i class="fas fa-info-circle me-1"></i> Giới thiệu</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" th:href="@{/services}"><i class="fas fa-concierge-bell me-1"></i> Dịch vụ</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" th:href="@{/public/request}"><i class="fas fa-box me-1"></i> Gửi hàng</a>
         </li>
       </ul>
-      
+
       <!-- Menu phải -->
       <ul class="navbar-nav align-items-center">
         <!-- Hiển thị khi CHƯA đăng nhập -->
@@ -40,23 +43,24 @@
             <i class="fas fa-sign-in-alt me-1"></i> Đăng nhập
           </a>
         </li>
-        
+
         <!-- Hiển thị khi ĐÃ đăng nhập -->
         <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
-          <a class="nav-link dropdown-toggle d-flex align-items-center py-2 px-3 rounded-pill" 
-             href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
-             style="background: rgba(255,255,255,0.1);">
+          <a class="nav-link dropdown-toggle d-flex align-items-center py-2 px-3 rounded-pill" href="#"
+            id="userDropdown" role="button" data-bs-toggle="dropdown" style="background: rgba(255,255,255,0.1);">
             <div class="avatar-circle me-2">
-                <i class="fas fa-user"></i>
+              <i class="fas fa-user"></i>
             </div>
             <span class="fw-medium" sec:authentication="name">User</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end animate__animated animate__fadeIn shadow-lg">
             <li class="dropdown-header px-3 py-2">
-                <small class="text-muted">Xin chào!</small>
-                <div class="fw-semibold" sec:authentication="name">User</div>
+              <small class="text-muted">Xin chào!</small>
+              <div class="fw-semibold" sec:authentication="name">User</div>
             </li>
-            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <hr class="dropdown-divider my-1">
+            </li>
             <li sec:authorize="hasRole('ADMIN')">
               <a class="dropdown-item py-2" th:href="@{/admin/dashboard}">
                 <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard Admin
@@ -82,7 +86,9 @@
                 <i class="fas fa-tachometer-alt me-2 text-secondary"></i>Dashboard Shipper
               </a>
             </li>
-            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <hr class="dropdown-divider my-1">
+            </li>
             <li>
               <form th:action="@{/auth/logout}" method="post" class="d-inline w-100">
                 <button type="submit" class="dropdown-item py-2 text-danger">
@@ -98,17 +104,17 @@
 </nav>
 
 <style>
-.navbar-public {
+  .navbar-public {
     padding: 0.75rem 0;
     transition: all 0.3s ease;
-}
+  }
 
-.navbar-public.scrolled {
+  .navbar-public.scrolled {
     padding: 0.5rem 0;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
 
-.brand-icon {
+  .brand-icon {
     width: 40px;
     height: 40px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -117,9 +123,9 @@
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-}
+  }
 
-.avatar-circle {
+  .avatar-circle {
     width: 32px;
     height: 32px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -128,38 +134,39 @@
     align-items: center;
     justify-content: center;
     font-size: 0.85rem;
-}
+  }
 
-.dropdown-menu {
+  .dropdown-menu {
     border: none;
     border-radius: 12px;
     padding: 0.5rem;
     min-width: 220px;
-}
+  }
 
-.dropdown-item {
+  .dropdown-item {
     border-radius: 8px;
     font-size: 0.9rem;
-}
+  }
 
-.dropdown-item:hover {
+  .dropdown-item:hover {
     background: #f1f5f9;
-}
+  }
 </style>
 
 <script th:inline="javascript">
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-        const navbar = document.querySelector('.navbar-public');
-        if (navbar) {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+    window.addEventListener('scroll', function () {
+      const navbar = document.querySelector('.navbar-public');
+      if (navbar) {
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
         }
+      }
     });
-});
+  });
 </script>
+
 </html>

@@ -24,19 +24,25 @@
                     <input type="hidden" name="id" th:value="${serviceType?.id}">
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label"><i class="fas fa-barcode me-1"></i>Mã dịch vụ <span
                                     class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="code" th:value="${serviceType?.code}" required
                                 placeholder="VD: EXPRESS">
                         </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label"><i class="fas fa-link me-1"></i>Slug (URL)</label>
+                            <input type="text" class="form-control" name="slug" th:value="${serviceType?.slug}"
+                                placeholder="VD: giao-nhanh">
+                            <small class="text-muted">Để trống sẽ tự tạo từ tên</small>
+                        </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label"><i class="fas fa-tag me-1"></i>Tên dịch vụ <span
                                     class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="name" th:value="${serviceType?.name}" required
-                                placeholder="VD: Giao nhanh">
+                                placeholder="VD: Giao nhanh Express">
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-2 mb-3">
                             <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</label>
                             <select class="form-select" name="isActive">
                                 <option value="true"
@@ -47,25 +53,43 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label"><i class="fas fa-align-left me-1"></i>Mô tả</label>
-                        <textarea class="form-control" name="description" rows="2" placeholder="Mô tả dịch vụ..."
-                            th:text="${serviceType?.description}"></textarea>
-                    </div>
-
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="fas fa-money-bill me-1"></i>Giá/km (VNĐ) <span
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label"><i class="fas fa-icons me-1"></i>Icon (Font Awesome)</label>
+                            <input type="text" class="form-control" name="icon" th:value="${serviceType?.icon}"
+                                placeholder="VD: fa-shipping-fast">
+                            <small class="text-muted">Font Awesome class: fa-truck, fa-bolt, ...</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label"><i class="fas fa-image me-1"></i>Ảnh URL</label>
+                            <input type="text" class="form-control" name="imageUrl" th:value="${serviceType?.imageUrl}"
+                                placeholder="VD: /images/services/express.jpg">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label"><i class="fas fa-money-bill me-1"></i>Giá/km <span
                                     class="text-danger">*</span></label>
                             <input type="number" step="100" class="form-control" name="pricePerKm"
-                                th:value="${serviceType?.pricePerKm}" required placeholder="VD: 5000">
+                                th:value="${serviceType?.pricePerKm}" required placeholder="5000">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="fas fa-tachometer-alt me-1"></i>Tốc độ trung bình
-                                (km/h)</label>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label"><i class="fas fa-tachometer-alt me-1"></i>Tốc độ (km/h)</label>
                             <input type="number" step="1" class="form-control" name="averageSpeedKmh"
-                                th:value="${serviceType?.averageSpeedKmh}" placeholder="VD: 60">
+                                th:value="${serviceType?.averageSpeedKmh}" placeholder="60">
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-align-left me-1"></i>Mô tả ngắn</label>
+                        <textarea class="form-control" name="description" rows="2"
+                            placeholder="Mô tả ngắn gọn về dịch vụ..." th:text="${serviceType?.description}"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-file-alt me-1"></i>Mô tả chi tiết (cho trang
+                            public)</label>
+                        <textarea class="form-control" name="longDescription" rows="4"
+                            placeholder="Mô tả chi tiết về dịch vụ, ưu điểm, phù hợp với ai..."
+                            th:text="${serviceType?.longDescription}"></textarea>
                     </div>
 
                     <hr>

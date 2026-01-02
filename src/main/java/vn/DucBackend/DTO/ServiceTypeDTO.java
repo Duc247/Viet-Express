@@ -8,8 +8,12 @@ import java.time.LocalDateTime;
 public class ServiceTypeDTO {
     private Long id;
     private String code;
+    private String slug;
     private String name;
+    private String icon;
     private String description;
+    private String longDescription;
+    private String imageUrl;
     private BigDecimal pricePerKm;
     private BigDecimal averageSpeedKmh;
     private Boolean isActive;

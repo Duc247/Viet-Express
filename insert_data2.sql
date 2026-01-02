@@ -25,11 +25,23 @@ INSERT IGNORE INTO locations (location_type, warehouse_code, name, address_text,
 -- =====================================================
 -- 3. SERVICE_TYPES (Loại dịch vụ)
 -- =====================================================
-INSERT IGNORE INTO service_types (code, name, description, price_per_km, average_speed_kmh, is_active, created_at, updated_at) VALUES
-('EXPRESS', 'Giao nhanh', 'Giao 24h nội thành, 48h liên tỉnh', 5000, 60, true, NOW(), NOW()),
-('STANDARD', 'Tiêu chuẩn', 'Giao 3-5 ngày', 2000, 40, true, NOW(), NOW()),
-('ECONOMY', 'Tiết kiệm', 'Giao 5-7 ngày', 1000, 30, true, NOW(), NOW()),
-('SAME_DAY', 'Giao trong ngày', 'Giao nội thành trong ngày', 10000, 80, true, NOW(), NOW());
+INSERT IGNORE INTO service_types (code, slug, name, icon, description, long_description, image_url, price_per_km, average_speed_kmh, is_active, created_at, updated_at) VALUES
+('EXPRESS', 'giao-nhanh', 'Giao nhanh Express', 'fa-shipping-fast', 
+ 'Giao hàng 24h nội thành, 48h liên tỉnh với ưu tiên cao nhất',
+ 'Dịch vụ Giao nhanh Express là giải pháp hoàn hảo cho những lô hàng cần giao gấp. Với đội ngũ shipper chuyên nghiệp và hệ thống logistics tối ưu, chúng tôi cam kết giao hàng trong vòng 24 giờ nội thành và 48 giờ liên tỉnh. Mọi đơn hàng đều được tracking realtime qua GPS, bảo hiểm 100% giá trị, và có nhân viên CSKH hỗ trợ 24/7. Phù hợp cho: hàng điện tử, tài liệu quan trọng, hàng thời trang, và các mặt hàng có deadline gấp.',
+ '/images/services/express.jpg', 5000, 60, true, NOW(), NOW()),
+('STANDARD', 'tieu-chuan', 'Tiêu chuẩn Standard', 'fa-truck', 
+ 'Dịch vụ vận chuyển tiêu chuẩn, giao trong 3-5 ngày',
+ 'Dịch vụ Tiêu chuẩn Standard mang đến sự cân bằng hoàn hảo giữa chi phí và tốc độ. Thời gian giao hàng từ 3-5 ngày làm việc tùy theo khoảng cách. Tất cả đơn hàng đều được đóng gói cẩn thận, có mã tracking để theo dõi, và được bảo hiểm cơ bản. Dịch vụ này phù hợp cho: hàng tiêu dùng, đồ gia dụng, sách vở, và các mặt hàng không yêu cầu giao gấp.',
+ '/images/services/standard.jpg', 2000, 40, true, NOW(), NOW()),
+('ECONOMY', 'tiet-kiem', 'Tiết kiệm Economy', 'fa-piggy-bank', 
+ 'Dịch vụ giao hàng tiết kiệm chi phí, 5-7 ngày',
+ 'Dịch vụ Tiết kiệm Economy là lựa chọn thông minh cho những ai ưu tiên tiết kiệm chi phí. Với mức giá cạnh tranh nhất thị trường, bạn vẫn được đảm bảo hàng hóa an toàn đến tay người nhận trong 5-7 ngày. Chúng tôi gom hàng theo tuyến để tối ưu chi phí vận chuyển. Phù hợp cho: hàng bulk, nguyên vật liệu, hàng không gấp, và đơn hàng số lượng lớn.',
+ '/images/services/economy.jpg', 1000, 30, true, NOW(), NOW()),
+('SAME_DAY', 'trong-ngay', 'Giao trong ngày Same Day', 'fa-bolt', 
+ 'Giao hàng nội thành ngay trong ngày đặt đơn',
+ 'Dịch vụ Same Day Delivery đáp ứng nhu cầu giao hàng siêu tốc trong ngày. Chỉ trong vài giờ đồng hồ, đơn hàng của bạn sẽ đến tay người nhận. Shipper chuyên dụng sẽ được điều phối ngay lập tức sau khi đơn hàng được xác nhận. Tracking GPS realtime, thông báo SMS/App liên tục. Bảo hiểm 100% giá trị hàng hóa. Phù hợp cho: tài liệu khẩn cấp, thuốc men, hàng giá trị cao cần giao ngay, quà tặng đặc biệt.',
+ '/images/services/sameday.jpg', 10000, 80, true, NOW(), NOW());
 
 -- =====================================================
 -- 4. VEHICLES (Xe)
