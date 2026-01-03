@@ -108,5 +108,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
                "LEFT JOIN FETCH r.sender " +
                "WHERE r.sender.id = :customerId")
         List<Payment> findByRequestSenderId(@Param("customerId") Long customerId);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }

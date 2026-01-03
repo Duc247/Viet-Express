@@ -17,6 +17,9 @@ import vn.DucBackend.Services.ServiceTypeService;
 
 import java.util.Optional;
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 /**
  * Web Controller - Chỉ xử lý các trang PUBLIC (không cần đăng nhập)
@@ -41,6 +44,9 @@ public class WebController {
     @Autowired
     private CustomerService customerService;
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     // ==========================================
     // TRANG CHỦ & GIỚI THIỆU

@@ -199,6 +199,25 @@
                                         </div>
                                         <small class="text-muted" th:text="${serviceType.description ?: 'Dịch vụ vận chuyển'}">Mô tả</small>
                                     </label>
+<<<<<<< Updated upstream
+=======
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(serviceTypes)}" class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Chưa có dịch vụ nào khả dụng
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-light text-primary fw-bold py-3 shadow">
+                                    <i class="fas fa-paper-plane me-2"></i> TẠO ĐƠN HÀNG
+                                </button>
+                                <div class="text-center small opacity-75 mt-2">
+                                    Người nhận sẽ cần xác nhận đơn hàng này.
+>>>>>>> Stashed changes
                                 </div>
                             </div>
                             <div th:if="${#lists.isEmpty(serviceTypes)}" class="alert alert-warning">
