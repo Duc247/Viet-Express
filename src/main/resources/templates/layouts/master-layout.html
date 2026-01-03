@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title>Công ty vận tải đường bộ  </title>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="flex-shrink-0">
+        <div layout:fragment="content"></div>
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-dark text-white">
+        <div class="container text-center">
+            <span>&copy; 2025 Công ty vận tải đường bộ   Logistics System. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
+</body>
+</html>

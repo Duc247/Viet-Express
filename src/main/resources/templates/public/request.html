@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/master-layout}">
+<head>
+    <title>Gửi Yêu Cầu - Logistic  </title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <div class="bg-primary text-white py-4 mb-4">
+        <div class="container text-center">
+            <h2 class="fw-bold">Gửi Yêu Cầu Vận Chuyển</h2>
+            <p class="mb-0 opacity-75">Nhận báo giá nhanh chóng - Không cần tài khoản</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow border-0">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <form th:action="@{/request}" method="post">
+                            
+                            <h5 class="text-primary fw-bold mb-3"><i class="fas fa-user-circle me-2"></i>Thông tin người gửi</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" name="customerName" class="form-control" placeholder="Nguyễn Văn A" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phoneNumber" class="form-control" placeholder="09xxxxxxx" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Email (Để nhận báo giá)</label>
+                                    <input type="email" name="email" class="form-control" placeholder="name@email.com">
+                                </div>
+                            </div>
+
+                            <hr class="text-muted opacity-25">
+
+                            <h5 class="text-primary fw-bold mb-3 mt-4"><i class="fas fa-box-open me-2"></i>Chi tiết hàng hóa</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên hàng hóa</label>
+                                    <input type="text" name="productName" class="form-control" placeholder="Ví dụ: Nội thất, Máy móc...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Trọng lượng (kg)</label>
+                                    <input type="number" name="weight" class="form-control" min="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Loại xe mong muốn</label>
+                                    <select name="vehicleType" class="form-select">
+                                        <option value="VAN">Xe Van</option>
+                                        <option value="TRUCK_1T">Xe Tải 1 Tấn</option>
+                                        <option value="TRUCK_5T">Xe Tải 5 Tấn</option>
+                                        <option value="CONTAINER">Container</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Nơi đi (Lấy hàng)</label>
+                                    <textarea name="pickupAddress" class="form-control" rows="2" placeholder="Địa chỉ chi tiết..." required></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Nơi đến (Giao hàng)</label>
+                                    <textarea name="deliveryAddress" class="form-control" rows="2" placeholder="Địa chỉ chi tiết..." required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Ghi chú thêm</label>
+                                <textarea name="note" class="form-control" rows="3" placeholder="Ví dụ: Hàng dễ vỡ, cần giao trong giờ hành chính..."></textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">
+                                    <i class="fas fa-paper-plane me-2"></i>GỬI YÊU CẦU NGAY
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4 text-muted">
+                    <small>Mọi thông tin của quý khách được cam kết bảo mật tuyệt đối.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý Trip</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-route me-2"></i>Quản lý Trip (Chuyến xe)</h1>
+            <a href="/admin/trip/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Loại</th>
+                                <th>Shipper</th>
+                                <th>Vehicle</th>
+                                <th>Điểm đi</th>
+                                <th>Điểm đến</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="t : ${trips}">
+                                <td th:text="${t.id}"></td>
+                                <td>
+                                    <span class="badge bg-info" th:if="${t.tripType.name() == 'PICKUP'}">PICKUP</span>
+                                    <span class="badge bg-primary"
+                                        th:if="${t.tripType.name() == 'TRANSFER'}">TRANSFER</span>
+                                    <span class="badge bg-success"
+                                        th:if="${t.tripType.name() == 'DELIVERY'}">DELIVERY</span>
+                                    <span class="badge bg-warning"
+                                        th:if="${t.tripType.name() == 'RETURN'}">RETURN</span>
+                                </td>
+                                <td th:text="${t.shipper != null ? t.shipper.fullName : '-'}"></td>
+                                <td th:text="${t.vehicle != null ? t.vehicle.licensePlate : '-'}"></td>
+                                <td th:text="${t.startLocation.name}"></td>
+                                <td th:text="${t.endLocation.name}"></td>
+                                <td>
+                                    <span class="badge bg-secondary" th:if="${t.status.name() == 'CREATED'}">Mới</span>
+                                    <span class="badge bg-warning" th:if="${t.status.name() == 'IN_PROGRESS'}">Đang thực
+                                        hiện</span>
+                                    <span class="badge bg-success" th:if="${t.status.name() == 'COMPLETED'}">Hoàn
+                                        thành</span>
+                                    <span class="badge bg-danger" th:if="${t.status.name() == 'CANCELLED'}">Đã
+                                        hủy</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(trips)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

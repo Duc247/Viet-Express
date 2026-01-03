@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý User</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-users me-2"></i>Quản lý User (Tài khoản)</h1>
+            <div class="d-flex gap-2">
+                <form th:action="@{/admin/user/search}" method="get" class="d-flex">
+                    <input type="text" name="keyword" class="form-control form-control-sm me-2"
+                        placeholder="Tìm kiếm..." th:value="${keyword}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm"><i
+                            class="fas fa-search"></i></button>
+                </form>
+                <a href="/admin/user/create" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Thêm
+                    mới</a>
+            </div>
+        </div>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Điện thoại</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${users}">
+                                <td th:text="${u.id}"></td>
+                                <td><strong th:text="${u.username}"></strong></td>
+                                <td th:text="${u.email}"></td>
+                                <td th:text="${u.phone}"></td>
+                                <td>
+                                    <span class="badge bg-primary"
+                                        th:text="${u.roleName != null ? u.roleName : '-'}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${u.isActive}">Hoạt động</span>
+                                    <span class="badge bg-secondary" th:unless="${u.isActive}">Ngừng</span>
+                                </td>
+                                <td
+                                    th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'dd/MM/yyyy') : '-'}">
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/user/edit/{id}(id=${u.id})}"
+                                            class="btn btn-outline-warning" title="Sửa"><i class="fas fa-edit"></i></a>
+                                        <a th:href="@{/admin/user/toggle/{id}(id=${u.id})}" class="btn btn-outline-info"
+                                            title="Bật/Tắt"><i class="fas fa-power-off"></i></a>
+                                        <a th:href="@{/admin/user/delete/{id}(id=${u.id})}"
+                                            class="btn btn-outline-danger" title="Xoá"
+                                            onclick="return confirm('Bạn có chắc muốn xoá?')"><i
+                                                class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="8" class="text-center text-muted py-4">Chưa có tài khoản</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý CaseStudy</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-star me-2"></i>Quản lý CaseStudy (Dự án tiêu biểu)</h1>
+            <a href="/admin/casestudy/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Tiêu đề</th>
+                                <th>Slug</th>
+                                <th>Khách hàng</th>
+                                <th>Nổi bật</th>
+                                <th>Xuất bản</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cs : ${caseStudies}">
+                                <td th:text="${cs.id}"></td>
+                                <td th:text="${cs.title}"></td>
+                                <td><code th:text="${cs.slug}"></code></td>
+                                <td th:text="${cs.clientNameDisplay}"></td>
+                                <td>
+                                    <span class="badge bg-warning" th:if="${cs.isFeatured}"><i
+                                            class="fas fa-star"></i></span>
+                                    <span th:unless="${cs.isFeatured}">-</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${cs.isPublished}">Đã xuất bản</span>
+                                    <span class="badge bg-secondary" th:unless="${cs.isPublished}">Nháp</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/casestudy/edit/{id}(id=${cs.id})}"
+                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(caseStudies)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
