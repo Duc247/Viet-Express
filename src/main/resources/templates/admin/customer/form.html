@@ -18,46 +18,80 @@
                 lại</a>
         </div>
 
-        <div class="card">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle me-2"></i>Thông tin khách hàng
+            </div>
             <div class="card-body">
                 <form th:action="${isEdit ? '/admin/customer/edit/' + customer.id : '/admin/customer/create'}"
                     method="post">
                     <div class="row">
+                        <!-- Tài khoản liên kết -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tài khoản liên kết</label>
+                            <label class="form-label"><i class="fas fa-user me-1"></i>Tài khoản liên kết</label>
                             <select name="userId" class="form-select">
                                 <option value="">-- Không liên kết --</option>
                                 <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"
-                                    th:selected="${customer.userId == u.id}"></option>
+                                    th:selected="${customer?.userId == u.id}"></option>
                             </select>
                         </div>
+                        <!-- Tên -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tên <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control" th:value="${customer.name}" required>
+                            <label class="form-label"><i class="fas fa-signature me-1"></i>Tên <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" th:value="${customer?.name}" required
+                                placeholder="Nhập tên khách hàng">
                         </div>
+                        <!-- Họ và tên đầy đủ -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Họ và tên đầy đủ <span class="text-danger">*</span></label>
-                            <input type="text" name="fullName" class="form-control" th:value="${customer.fullName}"
-                                required>
+                            <label class="form-label"><i class="fas fa-id-card me-1"></i>Họ và tên đầy đủ <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" name="fullName" class="form-control" th:value="${customer?.fullName}"
+                                required placeholder="Nhập họ và tên đầy đủ">
                         </div>
+                        <!-- Email -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" th:value="${customer.email}">
+                            <label class="form-label"><i class="fas fa-envelope me-1"></i>Email</label>
+                            <input type="email" name="email" class="form-control" th:value="${customer?.email}"
+                                placeholder="example@email.com">
                         </div>
+                        <!-- Số điện thoại -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Số điện thoại</label>
-                            <input type="text" name="phone" class="form-control" th:value="${customer.phone}">
+                            <label class="form-label"><i class="fas fa-phone me-1"></i>Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control" th:value="${customer?.phone}"
+                                placeholder="0912345678">
                         </div>
+                        <!-- Giới tính -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Địa chỉ</label>
-                            <input type="text" name="address" class="form-control" th:value="${customer.address}">
+                            <label class="form-label"><i class="fas fa-venus-mars me-1"></i>Giới tính</label>
+                            <select name="gender" class="form-select">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam" th:selected="${customer?.gender == 'Nam'}">Nam</option>
+                                <option value="Nữ" th:selected="${customer?.gender == 'Nữ'}">Nữ</option>
+                                <option value="Khác" th:selected="${customer?.gender == 'Khác'}">Khác</option>
+                            </select>
                         </div>
+                        <!-- Ngày sinh -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tên công ty</label>
+                            <label class="form-label"><i class="fas fa-birthday-cake me-1"></i>Ngày sinh</label>
+                            <input type="datetime-local" name="birthday" class="form-control"
+                                th:value="${customer?.birthday != null ? customer.birthday : ''}">
+                        </div>
+                        <!-- Địa chỉ -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Địa chỉ <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" name="address" class="form-control" th:value="${customer?.address}"
+                                required placeholder="Nhập địa chỉ">
+                        </div>
+                        <!-- Tên công ty -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-building me-1"></i>Tên công ty</label>
                             <input type="text" name="companyName" class="form-control"
-                                th:value="${customer.companyName}">
+                                th:value="${customer?.companyName}" placeholder="Nhập tên công ty (nếu có)">
                         </div>
                     </div>
+                    <hr>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save me-1"></i>

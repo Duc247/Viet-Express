@@ -3,19 +3,34 @@
     layout:decorate="~{admin/layout-admin}">
 
 <head>
-    <title>Quản lý Location</title>
+    <title>Quản lý Địa điểm</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2"><i class="fas fa-map-marker-alt me-2"></i>Quản lý Location (Địa điểm)</h1>
-            <a href="/admin/location/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-map-marker-alt"></i>Quản lý Địa điểm (Location)</h1>
+            <a href="/admin/location/create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Thêm mới
+            </a>
         </div>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Data Table -->
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
+                    <table class="table table-hover mb-0">
                         <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
@@ -24,34 +39,56 @@
                                 <th>Loại</th>
                                 <th>Địa chỉ</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th class="text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="loc : ${locations}">
-                                <td th:text="${loc.id}"></td>
+                                <td><code th:text="${loc.id}"></code></td>
                                 <td><code th:text="${loc.warehouseCode != null ? loc.warehouseCode : '-'}"></code></td>
-                                <td th:text="${loc.name}"></td>
+                                <td><strong th:text="${loc.name}"></strong></td>
                                 <td>
-                                    <span class="badge bg-primary" th:if="${loc.locationType.name() == 'WAREHOUSE'}">Kho
-                                        hàng</span>
-                                    <span class="badge bg-info" th:if="${loc.locationType.name() == 'SENDER'}">Người
-                                        gửi</span>
-                                    <span class="badge bg-warning"
-                                        th:if="${loc.locationType.name() == 'RECEIVER'}">Người nhận</span>
+                                    <span class="badge bg-primary" th:if="${loc.locationType == 'WAREHOUSE'}">
+                                        <i class="fas fa-warehouse me-1"></i>Kho hàng
+                                    </span>
+                                    <span class="badge bg-info" th:if="${loc.locationType == 'SENDER'}">
+                                        <i class="fas fa-user me-1"></i>Người gửi
+                                    </span>
+                                    <span class="badge bg-warning" th:if="${loc.locationType == 'RECEIVER'}">
+                                        <i class="fas fa-user-check me-1"></i>Người nhận
+                                    </span>
                                 </td>
                                 <td th:text="${loc.addressText}"></td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${loc.isActive}">Hoạt động</span>
-                                    <span class="badge bg-secondary" th:unless="${loc.isActive}">Ngừng</span>
+                                    <span class="badge bg-success" th:if="${loc.isActive}">
+                                        <i class="fas fa-check me-1"></i>Hoạt động
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${loc.isActive}">
+                                        <i class="fas fa-pause me-1"></i>Ngừng
+                                    </span>
                                 </td>
-                                <td>
-                                    <a th:href="@{/admin/location/edit/{id}(id=${loc.id})}"
-                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/location/edit/{id}(id=${loc.id})}" class="btn btn-warning"
+                                            title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/admin/location/toggle/{id}(id=${loc.id})}"
+                                            class="btn btn-secondary" title="Bật/Tắt">
+                                            <i class="fas fa-power-off"></i>
+                                        </a>
+                                        <a th:href="@{/admin/location/delete/{id}(id=${loc.id})}" class="btn btn-danger"
+                                            title="Xoá" onclick="return confirm('Bạn có chắc muốn xoá?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(locations)}">
-                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-inbox d-block"></i>
+                                    <span>Chưa có dữ liệu</span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

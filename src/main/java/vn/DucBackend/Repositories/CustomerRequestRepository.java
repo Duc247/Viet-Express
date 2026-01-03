@@ -39,5 +39,19 @@ public interface CustomerRequestRepository extends JpaRepository<CustomerRequest
     @Query("SELECT COUNT(r) FROM CustomerRequest r WHERE r.status = :status")
     Long countByStatus(@Param("status") CustomerRequest.RequestStatus status);
 
+    // Tìm requests được giao cho staff
+    List<CustomerRequest> findByAssignedStaffId(Long staffId);
+
+    // Tìm requests được giao cho manager
+    List<CustomerRequest> findByAssignedManagerId(Long managerId);
+
+    // Tìm requests được giao cho manager (dùng User entity)
+    @Query("SELECT r FROM CustomerRequest r WHERE r.assignedManager.id = :managerId ORDER BY r.managerAssignedAt DESC")
+    List<CustomerRequest> findByAssignedManager(@Param("managerId") Long managerId);
+
+    // Đếm số đơn mới được giao cho manager (trong 24h gần nhất)
+    @Query("SELECT COUNT(r) FROM CustomerRequest r WHERE r.assignedManager.id = :managerId AND r.managerAssignedAt >= :since")
+    Long countNewAssignmentsForManager(@Param("managerId") Long managerId, @Param("since") LocalDateTime since);
+
     boolean existsByRequestCode(String requestCode);
 }

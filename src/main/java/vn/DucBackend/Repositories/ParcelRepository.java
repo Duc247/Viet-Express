@@ -12,26 +12,57 @@ import java.util.Optional;
 @Repository
 public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 
-    Optional<Parcel> findByParcelCode(String parcelCode);
+        Optional<Parcel> findByParcelCode(String parcelCode);
 
-    List<Parcel> findByRequestId(Long requestId);
+        @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId")
+        List<Parcel> findByRequestId(@Param("requestId") Long requestId);
 
-    List<Parcel> findByStatus(Parcel.ParcelStatus status);
+        List<Parcel> findByStatus(Parcel.ParcelStatus status);
 
-    List<Parcel> findByCurrentShipperId(Long shipperId);
+        List<Parcel> findByCurrentShipperId(Long shipperId);
 
-    List<Parcel> findByCurrentTripId(Long tripId);
+        List<Parcel> findByCurrentTripId(Long tripId);
 
-    List<Parcel> findByCurrentLocationId(Long locationId);
+        List<Parcel> findByCurrentLocationId(Long locationId);
 
-    @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId ORDER BY p.createdAt")
-    List<Parcel> findByRequestIdOrderByCreatedAt(@Param("requestId") Long requestId);
+        @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId ORDER BY p.createdAt")
+        List<Parcel> findByRequestIdOrderByCreatedAt(@Param("requestId") Long requestId);
 
-    @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId")
-    Long countByRequestId(@Param("requestId") Long requestId);
+        @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId")
+        Long countByRequestId(@Param("requestId") Long requestId);
 
-    @Query("SELECT p FROM Parcel p WHERE p.currentShipper.id = :shipperId AND p.status IN ('PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY')")
-    List<Parcel> findActiveParcelsByShipper(@Param("shipperId") Long shipperId);
+        @Query("SELECT p FROM Parcel p WHERE p.currentShipper.id = :shipperId AND p.status IN ('PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY')")
+        List<Parcel> findActiveParcelsByShipper(@Param("shipperId") Long shipperId);
 
-    boolean existsByParcelCode(String parcelCode);
+        boolean existsByParcelCode(String parcelCode);
+
+        // Count parcels by status within a request
+        @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId AND p.status = 'DELIVERED'")
+        Long countDeliveredByRequestId(@Param("requestId") Long requestId);
+
+        @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId AND p.status = 'OUT_FOR_DELIVERY'")
+        Long countInDeliveryByRequestId(@Param("requestId") Long requestId);
+
+        @Query("SELECT COUNT(p) FROM Parcel p WHERE p.request.id = :requestId AND p.status NOT IN ('DELIVERED', 'OUT_FOR_DELIVERY')")
+        Long countPendingByRequestId(@Param("requestId") Long requestId);
+
+        // Search parcels
+        @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId AND " +
+                        "(LOWER(p.parcelCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        List<Parcel> searchByRequestIdAndKeyword(@Param("requestId") Long requestId, @Param("keyword") String keyword);
+
+        @Query("SELECT p FROM Parcel p WHERE p.request.id = :requestId AND p.status = :status")
+        List<Parcel> findByRequestIdAndStatus(@Param("requestId") Long requestId,
+                        @Param("status") Parcel.ParcelStatus status);
+
+        // Count by location and status (for Staff dashboard)
+        @Query("SELECT COUNT(p) FROM Parcel p WHERE p.currentLocation.id = :locationId AND p.status = :status")
+        Long countByCurrentLocationIdAndStatus(@Param("locationId") Long locationId,
+                        @Param("status") Parcel.ParcelStatus status);
+
+        // Find by location and status (for Warehouse page)
+        @Query("SELECT p FROM Parcel p WHERE p.currentLocation.id = :locationId AND p.status = :status")
+        List<Parcel> findByCurrentLocationIdAndStatus(@Param("locationId") Long locationId,
+                        @Param("status") Parcel.ParcelStatus status);
 }

@@ -32,6 +32,9 @@ public class Route {
     @Column(name = "estimated_time_hours", precision = 5, scale = 2)
     private BigDecimal estimatedTimeHours;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "is_active")
     private Boolean isActive;
 

@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ Role (Vai trò người dùng)
+ * Được sử dụng bởi: AdminPersonnelController, AdminSystemController
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -58,6 +62,14 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteRole(Long id) {
         roleRepository.deleteById(id);
+    }
+
+    @Override
+    public void toggleRoleStatus(Long id) {
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        role.setIsActive(!role.getIsActive());
+        roleRepository.save(role);
     }
 
     private RoleDTO toDTO(Role role) {

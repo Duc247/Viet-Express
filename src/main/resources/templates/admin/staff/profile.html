@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Chi tiết Nhân viên</title>
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-radius: 15px;
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #11998e;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #333;
+            margin-top: 0.25rem;
+        }
+
+        .badge-active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+
+        .badge-inactive {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-id-badge me-2"></i>Chi tiết Nhân viên
+            </h1>
+            <div class="btn-toolbar">
+                <a th:href="@{/admin/staff/edit/{id}(id=${staff.id})}" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                </a>
+                <a href="/admin/staff" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <h2 class="mb-1" th:text="${staff.fullName}">Tên nhân viên</h2>
+                    <p class="mb-2 opacity-75">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span th:text="${staff.email ?: 'Chưa cập nhật email'}">Email</span>
+                    </p>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span th:text="${staff.locationName ?: 'Chưa phân chi nhánh'}">Location</span>
+                    </p>
+                </div>
+                <div class="col-auto text-end">
+                    <span class="badge bg-light text-dark fs-6 d-block mb-2">
+                        <i class="fas fa-id-badge me-1"></i>ID: <span th:text="${staff.id}">1</span>
+                    </span>
+                    <span th:class="${staff.isActive ? 'badge-active' : 'badge-inactive'}">
+                        <i th:class="${staff.isActive ? 'fas fa-check-circle me-1' : 'fas fa-times-circle me-1'}"></i>
+                        <span th:text="${staff.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}">Status</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Thông tin cơ bản -->
+            <div class="col-lg-6 mb-4">
+                <div class="card info-card h-100">
+                    <div class="card-header bg-white border-0 pt-4 pb-2">
+                        <h5 class="mb-0"><i class="fas fa-info-circle text-success me-2"></i>Thông tin cơ bản</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-id-card me-1"></i>Họ và tên</div>
+                            <div class="info-value" th:text="${staff.fullName ?: 'Chưa cập nhật'}">Họ và tên</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-envelope me-1"></i>Email</div>
+                            <div class="info-value" th:text="${staff.email ?: 'Chưa cập nhật'}">Email</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-phone me-1"></i>Số điện thoại</div>
+                            <div class="info-value" th:text="${staff.phone ?: 'Chưa cập nhật'}">Số điện thoại</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin công việc -->
+            <div class="col-lg-6 mb-4">
+                <div class="card info-card h-100">
+                    <div class="card-header bg-white border-0 pt-4 pb-2">
+                        <h5 class="mb-0"><i class="fas fa-briefcase text-primary me-2"></i>Thông tin công việc</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-map-marker-alt me-1"></i>Chi nhánh</div>
+                            <div class="info-value" th:text="${staff.locationName ?: 'Chưa phân công'}">Chi nhánh</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-key me-1"></i>Location ID</div>
+                            <div class="info-value" th:text="${staff.locationId ?: 'N/A'}">Location ID</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</div>
+                            <div class="info-value">
+                                <span th:class="${staff.isActive ? 'badge bg-success' : 'badge bg-danger'}">
+                                    <span
+                                        th:text="${staff.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}">Status</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin tài khoản -->
+            <div class="col-lg-6 mb-4">
+                <div class="card info-card h-100">
+                    <div class="card-header bg-white border-0 pt-4 pb-2">
+                        <h5 class="mb-0"><i class="fas fa-user-shield text-warning me-2"></i>Thông tin tài khoản</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-user me-1"></i>Tài khoản liên kết</div>
+                            <div class="info-value" th:text="${staff.username ?: 'Không liên kết'}">Username</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-key me-1"></i>User ID</div>
+                            <div class="info-value" th:text="${staff.userId ?: 'N/A'}">User ID</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin hệ thống -->
+            <div class="col-lg-6 mb-4">
+                <div class="card info-card h-100">
+                    <div class="card-header bg-white border-0 pt-4 pb-2">
+                        <h5 class="mb-0"><i class="fas fa-cog text-secondary me-2"></i>Thông tin hệ thống</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-calendar-plus me-1"></i>Ngày tạo</div>
+                            <div class="info-value"
+                                th:text="${staff.createdAt != null ? #temporals.format(staff.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                Ngày tạo</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="fas fa-calendar-check me-1"></i>Cập nhật lần cuối</div>
+                            <div class="info-value"
+                                th:text="${staff.updatedAt != null ? #temporals.format(staff.updatedAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                Ngày cập nhật</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

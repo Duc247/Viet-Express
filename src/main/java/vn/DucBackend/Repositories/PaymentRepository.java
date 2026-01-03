@@ -12,32 +12,30 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    Optional<Payment> findByPaymentCode(String paymentCode);
+        Optional<Payment> findByPaymentCode(String paymentCode);
 
-    List<Payment> findByRequestId(Long requestId);
+        @Query("SELECT p FROM Payment p WHERE p.request.id = :requestId")
+        List<Payment> findByRequestId(@Param("requestId") Long requestId);
 
-    List<Payment> findByParcelId(Long parcelId);
+        List<Payment> findByParcelId(Long parcelId);
 
-    List<Payment> findByStatus(Payment.PaymentStatus status);
+        List<Payment> findByStatus(Payment.PaymentStatus status);
 
-    List<Payment> findByPaymentType(Payment.PaymentType paymentType);
+        List<Payment> findByPaymentType(Payment.PaymentType paymentType);
 
-    @Query("SELECT p FROM Payment p WHERE p.request.id = :requestId AND p.paymentType = :type")
-    Optional<Payment> findByRequestIdAndType(@Param("requestId") Long requestId,
-            @Param("type") Payment.PaymentType type);
+        @Query("SELECT p FROM Payment p WHERE p.request.id = :requestId AND p.paymentType = :type")
+        Optional<Payment> findByRequestIdAndType(@Param("requestId") Long requestId,
+                        @Param("type") Payment.PaymentType type);
 
-    @Query("SELECT p FROM Payment p WHERE p.status IN ('UNPAID', 'PARTIALLY_PAID')")
-    List<Payment> findUnpaidPayments();
+        @Query("SELECT p FROM Payment p WHERE p.status IN ('UNPAID', 'PARTIALLY_PAID')")
+        List<Payment> findUnpaidPayments();
 
-    @Query("SELECT SUM(p.expectedAmount) FROM Payment p WHERE p.request.id = :requestId")
-    java.math.BigDecimal sumExpectedAmountByRequestId(@Param("requestId") Long requestId);
+        @Query("SELECT SUM(p.expectedAmount) FROM Payment p WHERE p.request.id = :requestId")
+        java.math.BigDecimal sumExpectedAmountByRequestId(@Param("requestId") Long requestId);
 
-    @Query("SELECT SUM(p.paidAmount) FROM Payment p WHERE p.request.id = :requestId")
-    java.math.BigDecimal sumPaidAmountByRequestId(@Param("requestId") Long requestId);
+        @Query("SELECT SUM(p.paidAmount) FROM Payment p WHERE p.request.id = :requestId")
+        java.math.BigDecimal sumPaidAmountByRequestId(@Param("requestId") Long requestId);
 
-<<<<<<< Updated upstream
-    boolean existsByPaymentCode(String paymentCode);
-=======
         boolean existsByPaymentCode(String paymentCode);
 
         // Count payments by request
@@ -108,8 +106,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
                "LEFT JOIN FETCH r.sender " +
                "WHERE r.sender.id = :customerId")
         List<Payment> findByRequestSenderId(@Param("customerId") Long customerId);
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Chi tiết Chuyến xe</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-route me-2"></i>Chi tiết Chuyến xe</h1>
+            <div>
+                <a th:href="@{/admin/trip/{id}/edit(id=${trip.id})}" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Sửa
+                </a>
+                <a href="/admin/trip" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Thông tin chuyến xe -->
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-info-circle me-2"></i>Thông tin chuyến xe</div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="30%">ID Chuyến:</th>
+                                <td><code th:text="${trip.id}"></code></td>
+                            </tr>
+                            <tr>
+                                <th>Loại chuyến:</th>
+                                <td>
+                                    <span class="badge bg-primary" th:if="${trip.tripType == 'PICKUP'}">Lấy hàng</span>
+                                    <span class="badge bg-success" th:if="${trip.tripType == 'DELIVERY'}">Giao
+                                        hàng</span>
+                                    <span class="badge bg-info" th:if="${trip.tripType == 'TRANSFER'}">Chuyển kho</span>
+                                    <span class="badge bg-warning" th:if="${trip.tripType == 'RETURN'}">Hoàn trả</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>
+                                    <span class="badge bg-secondary" th:if="${trip.status == 'CREATED'}">Mới tạo</span>
+                                    <span class="badge bg-primary" th:if="${trip.status == 'IN_PROGRESS'}">Đang thực
+                                        hiện</span>
+                                    <span class="badge bg-success" th:if="${trip.status == 'COMPLETED'}">Hoàn
+                                        thành</span>
+                                    <span class="badge bg-dark" th:if="${trip.status == 'CANCELLED'}">Đã hủy</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Tải trọng:</th>
+                                <td>
+                                    <span class="badge bg-secondary"
+                                        th:if="${trip.capacityStatus == 'EMPTY'}">Trống</span>
+                                    <span class="badge bg-info" th:if="${trip.capacityStatus == 'AVAILABLE'}">Còn
+                                        chỗ</span>
+                                    <span class="badge bg-danger" th:if="${trip.capacityStatus == 'FULL'}">Đầy</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>COD cần thu:</th>
+                                <td><strong class="text-danger"
+                                        th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'NONE') + ' đ' : '0 đ'}"></strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ghi chú:</th>
+                                <td th:text="${trip.note ?: '-'}"></td>
+                            </tr>
+                            <tr>
+                                <th>Mô tả:</th>
+                                <td th:text="${trip.description ?: '-'}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lộ trình -->
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-map-marked-alt me-2"></i>Lộ trình</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h6><i class="fas fa-play-circle text-success me-1"></i> Điểm bắt đầu</h6>
+                                <p th:text="${trip.startLocationName ?: 'Chưa xác định'}" class="mb-0"></p>
+                            </div>
+                            <div class="col-md-2 text-center align-self-center">
+                                <i class="fas fa-arrow-right fa-2x text-muted"></i>
+                            </div>
+                            <div class="col-md-5">
+                                <h6><i class="fas fa-stop-circle text-danger me-1"></i> Điểm kết thúc</h6>
+                                <p th:text="${trip.endLocationName ?: 'Chưa xác định'}" class="mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thời gian -->
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-clock me-2"></i>Thời gian</div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="30%">Ngày tạo:</th>
+                                <td
+                                    th:text="${trip.createdAt != null ? #temporals.format(trip.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Bắt đầu:</th>
+                                <td
+                                    th:text="${trip.startedAt != null ? #temporals.format(trip.startedAt, 'dd/MM/yyyy HH:mm') : 'Chưa bắt đầu'}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Kết thúc:</th>
+                                <td
+                                    th:text="${trip.endedAt != null ? #temporals.format(trip.endedAt, 'dd/MM/yyyy HH:mm') : 'Chưa kết thúc'}">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Shipper -->
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-motorcycle me-2"></i>Shipper</div>
+                    <div class="card-body">
+                        <p th:if="${trip.shipperName != null}">
+                            <strong th:text="${trip.shipperName}"></strong>
+                        </p>
+                        <p th:unless="${trip.shipperName != null}" class="text-muted">Chưa gán shipper</p>
+                    </div>
+                </div>
+
+                <!-- Phương tiện -->
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-truck me-2"></i>Phương tiện</div>
+                    <div class="card-body">
+                        <p th:if="${trip.vehicleId != null}" th:text="${trip.vehiclePlateNumber}"></p>
+                        <p th:unless="${trip.vehicleId != null}" class="text-muted">Chưa gán phương tiện</p>
+                    </div>
+                </div>
+
+                <!-- Đơn hàng -->
+                <div class="card mb-4" th:if="${trip.requestId != null}">
+                    <div class="card-header"><i class="fas fa-file-invoice me-2"></i>Đơn hàng</div>
+                    <div class="card-body">
+                        <p><strong>Mã đơn:</strong> <code th:text="${trip.requestCode}"></code></p>
+                        <a th:href="@{/admin/request/{id}(id=${trip.requestId})}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i> Xem đơn hàng
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hành động -->
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-cogs me-2"></i>Hành động</div>
+                    <div class="card-body d-grid gap-2">
+                        <a th:href="@{/admin/trip/{id}/edit(id=${trip.id})}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i> Chỉnh sửa
+                        </a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-1"></i> Xóa chuyến xe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xóa chuyến xe #<span th:text="${trip.id}"></span>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form th:action="@{/admin/trip/{id}/delete(id=${trip.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

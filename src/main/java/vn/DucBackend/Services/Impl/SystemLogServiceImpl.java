@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ SystemLog (Nhật ký hệ thống)
+ * Được sử dụng bởi: AdminSystemController (Xem log hệ thống)
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -108,6 +112,16 @@ public class SystemLogServiceImpl implements SystemLogService {
         logRepository.deleteAll(oldLogs);
     }
 
+    @Override
+    public void deleteLog(Long id) {
+        logRepository.deleteById(id);
+    }
+
+    @Override
+    public void clearAllLogs() {
+        logRepository.deleteAll();
+    }
+
     private SystemLogDTO createLog(SystemLog.LogLevel level, String moduleName, String actionType, Long actorId,
             String targetId, String details, String ipAddress, String userAgent) {
         SystemLog log = new SystemLog();
@@ -133,6 +147,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         if (log.getActor() != null) {
             dto.setActorId(log.getActor().getId());
             dto.setActorName(log.getActor().getUsername());
+            dto.setActorUsername(log.getActor().getUsername());
         }
         dto.setTargetId(log.getTargetId());
         dto.setLogDetails(log.getLogDetails());

@@ -39,6 +39,9 @@ public class Vehicle {
     @Column(name = "capacity_volume", precision = 10, scale = 2)
     private BigDecimal capacityVolume;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
     private VehicleStatus status;

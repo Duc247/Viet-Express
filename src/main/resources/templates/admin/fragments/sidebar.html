@@ -2,157 +2,184 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <body>
-    <nav th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse py-3 border-end"
-        style="min-height: 100vh;">
-        <div class="position-sticky pt-3">
+    <nav th:fragment="sidebar" class="sidebar py-3" id="sidebarMenu">
+        <div class="position-sticky">
             <!-- Tổng quan -->
-            <h6 class="sidebar-heading px-3 mt-2 mb-1 text-muted text-uppercase">
+            <h6 class="sidebar-heading">
                 <span>Tổng quan</span>
             </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI == '/admin/dashboard' ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link" th:classappend="${requestURI == '/admin/dashboard' ? 'active' : ''}"
                         href="/admin/dashboard">
-                        <i class="fas fa-home me-2"></i> Dashboard
+                        <i class="fas fa-chart-pie"></i> Dashboard
                     </a>
                 </li>
             </ul>
 
             <!-- Vận hành -->
-            <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase"><span>Vận hành</span></h6>
+            <h6 class="sidebar-heading">
+                <span><i class="fas fa-cogs me-1"></i> Vận hành</span>
+            </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/request') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/request') ? 'active' : ''}"
                         href="/admin/request">
-                        <i class="fas fa-file-invoice me-2"></i> CustomerRequest
+                        <i class="fas fa-file-invoice"></i> Yêu cầu KH
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/parcel') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/parcel') ? 'active' : ''}"
                         href="/admin/parcel">
-                        <i class="fas fa-box me-2"></i> Parcel
+                        <i class="fas fa-box"></i> Kiện hàng
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/trip') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/trip') ? 'active' : ''}"
                         href="/admin/trip">
-                        <i class="fas fa-route me-2"></i> Trip
+                        <i class="fas fa-route"></i> Chuyến xe
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/payment') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/payment') ? 'active' : ''}"
                         href="/admin/payment">
-                        <i class="fas fa-credit-card me-2"></i> Payment
+                        <i class="fas fa-credit-card"></i> Thanh toán
                     </a>
                 </li>
             </ul>
 
             <!-- Tài nguyên -->
-            <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase"><span>Tài nguyên</span></h6>
+            <h6 class="sidebar-heading">
+                <span><i class="fas fa-cubes me-1"></i> Tài nguyên</span>
+            </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/location') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/location') ? 'active' : ''}"
                         href="/admin/location">
-                        <i class="fas fa-map-marker-alt me-2"></i> Location
+                        <i class="fas fa-map-marker-alt"></i> Địa điểm
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/route') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/route') ? 'active' : ''}"
                         href="/admin/route">
-                        <i class="fas fa-project-diagram me-2"></i> Route
+                        <i class="fas fa-project-diagram"></i> Tuyến đường
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/vehicle') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/vehicle') ? 'active' : ''}"
                         href="/admin/vehicle">
-                        <i class="fas fa-truck-moving me-2"></i> Vehicle
+                        <i class="fas fa-truck"></i> Phương tiện
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/servicetype') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/servicetype') ? 'active' : ''}"
                         href="/admin/servicetype">
-                        <i class="fas fa-tags me-2"></i> ServiceType
+                        <i class="fas fa-tags"></i> Loại dịch vụ
                     </a>
                 </li>
             </ul>
 
             <!-- Nhân sự -->
-            <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase"><span>Nhân sự</span></h6>
+            <h6 class="sidebar-heading">
+                <span><i class="fas fa-users me-1"></i> Nhân sự</span>
+            </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/user') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/user') ? 'active' : ''}"
                         href="/admin/user">
-                        <i class="fas fa-users me-2"></i> User
+                        <i class="fas fa-user-cog"></i> Tài khoản
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/customer') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/customer') ? 'active' : ''}"
                         href="/admin/customer">
-                        <i class="fas fa-user-tie me-2"></i> Customer
+                        <i class="fas fa-user-tie"></i> Khách hàng
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/shipper') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/shipper') ? 'active' : ''}"
                         href="/admin/shipper">
-                        <i class="fas fa-biking me-2"></i> Shipper
+                        <i class="fas fa-motorcycle"></i> Shipper
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/staff') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/staff') ? 'active' : ''}"
                         href="/admin/staff">
-                        <i class="fas fa-id-badge me-2"></i> Staff
+                        <i class="fas fa-id-badge"></i> Nhân viên
                     </a>
                 </li>
             </ul>
 
             <!-- Marketing -->
-            <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase"><span>Marketing</span></h6>
+            <h6 class="sidebar-heading">
+                <span><i class="fas fa-bullhorn me-1"></i> Marketing</span>
+            </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/casestudy') ? 'active fw-bold text-primary' : ''}"
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/casestudy') ? 'active' : ''}"
                         href="/admin/casestudy">
-                        <i class="fas fa-star me-2"></i> CaseStudy
+                        <i class="fas fa-star"></i> Case Study
                     </a>
                 </li>
             </ul>
 
             <!-- Hệ thống -->
-            <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted text-uppercase"><span>Hệ thống</span></h6>
+            <h6 class="sidebar-heading">
+                <span><i class="fas fa-server me-1"></i> Hệ thống</span>
+            </h6>
+            <ul class="nav flex-column mb-4">
+                <li class="nav-item">
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/role') ? 'active' : ''}"
+                        href="/admin/role">
+                        <i class="fas fa-user-shield"></i> Vai trò
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/system-config') ? 'active' : ''}"
+                        href="/admin/system-config">
+                        <i class="fas fa-cogs"></i> Cấu hình hệ thống
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/actiontype') ? 'active' : ''}"
+                        href="/admin/actiontype">
+                        <i class="fas fa-bolt"></i> Loại thao tác
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/systemlog') ? 'active' : ''}"
+                        href="/admin/systemlog">
+                        <i class="fas fa-history"></i> Lịch sử hệ thống
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Đăng xuất -->
+            <hr>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/role') ? 'active fw-bold text-primary' : ''}"
-                        href="/admin/role">
-                        <i class="fas fa-user-shield me-2"></i> Role
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/actiontype') ? 'active fw-bold text-primary' : ''}"
-                        href="/admin/actiontype">
-                        <i class="fas fa-bolt me-2"></i> ActionType
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark"
-                        th:classappend="${requestURI != null and requestURI.startsWith('/admin/systemlog') ? 'active fw-bold text-primary' : ''}"
-                        href="/admin/systemlog">
-                        <i class="fas fa-history me-2"></i> SystemLog
-                    </a>
+                    <form th:action="@{/auth/logout}" method="post" class="m-0">
+                        <button type="submit" class="nav-link text-danger btn btn-link p-0 w-100 text-start">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>

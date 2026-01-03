@@ -1,6 +1,8 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.CustomerDTO;
@@ -13,19 +15,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý nghiệp vụ Customer
+ * Được sử dụng bởi: AdminPersonnelController (CRUD Customer)
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CustomerServiceImpl implements CustomerService {
 
+    @Autowired
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Lấy danh sách tất cả Customer
+     * Sử dụng bởi: AdminPersonnelController.customerList() - GET /admin/customer
+     */
     @Override
     public List<CustomerDTO> findAllCustomers() {
         return customerRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Tìm Customer theo ID
+     * Sử dụng bởi: AdminPersonnelController.customerEditForm() - GET
+     * /admin/customer/edit/{id}
+     */
     @Override
     public Optional<CustomerDTO> findCustomerById(Long id) {
         return customerRepository.findById(id).map(this::toDTO);
@@ -51,11 +67,21 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findBusinessCustomers().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Tìm kiếm Customer theo keyword (name, phone, email)
+     * Sử dụng bởi: AdminPersonnelController.customerSearch() - GET
+     * /admin/customer/search
+     */
     @Override
     public List<CustomerDTO> searchCustomers(String keyword) {
         return customerRepository.searchByKeyword(keyword).stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Tạo Customer mới
+     * Sử dụng bởi: AdminPersonnelController.customerCreate() - POST
+     * /admin/customer/create
+     */
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
         Customer customer = new Customer();
@@ -63,12 +89,22 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setUser(userRepository.findById(dto.getUserId()).orElse(null));
         }
         customer.setName(dto.getName());
+        customer.setFullName(dto.getFullName() != null ? dto.getFullName() : dto.getName());
         customer.setPhone(dto.getPhone());
         customer.setEmail(dto.getEmail());
         customer.setCompanyName(dto.getCompanyName());
+        customer.setGender(dto.getGender());
+        customer.setAddress(dto.getAddress());
+        customer.setBirthday(dto.getBirthday());
+        customer.setDescription(dto.getDescription());
         return toDTO(customerRepository.save(customer));
     }
 
+    /**
+     * Cập nhật thông tin Customer
+     * Sử dụng bởi: AdminPersonnelController.customerUpdate() - POST
+     * /admin/customer/edit/{id}
+     */
     @Override
     public CustomerDTO updateCustomer(Long id, CustomerDTO dto) {
         Customer customer = customerRepository.findById(id)
@@ -81,9 +117,32 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setEmail(dto.getEmail());
         if (dto.getCompanyName() != null)
             customer.setCompanyName(dto.getCompanyName());
+        if (dto.getUserId() != null) {
+            customer.setUser(userRepository.findById(dto.getUserId()).orElse(null));
+        }
+        if (dto.getGender() != null) {
+            customer.setGender(dto.getGender());
+        }
+        if (dto.getAddress() != null) {
+            customer.setAddress(dto.getAddress());
+        }
+        if (dto.getBirthday() != null) {
+            customer.setBirthday(dto.getBirthday());
+        }
+        if (dto.getFullName() != null) {
+            customer.setFullName(dto.getFullName());
+        }
+        if (dto.getDescription() != null) {
+            customer.setDescription(dto.getDescription());
+        }
         return toDTO(customerRepository.save(customer));
     }
 
+    /**
+     * Xóa Customer theo ID
+     * Sử dụng bởi: AdminPersonnelController.customerDelete() - POST
+     * /admin/customer/delete/{id}
+     */
     @Override
     public void deleteCustomer(Long id) {
         customerRepository.deleteById(id);
@@ -97,9 +156,14 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setUsername(customer.getUser().getUsername());
         }
         dto.setName(customer.getName());
+        dto.setFullName(customer.getFullName());
         dto.setPhone(customer.getPhone());
         dto.setEmail(customer.getEmail());
+        dto.setAddress(customer.getAddress());
+        dto.setGender(customer.getGender());
+        dto.setBirthday(customer.getBirthday());
         dto.setCompanyName(customer.getCompanyName());
+        dto.setDescription(customer.getDescription());
         dto.setCreatedAt(customer.getCreatedAt());
         dto.setUpdatedAt(customer.getUpdatedAt());
         return dto;

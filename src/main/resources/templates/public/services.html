@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/master-layout}">
+
+<head>
+    <title>Dịch vụ - Logistics</title>
+    <style>
+        .services-hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 58, 95, 0.88) 100%),
+                url('/images/container2.jpg') center/cover no-repeat;
+            padding: 5rem 0;
+            color: white;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-card .card-img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .service-card .card-body {
+            padding: 1.75rem;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .service-card h5 {
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-card p {
+            color: #64748b;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .price-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+
+        <!-- Hero Section -->
+        <section class="services-hero text-center">
+            <div class="container">
+                <span class="badge bg-white text-primary px-3 py-2 mb-3" style="font-size: 0.9rem;">
+                    <i class="fas fa-concierge-bell me-2"></i>Dịch vụ của chúng tôi
+                </span>
+                <h1 class="display-5 fw-bold mb-3">Các Dịch Vụ Vận Chuyển</h1>
+                <p class="lead opacity-75 mb-0">Đa dạng giải pháp logistics phù hợp với mọi nhu cầu của bạn</p>
+            </div>
+        </section>
+
+        <!-- Services Grid -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6" th:each="service : ${services}">
+                        <div class="service-card">
+                            <img th:src="${service.imageUrl ?: '/images/placeholder.jpg'}" class="card-img"
+                                alt="Service Image" onerror="this.src='/images/placeholder.jpg'">
+                            <div class="card-body">
+                                <div class="service-icon">
+                                    <i th:class="${'fas ' + (service.icon ?: 'fa-truck')}"></i>
+                                </div>
+                                <h5 th:text="${service.name}">Tên dịch vụ</h5>
+                                <p th:text="${service.description}">Mô tả ngắn về dịch vụ...</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-badge">
+                                        <span
+                                            th:text="${#numbers.formatDecimal(service.pricePerKm, 0, 'COMMA', 0, 'POINT')}">2000</span>
+                                        đ/km
+                                    </span>
+                                    <a th:href="@{/services/{slug}(slug=${service.slug ?: service.code})}"
+                                        class="view-btn">
+                                        Xem chi tiết <i class="fas fa-arrow-right ms-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(services)}">
+                        <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted">Chưa có dịch vụ nào</h4>
+                        <p class="text-muted">Vui lòng quay lại sau</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-5 text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="container">
+                <h3 class="text-white fw-bold mb-3">Cần tư vấn thêm?</h3>
+                <p class="text-white opacity-75 mb-4">Liên hệ ngay với chúng tôi để được hỗ trợ tốt nhất</p>
+                <a href="/public/request" class="btn btn-light btn-lg px-5">
+                    <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu báo giá
+                </a>
+            </div>
+        </section>
+
+    </div>
+</body>
+
+</html>

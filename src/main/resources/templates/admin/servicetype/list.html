@@ -3,50 +3,102 @@
     layout:decorate="~{admin/layout-admin}">
 
 <head>
-    <title>Quản lý ServiceType</title>
+    <title>Quản lý Loại dịch vụ</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2"><i class="fas fa-tags me-2"></i>Quản lý ServiceType (Loại dịch vụ)</h1>
-            <a href="/admin/servicetype/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-tags"></i>Quản lý Loại dịch vụ (ServiceType)</h1>
+            <a href="/admin/servicetype/create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Thêm mới
+            </a>
         </div>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Data Table -->
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
+                    <table class="table table-hover mb-0">
                         <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
-                                <th>Mã</th>
+                                <th>Icon</th>
+                                <th>Mã / Slug</th>
                                 <th>Tên dịch vụ</th>
-                                <th>Mô tả</th>
                                 <th>Giá/km</th>
-                                <th>Tốc độ TB (km/h)</th>
+                                <th>Tốc độ</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th class="text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="st : ${serviceTypes}">
-                                <td th:text="${st.id}"></td>
-                                <td><code th:text="${st.code}"></code></td>
-                                <td th:text="${st.name}"></td>
-                                <td th:text="${st.description}"></td>
-                                <td th:text="${st.pricePerKm != null ? st.pricePerKm + 'đ' : '-'}"></td>
-                                <td th:text="${st.averageSpeedKmh}"></td>
+                                <td><code th:text="${st.id}"></code></td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${st.isActive}">Hoạt động</span>
-                                    <span class="badge bg-secondary" th:unless="${st.isActive}">Ngừng</span>
+                                    <i th:class="${'fas ' + (st.icon ?: 'fa-tag') + ' text-primary'}"
+                                        style="font-size: 1.25rem;"></i>
                                 </td>
                                 <td>
-                                    <a th:href="@{/admin/servicetype/edit/{id}(id=${st.id})}"
-                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                    <code th:text="${st.code}"></code><br>
+                                    <small class="text-muted" th:text="${st.slug ?: '-'}">slug</small>
+                                </td>
+                                <td>
+                                    <strong th:text="${st.name}"></strong><br>
+                                    <small class="text-muted"
+                                        th:text="${#strings.abbreviate(st.description ?: '', 30)}"></small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success"
+                                        th:text="${st.pricePerKm != null ? #numbers.formatDecimal(st.pricePerKm, 0, 'COMMA', 0, 'POINT') + ' đ' : '-'}"></span>
+                                </td>
+                                <td th:text="${st.averageSpeedKmh != null ? st.averageSpeedKmh + ' km/h' : '-'}"></td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${st.isActive}">
+                                        <i class="fas fa-check me-1"></i>Hoạt động
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${st.isActive}">
+                                        <i class="fas fa-pause me-1"></i>Ngừng
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/services/{slug}(slug=${st.slug ?: st.code})}"
+                                            class="btn btn-info" title="Xem trang public" target="_blank">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:href="@{/admin/servicetype/edit/{id}(id=${st.id})}"
+                                            class="btn btn-warning" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/admin/servicetype/toggle/{id}(id=${st.id})}"
+                                            class="btn btn-secondary" title="Bật/Tắt">
+                                            <i class="fas fa-power-off"></i>
+                                        </a>
+                                        <a th:href="@{/admin/servicetype/delete/{id}(id=${st.id})}"
+                                            class="btn btn-danger" title="Xoá"
+                                            onclick="return confirm('Bạn có chắc muốn xoá?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(serviceTypes)}">
-                                <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu</td>
+                                <td colspan="8" class="empty-state">
+                                    <i class="fas fa-inbox d-block"></i>
+                                    <span>Chưa có dữ liệu</span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

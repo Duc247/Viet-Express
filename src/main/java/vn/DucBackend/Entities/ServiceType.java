@@ -21,11 +21,23 @@ public class ServiceType {
     @Column(name = "code", unique = true, nullable = false, length = 50)
     private String code;
 
+    @Column(name = "slug", unique = true, length = 100)
+    private String slug;
+
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "icon", length = 50)
+    private String icon; // Font Awesome icon class, e.g. "fa-truck"
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "long_description", columnDefinition = "TEXT")
+    private String longDescription;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Column(name = "price_per_km", precision = 15, scale = 2)
     private BigDecimal pricePerKm;

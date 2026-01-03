@@ -1,14 +1,35 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <body>
-    <header th:fragment="header" class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Logistics Manager</a>
-        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-nav">
-            <div class="nav-item text-nowrap">
-                <a class="nav-link px-3" href="/auth/login">Đăng xuất <i class="fas fa-sign-out-alt ms-1"></i></a>
+    <header th:fragment="header" class="navbar staff-header navbar-dark navbar-expand-md p-0">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/staff/dashboard}">
+                <i class="fas fa-warehouse"></i>
+                <span>Nhân Viên</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" role="button" data-bs-toggle="dropdown">
+                        <div class="avatar-circle bg-white text-purple me-2" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#8b5cf6;">
+                            <span sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1)}">S</span>
+                        </div>
+                        <span class="d-none d-md-inline" sec:authentication="name">Staff</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/staff/profile}"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/auth/logout}" method="post" class="m-0">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>

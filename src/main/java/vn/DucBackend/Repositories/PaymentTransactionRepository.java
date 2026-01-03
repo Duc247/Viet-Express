@@ -34,4 +34,11 @@ public interface PaymentTransactionRepository extends JpaRepository<PaymentTrans
 
     @Query("SELECT pt FROM PaymentTransaction pt WHERE pt.transactionRef = :ref")
     java.util.Optional<PaymentTransaction> findByTransactionRef(@Param("ref") String transactionRef);
+
+    @Query("SELECT pt FROM PaymentTransaction pt WHERE pt.payment.id = :paymentId " +
+            "AND (LOWER(pt.transactionRef) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(pt.gatewayResponse) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "ORDER BY pt.transactionAt DESC")
+    List<PaymentTransaction> findByPaymentIdAndKeyword(@Param("paymentId") Long paymentId,
+            @Param("keyword") String keyword);
 }

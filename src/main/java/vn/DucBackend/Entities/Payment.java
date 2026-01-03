@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class Payment {
 
     public enum PaymentType {
-        SHIPPING_FEE, COD
+        SHIPPING_FEE, COD, DEPOSIT
     }
 
     public enum PayerType {
@@ -26,7 +26,22 @@ public class Payment {
     }
 
     public enum PaymentStatus {
-        UNPAID, PARTIALLY_PAID, PAID, REFUNDED
+        UNPAID, // Chưa thu
+        PARTIALLY_PAID, // Đã thu một phần
+        PAID, // Đã thanh toán (cho phí ship)
+        COLLECTED_FROM_RECEIVER, // Đã thu COD từ người nhận (shipper đã thu)
+        PAID_TO_SENDER, // Đã trả COD cho người gửi (manager xác nhận)
+        REFUNDED // Đã hoàn tiền
+    }
+
+    /**
+     * Phạm vi thanh toán:
+     * FULL_REQUEST - Thanh toán toàn bộ cho cả đơn hàng (gắn với request_id,
+     * trip_id = null)
+     * PER_TRIP - Thanh toán theo từng chuyến (gắn với trip_id)
+     */
+    public enum PaymentScope {
+        FULL_REQUEST, PER_TRIP
     }
 
     @Id
@@ -42,6 +57,10 @@ public class Payment {
     @JoinColumn(name = "parcel_id")
     private Parcel parcel;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_id")
+    private Trip trip;
+
     @Column(name = "payment_code", unique = true, length = 50)
     private String paymentCode;
 
@@ -56,6 +75,13 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     @Column(name = "receiver_type", length = 20)
     private ReceiverType receiverType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_scope", length = 20)
+    private PaymentScope paymentScope;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "expected_amount", precision = 15, scale = 2)
     private BigDecimal expectedAmount;
