@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.StaffDTO;
-import vn.DucBackend.Entities.Location;
 import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Entities.Location;
 import vn.DucBackend.Repositories.StaffRepository;
@@ -74,22 +73,12 @@ public class StaffServiceImpl implements StaffService {
 		if (dto.getLocationId() != null) {
 			Location location = locationRepository.findById(dto.getLocationId())
 					.orElseThrow(() -> new RuntimeException("Location not found"));
-<<<<<<< Updated upstream
-			// Validation: Staff phải gắn location có type là WAREHOUSE
-			if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
-				throw new RuntimeException("Staff phải được gắn với location có type là WAREHOUSE!");
-			}
-			staff.setLocation(location);
-		} else {
-			throw new RuntimeException("Staff bắt buộc phải gắn với một location có type là WAREHOUSE!");
-=======
 			if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
 				throw new RuntimeException("Staff phải gắn với location có type là WAREHOUSE!");
 			}
 			staff.setLocation(location);
 		} else {
-			throw new RuntimeException("Staff bắt buộc phải gắn với một location (warehouse)!");
->>>>>>> Stashed changes
+			throw new RuntimeException("Staff bắt buộc phải gắn với một location có type là WAREHOUSE!");
 		}
 		staff.setFullName(dto.getFullName());
 		staff.setPhone(dto.getPhone());
@@ -118,22 +107,12 @@ public class StaffServiceImpl implements StaffService {
 		if (dto.getLocationId() != null) {
 			Location location = locationRepository.findById(dto.getLocationId())
 					.orElseThrow(() -> new RuntimeException("Location not found"));
-<<<<<<< Updated upstream
-			// Validation: Staff phải gắn location có type là WAREHOUSE
-			if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
-				throw new RuntimeException("Staff phải được gắn với location có type là WAREHOUSE!");
-			}
-			staff.setLocation(location);
-		} else if (staff.getLocation() == null) {
-			throw new RuntimeException("Staff bắt buộc phải gắn với một location có type là WAREHOUSE!");
-=======
 			if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
 				throw new RuntimeException("Staff phải gắn với location có type là WAREHOUSE!");
 			}
 			staff.setLocation(location);
-		} else {
-			throw new RuntimeException("Staff bắt buộc phải gắn với một location (warehouse)!");
->>>>>>> Stashed changes
+		} else if (staff.getLocation() == null) {
+			throw new RuntimeException("Staff bắt buộc phải gắn với một location có type là WAREHOUSE!");
 		}
 		if (dto.getIsActive() != null)
 			staff.setIsActive(dto.getIsActive());

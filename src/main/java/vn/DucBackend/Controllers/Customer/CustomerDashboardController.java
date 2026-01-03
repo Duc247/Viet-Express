@@ -2,10 +2,7 @@ package vn.DucBackend.Controllers.Customer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-<<<<<<< Updated upstream
 import org.springframework.transaction.annotation.Transactional;
-=======
->>>>>>> Stashed changes
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Repositories.CustomerRequestRepository;
+import vn.DucBackend.Repositories.PaymentRepository;
 
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class CustomerDashboardController {
     private CustomerRequestRepository customerRequestRepository;
 
     @Autowired
-    private vn.DucBackend.Repositories.PaymentRepository paymentRepository;
+    private PaymentRepository paymentRepository;
 
     private Long getCustomerIdFromSession(HttpSession session) {
         Object customerId = session.getAttribute("customerId");
@@ -38,10 +36,7 @@ public class CustomerDashboardController {
     }
 
     @GetMapping("/dashboard")
-<<<<<<< Updated upstream
     @Transactional(readOnly = true)  // Đảm bảo transaction mở trong suốt method
-=======
->>>>>>> Stashed changes
     public String dashboard(Model model, HttpSession session) {
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
@@ -58,14 +53,8 @@ public class CustomerDashboardController {
         long deliveredOrders = recentOrders.stream().filter(o -> "DELIVERED".equals(o.getStatus().name())).count();
 
         // 3. Tính toán tiền nợ (Tổng Cần trả - Tổng Đã trả)
-<<<<<<< Updated upstream
         // Sử dụng query method với JOIN FETCH để tránh LazyInitializationException
         java.math.BigDecimal totalUnpaid = paymentRepository.findByRequestSenderId(customerId).stream()
-=======
-        java.math.BigDecimal totalUnpaid = paymentRepository.findAll().stream()
-                .filter(p -> p.getRequest().getSender() != null
-                        && p.getRequest().getSender().getId().equals(customerId))
->>>>>>> Stashed changes
                 .map(p -> p.getExpectedAmount()
                         .subtract(p.getPaidAmount() != null ? p.getPaidAmount() : java.math.BigDecimal.ZERO))
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);

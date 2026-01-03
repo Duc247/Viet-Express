@@ -91,13 +91,10 @@ public class CustomerOrderCreateController {
             @RequestParam(value = "distanceKm", required = false) BigDecimal distanceKm,
             @RequestParam(value = "note", required = false) String note,
             @RequestParam(value = "weight", required = false) BigDecimal weight,
-<<<<<<< Updated upstream
             @RequestParam(value = "parcelCount", defaultValue = "1") Integer parcelCount,
             @RequestParam(value = "lengthCm", required = false) BigDecimal lengthCm,
             @RequestParam(value = "widthCm", required = false) BigDecimal widthCm,
             @RequestParam(value = "heightCm", required = false) BigDecimal heightCm,
-=======
->>>>>>> Stashed changes
             HttpServletRequest request,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
@@ -161,26 +158,20 @@ public class CustomerOrderCreateController {
             receiver = receiverOpt.get();
         }
 
-<<<<<<< Updated upstream
         // Validate service type - get from request parameter
         if (serviceTypeId == null) {
             // Try to get from serviceType parameter (old format)
             String serviceTypeStr = request.getParameter("serviceType");
-            if (serviceTypeStr != null) {
+            if (serviceTypeStr != null && !serviceTypeStr.trim().isEmpty()) {
                 // Map old service type codes to IDs
-                serviceTypeId = serviceTypeRepository.findByCode(serviceTypeStr)
+                serviceTypeId = serviceTypeRepository.findByCode(serviceTypeStr.trim())
                         .map(st -> st.getId())
                         .orElse(null);
             }
         }
-        
+
         if (serviceTypeId == null) {
             serviceTypeId = serviceTypeRepository.findByIsActiveTrue().stream()
-=======
-        // Validate service type
-        if (serviceTypeId == null) {
-            serviceTypeId = serviceTypeRepository.findAll().stream()
->>>>>>> Stashed changes
                     .findFirst()
                     .map(st -> st.getId())
                     .orElse(null);

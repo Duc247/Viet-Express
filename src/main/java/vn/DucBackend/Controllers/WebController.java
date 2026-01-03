@@ -1,11 +1,7 @@
 package vn.DucBackend.Controllers;
 
-<<<<<<< Updated upstream
-=======
 import java.math.BigDecimal;
 import java.util.Optional;
-
->>>>>>> Stashed changes
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,14 +13,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import vn.DucBackend.DTO.CaseStudyDTO;
 import vn.DucBackend.DTO.CustomerDTO;
-<<<<<<< Updated upstream
-import vn.DucBackend.DTO.ServiceTypeDTO;
-import vn.DucBackend.Services.CaseStudyService;
-import vn.DucBackend.Services.CustomerService;
-import vn.DucBackend.Services.ServiceTypeService;
-
-import java.util.Optional;
-=======
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.DTO.ServiceTypeDTO;
 import vn.DucBackend.Entities.Customer;
@@ -37,7 +25,6 @@ import vn.DucBackend.Services.CustomerRequestService;
 import vn.DucBackend.Services.CustomerService;
 import vn.DucBackend.Services.EmailService;
 import vn.DucBackend.Services.ServiceTypeService;
->>>>>>> Stashed changes
 
 /**
  * Web Controller - Chỉ xử lý các trang PUBLIC (không cần đăng nhập)
@@ -60,8 +47,6 @@ public class WebController {
     @Autowired
     private CustomerService customerService;
 
-<<<<<<< Updated upstream
-=======
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -76,8 +61,6 @@ public class WebController {
 
     @Autowired
     private EmailService emailService;
-
->>>>>>> Stashed changes
     // ==========================================
     // TRANG CHỦ & GIỚI THIỆU
     // ==========================================
@@ -136,21 +119,13 @@ public class WebController {
         return "public/request";
     }
 
-<<<<<<< Updated upstream
-    @PostMapping("/request")
-=======
     @PostMapping({"/request", "/public/request"})
->>>>>>> Stashed changes
     public String handleRequestSubmit(
             @RequestParam("customerName") String customerName,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "productName", required = false) String productName,
-<<<<<<< Updated upstream
-            @RequestParam(value = "weight", required = false) String weight,
-=======
             @RequestParam(value = "weight", required = false) String weightStr,
->>>>>>> Stashed changes
             @RequestParam(value = "vehicleType", required = false) String vehicleType,
             @RequestParam("pickupAddress") String pickupAddress,
             @RequestParam("deliveryAddress") String deliveryAddress,
@@ -158,37 +133,6 @@ public class WebController {
             RedirectAttributes redirectAttributes) {
         
         try {
-<<<<<<< Updated upstream
-            // Tìm hoặc tạo customer từ số điện thoại
-            Optional<CustomerDTO> customerOpt = customerService.findByPhone(phoneNumber.trim());
-            CustomerDTO customer;
-            
-            if (customerOpt.isPresent()) {
-                customer = customerOpt.get();
-                // Cập nhật thông tin nếu có thay đổi
-                if (email != null && !email.trim().isEmpty() && 
-                    (customer.getEmail() == null || customer.getEmail().isEmpty())) {
-                    customer.setEmail(email.trim());
-                    customerService.updateCustomer(customer.getId(), customer);
-                }
-            } else {
-                // Tạo customer mới cho khách vãng lai (không có user account)
-                CustomerDTO newCustomer = new CustomerDTO();
-                newCustomer.setName(customerName.trim());
-                newCustomer.setFullName(customerName.trim());
-                newCustomer.setPhone(phoneNumber.trim());
-                newCustomer.setEmail(email != null ? email.trim() : null);
-                newCustomer.setAddress(pickupAddress.trim()); // Dùng địa chỉ lấy hàng làm địa chỉ mặc định
-                customer = customerService.createCustomer(newCustomer);
-            }
-            
-            // Lưu thông tin request vào note hoặc log (có thể tạo bảng guest_requests sau)
-            // Hiện tại chỉ thông báo thành công
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Cảm ơn bạn đã gửi yêu cầu! Chúng tôi sẽ liên hệ với số điện thoại " + phoneNumber + 
-                " trong vòng 30 phút để xác nhận và báo giá chi tiết.");
-            
-=======
             // Tìm hoặc tạo customer
             Customer customer;
             Optional<Customer> existingCustomerOpt = customerRepository.findByPhone(phoneNumber.trim());
@@ -296,18 +240,12 @@ public class WebController {
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Yêu cầu vận chuyển của bạn đã được tiếp nhận! Mã đơn: " + createdRequest.getRequestCode() + 
                 ". Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.");
->>>>>>> Stashed changes
             return "redirect:/?success=true";
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", 
-<<<<<<< Updated upstream
                 "Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại hoặc liên hệ hotline.");
-            return "redirect:/request?error=true";
-=======
-                "Có lỗi xảy ra khi xử lý yêu cầu: " + e.getMessage());
             return "redirect:/request";
->>>>>>> Stashed changes
         }
     }
 

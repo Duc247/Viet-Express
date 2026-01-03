@@ -146,12 +146,9 @@ public class LoginController {
                 return "redirect:/staff/dashboard";
 
             case "MANAGER":
-<<<<<<< Updated upstream
-=======
                 // Manager không có entity riêng, dùng User ID làm managerId
                 session.setAttribute("managerId", user.getId());
                 session.setAttribute("managerName", user.getFullName() != null ? user.getFullName() : username);
->>>>>>> Stashed changes
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Đăng nhập thành công! Xin chào Manager " + username);
                 return "redirect:/manager/dashboard";

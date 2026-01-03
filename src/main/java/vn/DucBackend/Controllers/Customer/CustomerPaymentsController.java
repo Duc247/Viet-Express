@@ -49,8 +49,6 @@ public class CustomerPaymentsController {
         return null;
     }
 
-<<<<<<< Updated upstream
-=======
     /**
      * Hiển thị trang tổng hợp thanh toán của customer
      * Lấy tất cả payments từ các requests mà customer là sender hoặc receiver
@@ -140,7 +138,6 @@ public class CustomerPaymentsController {
         return "customer/payments";
     }
 
->>>>>>> Stashed changes
     @GetMapping("/orders/{id}/payments")
     public String paymentsDetail(
             @PathVariable("id") Long id,
@@ -254,114 +251,8 @@ public class CustomerPaymentsController {
         return "customer/order/payments-detail";
     }
 
-    /**
-<<<<<<< Updated upstream
-     * Trang thanh toán tổng hợp - hiển thị tất cả payments từ các đơn hàng của customer
-     * Có chức năng tìm kiếm theo mã request, mã trip
-     */
-    @GetMapping("/payments")
-    public String paymentsList(
-            @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "type", required = false) String type,
-            Model model,
-            HttpServletRequest request,
-            HttpSession session) {
-
-        addCommonAttributes(model, request);
-
-        Long customerId = getCustomerIdFromSession(session);
-
-        // Phải đăng nhập để xem
-        if (customerId == null) {
-            return "redirect:/auth/login";
-        }
-
-        // Lấy tất cả payments từ các đơn hàng của customer (sender hoặc receiver)
-        List<Payment> allPayments = paymentRepository.findAll().stream()
-                .filter(p -> {
-                    CustomerRequest req = p.getRequest();
-                    return (req.getSender() != null && req.getSender().getId().equals(customerId)) ||
-                           (req.getReceiver() != null && req.getReceiver().getId().equals(customerId));
-                })
-                .toList();
-
-        // Filter by search keyword (request code, trip code, payment code)
-        List<Payment> payments = allPayments;
-        if (search != null && !search.trim().isEmpty()) {
-            String keyword = search.trim().toLowerCase();
-            payments = allPayments.stream()
-                    .filter(p -> {
-                        String requestCode = p.getRequest().getRequestCode() != null ? 
-                            p.getRequest().getRequestCode().toLowerCase() : "";
-                        String paymentCode = p.getPaymentCode() != null ? 
-                            p.getPaymentCode().toLowerCase() : "";
-                        String tripId = p.getTrip() != null ? 
-                            p.getTrip().getId().toString() : "";
-                        return requestCode.contains(keyword) || 
-                               paymentCode.contains(keyword) || 
-                               tripId.contains(keyword);
-                    })
-                    .toList();
-            model.addAttribute("search", search);
-        }
-
-        // Filter by status
-        if (status != null && !status.isEmpty()) {
-            try {
-                Payment.PaymentStatus paymentStatus = Payment.PaymentStatus.valueOf(status);
-                payments = payments.stream()
-                        .filter(p -> p.getStatus() == paymentStatus)
-                        .toList();
-            } catch (IllegalArgumentException e) {
-                // Invalid status, ignore filter
-            }
-            model.addAttribute("status", status);
-        }
-
-        // Filter by type
-        if (type != null && !type.isEmpty()) {
-            try {
-                Payment.PaymentType paymentType = Payment.PaymentType.valueOf(type);
-                payments = payments.stream()
-                        .filter(p -> p.getPaymentType() == paymentType)
-                        .toList();
-            } catch (IllegalArgumentException e) {
-                // Invalid type, ignore filter
-            }
-            model.addAttribute("type", type);
-        }
-
-        model.addAttribute("payments", payments);
-
-        // Calculate summary statistics
-        BigDecimal totalPaid = payments.stream()
-                .filter(p -> p.getPaidAmount() != null)
-                .map(Payment::getPaidAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalUnpaid = payments.stream()
-                .filter(p -> p.getStatus() == Payment.PaymentStatus.UNPAID && p.getExpectedAmount() != null)
-                .map(Payment::getExpectedAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalCod = payments.stream()
-                .filter(p -> p.getPaymentType() == Payment.PaymentType.COD && p.getExpectedAmount() != null)
-                .map(Payment::getExpectedAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        model.addAttribute("totalPaid", totalPaid);
-        model.addAttribute("totalUnpaid", totalUnpaid);
-        model.addAttribute("totalCod", totalCod);
-        model.addAttribute("paymentStatuses", Payment.PaymentStatus.values());
-        model.addAttribute("paymentTypes", Payment.PaymentType.values());
-
-        return "customer/payments";
-    }
 
     /**
-=======
->>>>>>> Stashed changes
      * API lấy lịch sử giao dịch của một khoản thanh toán
      */
     @GetMapping("/payments/{paymentId}/transactions")

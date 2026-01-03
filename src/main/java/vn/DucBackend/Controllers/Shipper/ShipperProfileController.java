@@ -59,23 +59,6 @@ public class ShipperProfileController extends ShipperBaseController {
         }
         
         try {
-<<<<<<< Updated upstream
-            // Cập nhật thông tin
-            if (fullName != null && !fullName.trim().isEmpty()) {
-                shipper.setFullName(fullName.trim());
-            }
-            if (phone != null && !phone.trim().isEmpty()) {
-                shipper.setPhone(phone.trim());
-            }
-            if (workingArea != null) {
-                shipper.setWorkingArea(workingArea.trim());
-            }
-            if (currentLocationId != null) {
-                shipper.setCurrentLocationId(currentLocationId);
-            }
-            
-            shipperService.updateShipper(shipper.getId(), shipper);
-=======
             // Get current shipper data to preserve existing values
             ShipperDTO currentShipper = shipperService.findShipperById(shipper.getId())
                     .orElseThrow(() -> new RuntimeException("Shipper not found"));
@@ -92,7 +75,6 @@ public class ShipperProfileController extends ShipperBaseController {
             updateDTO.setUserId(currentShipper.getUserId());
             
             shipperService.updateShipper(shipper.getId(), updateDTO);
->>>>>>> Stashed changes
             
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
             
