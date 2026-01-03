@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title th:text="${isEdit ? 'Chỉnh sửa địa điểm' : 'Thêm địa điểm mới'}">Địa điểm</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <span th:text="${isEdit ? 'Chỉnh sửa địa điểm' : 'Thêm địa điểm mới'}">Địa điểm</span>
+            </h1>
+            <a href="/admin/location" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-1"></i>Thông tin địa điểm</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" th:action="@{/admin/location/save}">
+                            <input type="hidden" name="id" th:value="${location?.id}">
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="fas fa-tag me-1"></i>Loại địa điểm <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select" name="locationType" required>
+                                        <option value="">-- Chọn loại --</option>
+                                        <option value="WAREHOUSE"
+                                            th:selected="${location?.locationType == 'WAREHOUSE'}">Kho hàng
+                                        </option>
+                                        <option value="SENDER" th:selected="${location?.locationType == 'SENDER'}">Địa
+                                            chỉ người
+                                            gửi</option>
+                                        <option value="RECEIVER" th:selected="${location?.locationType == 'RECEIVER'}">
+                                            Địa chỉ người
+                                            nhận</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="fas fa-barcode me-1"></i>Mã kho (nếu là
+                                        kho)</label>
+                                    <input type="text" class="form-control" name="warehouseCode"
+                                        th:value="${location?.warehouseCode}" placeholder="VD: WH-HCM-01">
+                                    <small class="text-muted">Để trống nếu là địa chỉ người gửi/nhận</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-building me-1"></i>Tên địa điểm <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" required
+                                    th:value="${location?.name}" placeholder="VD: Kho Tân Bình hoặc Nguyễn Văn A">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-map me-1"></i>Địa chỉ đầy đủ <span
+                                        class="text-danger">*</span></label>
+                                <textarea class="form-control" name="addressText" rows="3" required
+                                    placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+                                    th:text="${location?.addressText}"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="isActive" value="false">
+                                    <input class="form-check-input" type="checkbox" id="isActive" name="isActive"
+                                        value="true" th:checked="${location?.isActive == null || location?.isActive}">
+                                    <label class="form-check-label" for="isActive">Đang hoạt động</label>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="/admin/location" class="btn btn-secondary">Hủy</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    <span th:text="${isEdit ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle me-1"></i> Hướng dẫn</h6>
+                        <hr>
+                        <p class="small"><strong>Loại địa điểm:</strong></p>
+                        <ul class="small">
+                            <li><strong>Kho hàng:</strong> Địa điểm lưu trữ, phân loại hàng hóa</li>
+                            <li><strong>Địa chỉ người gửi:</strong> Nơi lấy hàng từ khách</li>
+                            <li><strong>Địa chỉ người nhận:</strong> Nơi giao hàng đến</li>
+                        </ul>
+                        <p class="small text-muted">
+                            <i class="fas fa-lightbulb me-1"></i> Mã kho nên theo format: WH-[THÀNH PHỐ]-[SỐ]
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{shipper/layout-shipper}">
+
+<head>
+    <title>Chi Tiết Chuyến Xe</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content" th:if="${trip != null}">
+
+        <div class="d-flex align-items-center mb-3">
+            <a href="/shipper/trips" class="btn btn-light me-2 rounded-circle"><i class="fas fa-arrow-left"></i></a>
+            <h5 class="mb-0 fw-bold">Chi tiết chuyến xe #<span th:text="${trip.id}">123</span></h5>
+            <span class="badge ms-2" th:text="${trip.status}"
+                th:classappend="${trip.status == 'IN_PROGRESS' || trip.status == 'ASSIGNED' ? 'bg-warning text-dark' : (trip.status == 'COMPLETED' ? 'bg-success' : 'bg-secondary')}">STATUS</span>
+        </div>
+
+        <!-- Trip Details -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin chuyến xe</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Điểm đi</label>
+                        <h6 class="fw-bold" th:text="${trip.startLocationName}">Hà Nội</h6>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Điểm đến</label>
+                        <h6 class="fw-bold" th:text="${trip.endLocationName}">Hải Phòng</h6>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Bắt đầu lúc</label>
+                        <p class="mb-0"
+                            th:text="${#temporals.format(trip.startedAt, 'HH:mm dd/MM/yyyy')} ?: 'Chưa bắt đầu'">--</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Ghi chú</label>
+                        <p class="mb-0" th:text="${trip.note} ?: 'Không có ghi chú'">--</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Tiền COD</label>
+                        <p class="mb-0 fw-bold text-success" th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">0 VNĐ</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Loại chuyến</label>
+                        <p class="mb-0">
+                            <span th:if="${trip.tripType == 'PICKUP'}" class="badge bg-success">🚚 Lấy hàng</span>
+                            <span th:if="${trip.tripType == 'TRANSFER'}" class="badge bg-info">🔄 Trung chuyển</span>
+                            <span th:if="${trip.tripType == 'DELIVERY'}" class="badge bg-warning text-dark">📦 Giao hàng</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3" th:if="${trip.vehicleLicensePlate != null}">
+                        <label class="small text-muted text-uppercase">Phương tiện</label>
+                        <p class="mb-0 fw-bold" th:text="${trip.vehicleLicensePlate}">Biển số xe</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+            <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post"
+                th:if="${trip.status == 'ASSIGNED'}">
+                <input type="hidden" name="status" value="IN_PROGRESS">
+                <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-play me-2"></i>Bắt đầu
+                    chuyến</button>
+            </form>
+
+            <button class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#updateStatusModal"
+                th:if="${trip.status == 'IN_PROGRESS'}">
+                <i class="fas fa-check-circle me-2"></i>Cập nhật / Hoàn thành
+            </button>
+        </div>
+
+        <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Cập nhật trạng thái</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Trạng thái mới</label>
+                                <select class="form-select" name="status">
+                                    <option value="COMPLETED">Đã hoàn thành</option>
+                                    <option value="CANCELLED">Hủy chuyến</option>
+                                    <option value="IN_PROGRESS">Đang thực hiện</option>
+                                </select>
+                            </div>
+                            <!-- Placeholder for advanced features -->
+                            <div class="alert alert-info py-2 small">
+                                <i class="fas fa-info-circle me-1"></i> Tính năng tải ảnh và cập nhật COD sẽ được cập
+                                nhật sau.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary fw-bold">Lưu thay đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div layout:fragment="content" th:if="${trip == null}">
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> Không tìm thấy thông tin chuyến xe.
+        </div>
+    </div>
+</body>
+
+</html>

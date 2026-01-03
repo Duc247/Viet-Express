@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{shipper/layout-shipper}">
+
+<head>
+    <title>Nhiệm Vụ Của Tôi</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <h4 class="mb-4 fw-bold border-bottom pb-2">Danh sách chuyến xe</h4>
+
+        <div class="mb-3">
+            <a th:href="@{/shipper/trips(filter='all')}" class="btn btn-sm rounded-pill px-3"
+                th:classappend="${filter == 'all' or filter == null ? 'btn-primary' : 'btn-outline-secondary'}">Tất
+                cả</a>
+            <a th:href="@{/shipper/trips(filter='active')}" class="btn btn-sm rounded-pill px-3"
+                th:classappend="${filter == 'active' ? 'btn-primary' : 'btn-outline-secondary'}">Đang chạy</a>
+            <a th:href="@{/shipper/trips(filter='completed')}" class="btn btn-sm rounded-pill px-3"
+                th:classappend="${filter == 'completed' ? 'btn-primary' : 'btn-outline-secondary'}">Hoàn thành</a>
+        </div>
+
+        <div class="row g-3" th:if="${trips != null and !trips.empty}">
+            <div class="col-12 col-md-6 col-lg-4" th:each="trip : ${trips}">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold text-primary" th:text="'#' + ${trip.id}">#123</h5>
+                            <span class="badge rounded-pill"
+                                th:classappend="${trip.status == 'IN_PROGRESS' || trip.status == 'ASSIGNED' ? 'bg-warning text-dark' : (trip.status == 'COMPLETED' ? 'bg-success' : 'bg-secondary')}"
+                                th:text="${trip.status}">COMPLETED</span>
+                        </div>
+                        <h6 class="card-subtitle mb-2 text-muted"
+                            th:text="${trip.startLocationName} + ' -> ' + ${trip.endLocationName}">Hà Nội - Hải Phòng
+                        </h6>
+                        <p class="card-text small">
+                            <i class="fas fa-clock me-1"></i> <span
+                                th:text="${#temporals.format(trip.startedAt, 'HH:mm dd/MM/yyyy')}">2023-10-10</span><br>
+                            <i class="fas fa-map-marker-alt me-1"></i> <span th:text="${trip.startLocationName}">Kho
+                                A</span>
+                        </p>
+                        <a th:href="@{/shipper/trip/{id}(id=${trip.id})}"
+                            class="btn btn-outline-primary btn-sm w-100 stretched-link">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3" th:if="${trips == null or trips.empty}">
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-clipboard-check fa-4x text-muted mb-3 opacity-25"></i>
+                <h5 class="text-muted fw-normal">Không tìm thấy chuyến xe nào</h5>
+                <p class="small text-muted">Vui lòng kiểm tra lại bộ lọc hoặc chờ điều phối viên giao việc.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

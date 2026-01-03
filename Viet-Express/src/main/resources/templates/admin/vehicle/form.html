@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title th:text="${isEdit ? 'Chỉnh sửa Vehicle' : 'Thêm mới Vehicle'}">Vehicle</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-truck me-2"></i>
+                <span th:text="${isEdit ? 'Chỉnh sửa Vehicle' : 'Thêm mới Vehicle'}">Vehicle</span>
+            </h1>
+            <a href="/admin/vehicle" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-truck me-1"></i>Thông tin phương tiện</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/vehicle/save}" method="post">
+                    <input type="hidden" name="id" th:value="${vehicle?.id}">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-id-card me-1"></i>Biển số <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="licensePlate"
+                                th:value="${vehicle?.licensePlate}" required placeholder="59A-12345">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-car me-1"></i>Loại xe <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" name="vehicleType" required>
+                                <option value="MOTORBIKE" th:selected="${vehicle?.vehicleType == 'MOTORBIKE'}">
+                                    Xe máy</option>
+                                <option value="VAN" th:selected="${vehicle?.vehicleType == 'VAN'}">Xe tải nhỏ
+                                </option>
+                                <option value="TRUCK" th:selected="${vehicle?.vehicleType == 'TRUCK'}">Xe tải
+                                </option>
+                                <option value="CONTAINER" th:selected="${vehicle?.vehicleType == 'CONTAINER'}">
+                                    Container</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label"><i class="fas fa-weight me-1"></i>Tải trọng (kg)</label>
+                            <input type="number" step="0.01" class="form-control" name="capacityWeight"
+                                th:value="${vehicle?.capacityWeight}" placeholder="500">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label"><i class="fas fa-cube me-1"></i>Thể tích (m³)</label>
+                            <input type="number" step="0.01" class="form-control" name="capacityVolume"
+                                th:value="${vehicle?.capacityVolume}" placeholder="10">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</label>
+                            <select class="form-select" name="status">
+                                <option value="AVAILABLE"
+                                    th:selected="${vehicle?.status == 'AVAILABLE' || vehicle?.status == null}">
+                                    Sẵn sàng</option>
+                                <option value="IN_USE" th:selected="${vehicle?.status == 'IN_USE'}">Đang sử dụng
+                                </option>
+                                <option value="MAINTENANCE" th:selected="${vehicle?.status == 'MAINTENANCE'}">
+                                    Bảo trì</option>
+                                <option value="INACTIVE" th:selected="${vehicle?.status == 'INACTIVE'}">Ngừng
+                                    hoạt động</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Vị trí hiện tại</label>
+                        <select class="form-select" name="currentLocationId">
+                            <option value="">-- Chưa xác định --</option>
+                            <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
+                                th:selected="${vehicle?.currentLocationId == loc.id}"></option>
+                        </select>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>
+                            <span th:text="${isEdit ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                        </button>
+                        <a href="/admin/vehicle" class="btn btn-outline-secondary">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

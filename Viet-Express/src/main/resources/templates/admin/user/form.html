@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title th:text="${isEdit ? 'Chỉnh sửa User' : 'Thêm User mới'}">User Form</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-user-plus me-2" th:if="${!isEdit}"></i>
+                <i class="fas fa-user-edit me-2" th:if="${isEdit}"></i>
+                <span th:text="${isEdit ? 'Chỉnh sửa User' : 'Thêm User mới'}"></span>
+            </h1>
+            <a href="/admin/user" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="${isEdit ? '/admin/user/edit/' + user.id : '/admin/user/create'}" method="post">
+
+                    <!-- Thông tin tài khoản -->
+                    <h5 class="mb-3 text-primary"><i class="fas fa-key me-2"></i>Thông tin tài khoản</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username <span class="text-danger">*</span></label>
+                            <input type="text" name="username" class="form-control" th:value="${user?.username}"
+                                required th:readonly="${isEdit}">
+                        </div>
+                        <div class="col-md-6 mb-3" th:if="${!isEdit}">
+                            <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vai trò <span class="text-danger">*</span></label>
+                            <select name="roleId" id="roleSelect" class="form-select" required
+                                onchange="toggleRoleFields()">
+                                <option value="">-- Chọn vai trò --</option>
+                                <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.roleName}"
+                                    th:data-rolename="${r.roleName}"
+                                    th:selected="${user != null and user.roleId != null and user.roleId == r.id}">
+                                </option>
+                            </select>
+                            <small class="text-muted" th:if="${#lists.isEmpty(roles)}">
+                                Chưa có vai trò. Vui lòng tạo vai trò trước.
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Thông tin cá nhân (chung cho tất cả) -->
+                    <h5 class="mb-3 text-primary"><i class="fas fa-user me-2"></i>Thông tin cá nhân</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" name="fullName" class="form-control" th:value="${user?.fullName}"
+                                required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" th:value="${user?.email}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="text" name="phone" class="form-control" th:value="${user?.phone}" required>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin dành riêng cho CUSTOMER -->
+                    <div id="customerFields" class="role-fields" style="display: none;">
+                        <hr class="my-4">
+                        <h5 class="mb-3 text-success"><i class="fas fa-user-tag me-2"></i>Thông tin Khách hàng</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Địa chỉ</label>
+                                <input type="text" name="address" class="form-control" th:value="${user?.address}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Giới tính</label>
+                                <select name="gender" class="form-select">
+                                    <option value="">-- Chọn giới tính --</option>
+                                    <option value="MALE" th:selected="${user?.gender == 'MALE'}">Nam</option>
+                                    <option value="FEMALE" th:selected="${user?.gender == 'FEMALE'}">Nữ</option>
+                                    <option value="OTHER" th:selected="${user?.gender == 'OTHER'}">Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tên công ty</label>
+                                <input type="text" name="companyName" class="form-control"
+                                    th:value="${user?.companyName}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin dành riêng cho SHIPPER -->
+                    <div id="shipperFields" class="role-fields" style="display: none;">
+                        <hr class="my-4">
+                        <h5 class="mb-3 text-warning"><i class="fas fa-motorcycle me-2"></i>Thông tin Shipper</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Khu vực làm việc</label>
+                                <input type="text" name="workingArea" class="form-control"
+                                    th:value="${user?.workingArea}" placeholder="VD: Quận 1, Quận 3, TP.HCM">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Vị trí hiện tại</label>
+                                <select name="currentLocationId" class="form-select">
+                                    <option value="">-- Chọn vị trí --</option>
+                                    <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
+                                        th:selected="${user?.currentLocationId == loc.id}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin dành riêng cho STAFF -->
+                    <div id="staffFields" class="role-fields" style="display: none;">
+                        <hr class="my-4">
+                        <h5 class="mb-3 text-info"><i class="fas fa-id-badge me-2"></i>Thông tin Nhân viên</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Chi nhánh làm việc</label>
+                                <select name="locationId" class="form-select">
+                                    <option value="">-- Chọn chi nhánh --</option>
+                                    <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
+                                        th:selected="${user?.locationId == loc.id}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            <span th:text="${isEdit ? 'Cập nhật' : 'Tạo mới'}"></span>
+                        </button>
+                        <a href="/admin/user" class="btn btn-outline-secondary">Huỷ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function toggleRoleFields() {
+            // Ẩn tất cả các trường riêng của role
+            document.querySelectorAll('.role-fields').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Lấy role được chọn
+            const roleSelect = document.getElementById('roleSelect');
+            const selectedOption = roleSelect.options[roleSelect.selectedIndex];
+            const roleName = selectedOption.getAttribute('data-rolename');
+
+            if (roleName) {
+                const roleNameUpper = roleName.toUpperCase();
+                if (roleNameUpper === 'CUSTOMER') {
+                    document.getElementById('customerFields').style.display = 'block';
+                } else if (roleNameUpper === 'SHIPPER') {
+                    document.getElementById('shipperFields').style.display = 'block';
+                } else if (roleNameUpper === 'STAFF') {
+                    document.getElementById('staffFields').style.display = 'block';
+                }
+            }
+        }
+
+        // Chạy khi trang load để hiển thị đúng fields nếu đang edit
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleRoleFields();
+        });
+    </script>
+</body>
+
+</html>

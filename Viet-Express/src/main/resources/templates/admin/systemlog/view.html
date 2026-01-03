@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Chi tiết Log</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-file-alt me-2"></i>Chi tiết Log #<span th:text="${log?.id}">1</span></h1>
+            <a href="/admin/systemlog" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+
+        <div th:if="${log == null}" class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>Không tìm thấy log!
+        </div>
+
+        <div th:if="${log != null}" class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Thông tin Log
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th width="25%">ID:</th>
+                                <td th:text="${log.id}">1</td>
+                            </tr>
+                            <tr>
+                                <th>Level:</th>
+                                <td>
+                                    <span class="badge bg-info" th:if="${log.logLevel == 'INFO'}">INFO</span>
+                                    <span class="badge bg-warning" th:if="${log.logLevel == 'WARN'}">WARNING</span>
+                                    <span class="badge bg-danger" th:if="${log.logLevel == 'ERROR'}">ERROR</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Module:</th>
+                                <td th:text="${log.moduleName}">AUTH</td>
+                            </tr>
+                            <tr>
+                                <th>Action Type:</th>
+                                <td><code th:text="${log.actionType}">USER_LOGIN</code></td>
+                            </tr>
+                            <tr>
+                                <th>Actor:</th>
+                                <td th:text="${log.actorUsername != null ? log.actorUsername : '-'}">admin</td>
+                            </tr>
+                            <tr>
+                                <th>Target ID:</th>
+                                <td th:text="${log.targetId != null ? log.targetId : '-'}">1</td>
+                            </tr>
+                            <tr>
+                                <th>IP Address:</th>
+                                <td th:text="${log.ipAddress != null ? log.ipAddress : '-'}">127.0.0.1</td>
+                            </tr>
+                            <tr>
+                                <th>Thời gian:</th>
+                                <td
+                                    th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss') : '-'}">
+                                    01/01/2026 10:00:00</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Log Details -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-light py-3">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-align-left me-2"></i>Chi tiết
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded" style="white-space: pre-wrap;"
+                            th:text="${log.logDetails != null ? log.logDetails : 'Không có chi tiết'}">Log details here...</pre>
+                    </div>
+                </div>
+
+                <!-- User Agent -->
+                <div class="card shadow-sm mt-4" th:if="${log.userAgent != null}">
+                    <div class="card-header bg-light py-3">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-globe me-2"></i>User Agent
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <code th:text="${log.userAgent}">Mozilla/5.0...</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white py-3">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-trash me-2"></i>Thao tác
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <a th:href="@{/admin/systemlog/delete/{id}(id=${log.id})}" class="btn btn-danger w-100"
+                            onclick="return confirm('Bạn có chắc muốn xóa log này?')">
+                            <i class="fas fa-trash me-1"></i>Xóa log này
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

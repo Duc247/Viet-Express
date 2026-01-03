@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{staff/layout-staff}">
+
+<head>
+    <title>Yêu cầu đã xác nhận - Staff</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-clipboard-list me-2"></i>Yêu cầu đã xác nhận</h1>
+            <span class="badge bg-success fs-6" th:text="${#lists.size(requests)} + ' yêu cầu'">0 yêu cầu</span>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Mã yêu cầu</th>
+                                <th>Khách hàng</th>
+                                <th>Hàng hóa</th>
+                                <th>Ngày tạo</th>
+                                <th class="text-end pe-4">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Hiển thị nếu không có request -->
+                            <tr th:if="${#lists.isEmpty(requests)}" class="text-center text-muted">
+                                <td colspan="5" class="py-5">
+                                    <i class="fas fa-check-circle fa-3x mb-3 d-block opacity-50 text-success"></i>
+                                    Không có yêu cầu nào cần xử lý
+                                </td>
+                            </tr>
+                            <!-- Danh sách requests -->
+                            <tr th:each="req : ${requests}">
+                                <td class="ps-4">
+                                    <code class="text-primary" th:text="${req.requestCode}">REQ-XXX</code>
+                                </td>
+                                <td>
+                                    <strong th:text="${req.sender?.name ?: 'N/A'}">Nguyễn Văn A</strong>
+                                    <br>
+                                    <small class="text-muted" th:text="${req.sender?.phone ?: ''}">0901234567</small>
+                                </td>
+                                <td>
+                                    <span th:text="${req.parcelDescription ?: 'Chưa có mô tả'}">Hàng hóa</span>
+                                </td>
+                                <td>
+                                    <span
+                                        th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a th:href="@{/staff/requests/{id}(id=${req.id})}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-box-open me-1"></i>Tạo kiện hàng
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

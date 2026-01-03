@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{manager/layout-manager}">
+
+<head>
+    <title>Quản Lý Thanh Toán - Manager</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-money-bill-wave me-2"></i>Quản lý thanh toán</h1>
+            <span class="badge bg-success fs-6" th:text="${paymentsPage.totalItems} + ' khoản'">0 khoản</span>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form th:action="@{/manager/payments}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" name="keyword" class="form-control"
+                            placeholder="Mã payment, mã đơn, mô tả..." th:value="${keyword}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Loại</label>
+                        <select name="type" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="SHIPPING_FEE" th:selected="${type == 'SHIPPING_FEE'}">💵 Phí ship</option>
+                            <option value="COD" th:selected="${type == 'COD'}">📦 COD</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="UNPAID" th:selected="${status == 'UNPAID'}">Chưa TT</option>
+                            <option value="PARTIALLY_PAID" th:selected="${status == 'PARTIALLY_PAID'}">Đã cọc</option>
+                            <option value="PAID" th:selected="${status == 'PAID'}">Đã TT</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill"><i class="fas fa-search"></i></button>
+                        <a href="/manager/payments" class="btn btn-outline-secondary"><i class="fas fa-redo"></i></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="card shadow mb-4">
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Mã</th>
+                                <th>Mã đơn</th>
+                                <th>Loại</th>
+                                <th>Số tiền</th>
+                                <th>Đã thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end pe-4">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(paymentsPage.content)}" class="text-center text-muted">
+                                <td colspan="7" class="py-5">
+                                    <i class="fas fa-wallet fa-3x mb-3 d-block opacity-50"></i>
+                                    Không tìm thấy khoản thanh toán
+                                </td>
+                            </tr>
+                            <tr th:each="p : ${paymentsPage.content}">
+                                <td class="ps-4"><code th:text="${p.paymentCode ?: '-'}">PAY-XXX</code></td>
+                                <td>
+                                    <a th:href="@{/manager/requests/{id}(id=${p.request.id})}"
+                                        th:text="${p.request?.requestCode}">REQ-XXX</a>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary" th:if="${p.paymentType.name() == 'SHIPPING_FEE'}">💵
+                                        Phí ship</span>
+                                    <span class="badge bg-warning text-dark" th:if="${p.paymentType.name() == 'COD'}">📦
+                                        COD</span>
+                                </td>
+                                <td class="fw-bold"
+                                    th:text="${#numbers.formatDecimal(p.expectedAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫</td>
+                                <td
+                                    th:text="${#numbers.formatDecimal(p.paidAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫</td>
+                                <td>
+                                    <span class="badge bg-danger" th:if="${p.status.name() == 'UNPAID'}">Chưa TT</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${p.status.name() == 'PARTIALLY_PAID'}">Đã cọc</span>
+                                    <span class="badge bg-success" th:if="${p.status.name() == 'PAID'}">Đã TT</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a th:href="@{/manager/payments/{id}(id=${p.id})}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Pagination -->
+            <div class="card-footer" th:if="${paymentsPage.totalPages > 1}">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <li class="page-item" th:classappend="${!paymentsPage.hasPrevious ? 'disabled' : ''}">
+                            <a class="page-link"
+                                th:href="@{/manager/payments(page=${paymentsPage.currentPage - 1}, keyword=${keyword}, status=${status}, type=${type})}">«</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(1, paymentsPage.totalPages)}" class="page-item"
+                            th:classappend="${i == paymentsPage.currentPage ? 'active' : ''}">
+                            <a class="page-link"
+                                th:href="@{/manager/payments(page=${i}, keyword=${keyword}, status=${status}, type=${type})}"
+                                th:text="${i}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${!paymentsPage.hasNext ? 'disabled' : ''}">
+                            <a class="page-link"
+                                th:href="@{/manager/payments(page=${paymentsPage.currentPage + 1}, keyword=${keyword}, status=${status}, type=${type})}">»</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

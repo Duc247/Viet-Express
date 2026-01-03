@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{customer/layout-customer}">
+
+<head>
+    <title>Tạo Đơn Hàng - Customer</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <h2 class="h4 mb-4 fw-bold border-bottom pb-2">Tạo vận đơn mới</h2>
+
+        <!-- Error/Success Messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <form th:action="@{/customer/create-order}" method="post">
+            <div class="row g-4">
+
+                <div class="col-lg-8">
+
+                    <!-- CARD 1: Thông tin địa điểm -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-map-marker-alt me-2"></i>Thông tin địa
+                                điểm</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <!-- Cột người gửi -->
+                                <div class="col-md-6 border-end">
+                                    <h6 class="small text-muted text-uppercase fw-bold mb-3">1. Người gửi (Bạn)</h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Họ tên người gửi</label>
+                                        <input type="text" name="senderName" class="form-control bg-light"
+                                            th:value="${currentCustomer?.fullName ?: currentCustomer?.name ?: ''}"
+                                            readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Số điện thoại</label>
+                                        <input type="text" name="senderPhone" class="form-control bg-light"
+                                            th:value="${currentCustomer?.phone ?: ''}" readonly>
+                                        <div class="form-text small text-success"><i
+                                                class="fas fa-check-circle me-1"></i>Thông tin người gửi lấy từ tài
+                                            khoản của bạn</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Địa chỉ lấy hàng <span
+                                                class="text-danger">*</span></label>
+                                        <textarea name="senderAddress" class="form-control" rows="2"
+                                            placeholder="Nhập địa chỉ lấy hàng..."
+                                            th:text="${currentCustomer?.address ?: ''}" required></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h6 class="small text-muted text-uppercase fw-bold mb-3">2. Người nhận (Đến đâu?)
+                                    </h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Số điện thoại</label>
+                                        <div class="input-group">
+                                            <input type="text" id="receiverPhone" name="receiverPhone"
+                                                class="form-control" placeholder="09xx...">
+                                            <span class="input-group-text" id="receiverPhoneStatus">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                        <div class="form-text small text-danger"><i class="fas fa-asterisk me-1"></i>Bắt
+                                            buộc nhập</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Họ tên người nhận</label>
+                                        <input type="text" id="receiverName" name="receiverName"
+                                            class="form-control bg-light" placeholder="Tự động điền..." readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Địa chỉ giao hàng</label>
+                                        <textarea id="receiverAddress" name="receiverAddress" class="form-control"
+                                            rows="2" placeholder="Nhập địa chỉ giao hàng..." required></textarea>
+                                        <div class="form-text small text-danger"><i class="fas fa-asterisk me-1"></i>Bắt
+                                            buộc nhập</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: Thông tin hàng hóa & COD -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-box me-2"></i>Thông tin hàng hóa & COD
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Tên hàng hóa <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="productDescription" class="form-control"
+                                        placeholder="VD: Máy giặt, Thùng sơn..." required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Loại hàng</label>
+                                    <select name="productType" class="form-select">
+                                        <option value="NORMAL">Hàng thông thường</option>
+                                        <option value="FRAGILE">Hàng dễ vỡ</option>
+                                        <option value="FROZEN">Hàng đông lạnh</option>
+                                        <option value="LIQUID">Chất lỏng/Hóa chất</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Số lượng kiện hàng</label>
+                                    <input type="number" name="parcelCount" class="form-control" min="1" step="1"
+                                        placeholder="1" value="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Trọng lượng (kg)</label>
+                                    <input type="number" name="weight" class="form-control" min="0.1" step="0.1"
+                                        placeholder="0.0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Giá trị hàng hóa (VNĐ)</label>
+                                    <input type="number" name="productValue" class="form-control"
+                                        placeholder="Để tính bảo hiểm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Chiều dài (cm)</label>
+                                    <input type="number" name="length" class="form-control" min="1" step="0.1"
+                                        placeholder="cm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Chiều rộng (cm)</label>
+                                    <input type="number" name="width" class="form-control" min="1" step="0.1"
+                                        placeholder="cm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Chiều cao (cm)</label>
+                                    <input type="number" name="height" class="form-control" min="1" step="0.1"
+                                        placeholder="cm">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-success"><i
+                                            class="fas fa-hand-holding-usd me-1"></i>Tiền thu hộ (COD)</label>
+                                    <input type="number" name="codAmount" class="form-control border-success"
+                                        placeholder="0" value="0">
+                                    <div class="form-text small">Nhập số tiền cần thu từ người nhận (nếu có).</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Ghi chú cho tài xế</label>
+                                    <textarea name="note" class="form-control" rows="2"
+                                        placeholder="VD: Gọi trước khi giao, hàng nhẹ xếp trên..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-truck me-2"></i>Gói vận chuyển</h6>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${#lists.isEmpty(serviceTypes)}" class="text-center text-muted py-3">
+                                <i class="fas fa-info-circle me-2"></i>Chưa có gói vận chuyển nào
+                            </div>
+                            <div th:each="serviceType, iterStat : ${serviceTypes}" 
+                                 th:class="'form-check mb-3 border rounded p-3' + (${iterStat.first} ? ' bg-light' : '') + (${iterStat.last} ? ' mb-0' : '')">
+                                <input class="form-check-input" type="radio" name="serviceTypeId" 
+                                    th:id="'srv' + ${serviceType.id}" th:value="${serviceType.id}"
+                                    th:checked="${iterStat.first}">
+                                <label class="form-check-label w-100" th:for="'srv' + ${serviceType.id}">
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span th:text="${serviceType.name}">Tên dịch vụ</span>
+                                        <span class="text-primary" th:if="${serviceType.pricePerKm != null}" 
+                                              th:text="'Giá: ' + ${#numbers.formatDecimal(serviceType.pricePerKm, 0, 'COMMA', 0, 'POINT')} + 'đ/km'">Giá</span>
+                                    </div>
+                                    <small class="text-muted" th:text="${serviceType.description ?: 'Không có mô tả'}">Mô tả</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-light text-primary fw-bold py-3 shadow">
+                                    <i class="fas fa-paper-plane me-2"></i> TẠO ĐƠN HÀNG
+                                </button>
+                                <div class="text-center small opacity-75 mt-2">
+                                    Người nhận sẽ cần xác nhận đơn hàng này.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Script auto-fill receiver by phone -->
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Auto-fill receiver only (sender is fixed from session)
+                const receiverPhone = document.getElementById('receiverPhone');
+                const receiverName = document.getElementById('receiverName');
+                const receiverAddress = document.getElementById('receiverAddress');
+                const receiverStatus = document.getElementById('receiverPhoneStatus');
+
+                function lookupCustomer(phone, nameField, addressField, statusSpan) {
+                    if (!phone || phone.length < 10) return;
+
+                    statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                    fetch('/api/customers/by-phone?phone=' + encodeURIComponent(phone))
+                        .then(response => {
+                            if (response.ok) return response.json();
+                            throw new Error('Not found');
+                        })
+                        .then(data => {
+                            nameField.value = data.fullName || data.name || '';
+                            if (data.address && !addressField.value) {
+                                addressField.value = data.address;
+                            }
+                            statusSpan.innerHTML = '<i class="fas fa-check text-success"></i>';
+                        })
+                        .catch(error => {
+                            nameField.value = '';
+                            statusSpan.innerHTML = '<i class="fas fa-times text-danger"></i>';
+                        });
+                }
+
+                // Debounce for receiver lookup
+                let receiverTimeout;
+
+                receiverPhone.addEventListener('input', function () {
+                    clearTimeout(receiverTimeout);
+                    receiverTimeout = setTimeout(() => {
+                        lookupCustomer(this.value, receiverName, receiverAddress, receiverStatus);
+                    }, 500);
+                });
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

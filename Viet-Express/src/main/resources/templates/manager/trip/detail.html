@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{manager/layout-manager}">
+
+<head>
+    <title>Chi tiết chuyến - Manager</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1"><i class="fas fa-truck me-2"></i>Chi tiết chuyến #<span
+                        th:text="${trip.id}">1</span></h2>
+                <span class="badge bg-success" th:if="${trip.tripType.name() == 'PICKUP'}">🚚 Lấy hàng</span>
+                <span class="badge bg-info" th:if="${trip.tripType.name() == 'TRANSFER'}">🔄 Trung chuyển</span>
+                <span class="badge bg-warning text-dark" th:if="${trip.tripType.name() == 'DELIVERY'}">📦 Giao
+                    hàng</span>
+            </div>
+            <a href="/manager/trips" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin chuyến
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th width="35%">ID:</th>
+                                <td th:text="${trip.id}">1</td>
+                            </tr>
+                            <tr>
+                                <th>Loại:</th>
+                                <td>
+                                    <span th:if="${trip.tripType.name() == 'PICKUP'}">🚚 Lấy hàng (PICKUP)</span>
+                                    <span th:if="${trip.tripType.name() == 'TRANSFER'}">🔄 Trung chuyển
+                                        (TRANSFER)</span>
+                                    <span th:if="${trip.tripType.name() == 'DELIVERY'}">📦 Giao hàng (DELIVERY)</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Tài xế:</th>
+                                <td th:text="${trip.shipper?.fullName ?: '-'}">Tài xế</td>
+                            </tr>
+                            <tr>
+                                <th>Xe:</th>
+                                <td th:text="${trip.vehicle?.licensePlate ?: '-'}">Biển số</td>
+                            </tr>
+                            <tr>
+                                <th>Điểm đi:</th>
+                                <td th:text="${trip.startLocation?.name ?: '-'}">A</td>
+                            </tr>
+                            <tr>
+                                <th>Điểm đến:</th>
+                                <td th:text="${trip.endLocation?.name ?: '-'}">B</td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>
+                                    <span class="badge bg-secondary" th:if="${trip.status.name() == 'CREATED'}">Chờ thực
+                                        hiện</span>
+                                    <span class="badge bg-primary" th:if="${trip.status.name() == 'IN_PROGRESS'}">Đang
+                                        thực hiện</span>
+                                    <span class="badge bg-success" th:if="${trip.status.name() == 'COMPLETED'}">Hoàn
+                                        thành</span>
+                                    <span class="badge bg-danger" th:if="${trip.status.name() == 'CANCELLED'}">Đã
+                                        hủy</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ghi chú:</th>
+                                <td th:text="${trip.note ?: '-'}">Ghi chú</td>
+                            </tr>
+                            <tr>
+                                <th>Ngày tạo:</th>
+                                <td th:text="${#temporals.format(trip.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning bg-opacity-25 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-edit me-2"></i>Cập nhật trạng thái</h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/manager/trips/{id}/status(id=${trip.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Trạng thái mới</label>
+                                <select name="newStatus" class="form-select" required>
+                                    <option value="CREATED" th:selected="${trip.status.name() == 'CREATED'}">Chờ thực
+                                        hiện</option>
+                                    <option value="IN_PROGRESS" th:selected="${trip.status.name() == 'IN_PROGRESS'}">
+                                        Đang thực hiện</option>
+                                    <option value="COMPLETED" th:selected="${trip.status.name() == 'COMPLETED'}">Hoàn
+                                        thành</option>
+                                    <option value="CANCELLED" th:selected="${trip.status.name() == 'CANCELLED'}">Đã hủy
+                                    </option>
+                                </select>
+                                <small class="text-muted">* Khi hoàn thành, tài xế sẽ được giải phóng</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-1"></i>Cập nhật
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Card Gán Shipper -->
+                <div class="card shadow-sm mb-4 border-info">
+                    <div class="card-header bg-info bg-opacity-25 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-user-tie me-2"></i>Gán Tài xế</h6>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${trip.shipper != null}" class="alert alert-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Tài xế hiện tại:</strong> <span th:text="${trip.shipper.fullName}">Shipper</span>
+                        </div>
+                        <div th:if="${trip.shipper == null}" class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Chưa gán tài xế!</strong> Shipper sẽ không thấy chuyến này.
+                        </div>
+                        <form th:action="@{/manager/trips/{id}/assign-shipper(id=${trip.id})}" method="post">
+                            <div class="row align-items-end">
+                                <div class="col-md-8 mb-2">
+                                    <label class="form-label fw-bold">Chọn tài xế:</label>
+                                    <select name="shipperId" class="form-select" required>
+                                        <option value="">-- Chọn Shipper --</option>
+                                        <option th:each="s : ${shippers}" th:value="${s.id}"
+                                            th:text="${s.fullName + (s.isAvailable ? ' ✅' : ' (Bận)')}"
+                                            th:selected="${trip.shipper != null && trip.shipper.id == s.id}">
+                                            Shipper
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <button type="submit" class="btn btn-info w-100">
+                                        <i class="fas fa-user-plus me-1"></i>Gán
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
