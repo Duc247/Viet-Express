@@ -59,6 +59,7 @@ public class ShipperProfileController extends ShipperBaseController {
         }
         
         try {
+<<<<<<< Updated upstream
             // Cập nhật thông tin
             if (fullName != null && !fullName.trim().isEmpty()) {
                 shipper.setFullName(fullName.trim());
@@ -74,6 +75,24 @@ public class ShipperProfileController extends ShipperBaseController {
             }
             
             shipperService.updateShipper(shipper.getId(), shipper);
+=======
+            // Get current shipper data to preserve existing values
+            ShipperDTO currentShipper = shipperService.findShipperById(shipper.getId())
+                    .orElseThrow(() -> new RuntimeException("Shipper not found"));
+            
+            // Cập nhật thông tin, giữ nguyên các giá trị hiện tại cho các trường không được cập nhật
+            ShipperDTO updateDTO = new ShipperDTO();
+            updateDTO.setFullName(fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : currentShipper.getFullName());
+            updateDTO.setPhone(phone != null && !phone.trim().isEmpty() ? phone.trim() : currentShipper.getPhone());
+            updateDTO.setWorkingArea(workingArea != null ? workingArea.trim() : currentShipper.getWorkingArea());
+            updateDTO.setCurrentLocationId(currentLocationId != null ? currentLocationId : currentShipper.getCurrentLocationId());
+            // Giữ nguyên các giá trị quan trọng
+            updateDTO.setIsActive(currentShipper.getIsActive());
+            updateDTO.setIsAvailable(currentShipper.getIsAvailable());
+            updateDTO.setUserId(currentShipper.getUserId());
+            
+            shipperService.updateShipper(shipper.getId(), updateDTO);
+>>>>>>> Stashed changes
             
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
             

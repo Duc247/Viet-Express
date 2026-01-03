@@ -10,7 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.DTO.ShipperDTO;
 import vn.DucBackend.DTO.UserDTO;
 import vn.DucBackend.Services.LocationService;
+<<<<<<< Updated upstream
 import vn.DucBackend.Services.ParcelService;
+=======
+>>>>>>> Stashed changes
 import vn.DucBackend.Services.ShipperService;
 import vn.DucBackend.Services.TripService;
 import vn.DucBackend.Services.UserService;
@@ -37,9 +40,12 @@ public abstract class ShipperBaseController {
     @Autowired
     protected LoggingHelper loggingHelper;
 
+<<<<<<< Updated upstream
     @Autowired
     protected ParcelService parcelService;
 
+=======
+>>>>>>> Stashed changes
     /**
      * Thêm các attributes chung vào Model
      */

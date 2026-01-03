@@ -1,6 +1,9 @@
 package vn.DucBackend.Config;
 
+<<<<<<< Updated upstream
 import org.hibernate.LazyInitializationException;
+=======
+>>>>>>> Stashed changes
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -26,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     /**
+<<<<<<< Updated upstream
      * Xử lý LazyInitializationException - Lỗi lazy loading phổ biến
      */
     @ExceptionHandler(LazyInitializationException.class)
@@ -45,6 +49,8 @@ public class GlobalExceptionHandler {
     }
 
     /**
+=======
+>>>>>>> Stashed changes
      * Xử lý lỗi Database/SQL - ẨN chi tiết khỏi user
      */
     @ExceptionHandler(DataAccessException.class)

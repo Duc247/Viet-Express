@@ -70,6 +70,12 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
+    public List<TripDTO> findCompletedTripsByShipper(Long shipperId) {
+        return tripRepository.findCompletedTripsByShipper(shipperId).stream().map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<TripDTO> findTripsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return tripRepository.findByDateRange(startDate, endDate).stream().map(this::toDTO)
                 .collect(Collectors.toList());

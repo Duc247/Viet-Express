@@ -20,8 +20,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
     Optional<Location> findByWarehouseCode(String warehouseCode);
 
-    @Query("SELECT l FROM Location l WHERE l.locationType = 'WAREHOUSE' AND l.isActive = true")
-    List<Location> findAllActiveWarehouses();
+    @Query("SELECT l FROM Location l WHERE l.locationType = :locationType AND (l.isActive = true OR l.isActive IS NULL)")
+    List<Location> findWarehousesByType(@Param("locationType") Location.LocationType locationType);
 
     @Query("SELECT l FROM Location l WHERE l.name LIKE %:keyword% OR l.addressText LIKE %:keyword%")
     List<Location> searchByKeyword(@Param("keyword") String keyword);

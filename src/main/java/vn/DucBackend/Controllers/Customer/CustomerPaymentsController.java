@@ -49,6 +49,98 @@ public class CustomerPaymentsController {
         return null;
     }
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * Hiển thị trang tổng hợp thanh toán của customer
+     * Lấy tất cả payments từ các requests mà customer là sender hoặc receiver
+     */
+    @GetMapping("/payments")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public String paymentsList(
+            @RequestParam(value = "search", required = false) String search,
+            Model model,
+            HttpServletRequest request,
+            HttpSession session) {
+
+        addCommonAttributes(model, request);
+
+        Long customerId = getCustomerIdFromSession(session);
+
+        // Phải đăng nhập để xem
+        if (customerId == null) {
+            return "redirect:/auth/login";
+        }
+
+        // Lấy tất cả requests mà customer là sender hoặc receiver
+        List<CustomerRequest> customerRequests = customerRequestRepository.findBySenderId(customerId);
+        List<CustomerRequest> receiverRequests = customerRequestRepository.findByReceiverId(customerId);
+        
+        // Gộp và loại bỏ trùng lặp
+        java.util.Set<Long> requestIds = new java.util.HashSet<>();
+        customerRequests.forEach(cr -> requestIds.add(cr.getId()));
+        receiverRequests.forEach(cr -> requestIds.add(cr.getId()));
+
+        // Lấy tất cả payments từ các requests này
+        List<Payment> allPayments = new java.util.ArrayList<>();
+        for (Long requestId : requestIds) {
+            List<Payment> payments = paymentRepository.findByRequestId(requestId);
+            // Pre-fetch relationships để tránh lazy loading exception
+            payments.forEach(p -> {
+                if (p.getRequest() != null) {
+                    p.getRequest().getRequestCode();
+                    if (p.getRequest().getSender() != null) p.getRequest().getSender().getName();
+                    if (p.getRequest().getReceiver() != null) p.getRequest().getReceiver().getName();
+                }
+            });
+            allPayments.addAll(payments);
+        }
+
+        // Filter by search keyword if provided
+        if (search != null && !search.trim().isEmpty()) {
+            String keyword = search.trim().toLowerCase();
+            allPayments = allPayments.stream()
+                    .filter(p -> 
+                        (p.getPaymentCode() != null && p.getPaymentCode().toLowerCase().contains(keyword)) ||
+                        (p.getRequest() != null && p.getRequest().getRequestCode() != null && 
+                         p.getRequest().getRequestCode().toLowerCase().contains(keyword)) ||
+                        (p.getDescription() != null && p.getDescription().toLowerCase().contains(keyword))
+                    )
+                    .collect(java.util.stream.Collectors.toList());
+            model.addAttribute("search", search);
+        }
+
+        model.addAttribute("payments", allPayments);
+
+        // Calculate summary statistics
+        BigDecimal totalPaid = allPayments.stream()
+                .filter(p -> p.getPaidAmount() != null)
+                .map(Payment::getPaidAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalUnpaid = allPayments.stream()
+                .filter(p -> p.getStatus() == Payment.PaymentStatus.UNPAID || 
+                            p.getStatus() == Payment.PaymentStatus.PARTIALLY_PAID)
+                .filter(p -> p.getExpectedAmount() != null)
+                .map(p -> p.getExpectedAmount().subtract(p.getPaidAmount() != null ? p.getPaidAmount() : BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalCod = allPayments.stream()
+                .filter(p -> p.getPaymentType() == Payment.PaymentType.COD)
+                .filter(p -> p.getStatus() != Payment.PaymentStatus.COLLECTED_FROM_RECEIVER && 
+                            p.getStatus() != Payment.PaymentStatus.PAID_TO_SENDER)
+                .filter(p -> p.getExpectedAmount() != null)
+                .map(p -> p.getExpectedAmount().subtract(p.getPaidAmount() != null ? p.getPaidAmount() : BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("totalPaid", totalPaid);
+        model.addAttribute("totalUnpaid", totalUnpaid);
+        model.addAttribute("totalCod", totalCod);
+
+        return "customer/payments";
+    }
+
+>>>>>>> Stashed changes
     @GetMapping("/orders/{id}/payments")
     public String paymentsDetail(
             @PathVariable("id") Long id,
@@ -163,6 +255,7 @@ public class CustomerPaymentsController {
     }
 
     /**
+<<<<<<< Updated upstream
      * Trang thanh toán tổng hợp - hiển thị tất cả payments từ các đơn hàng của customer
      * Có chức năng tìm kiếm theo mã request, mã trip
      */
@@ -267,6 +360,8 @@ public class CustomerPaymentsController {
     }
 
     /**
+=======
+>>>>>>> Stashed changes
      * API lấy lịch sử giao dịch của một khoản thanh toán
      */
     @GetMapping("/payments/{paymentId}/transactions")

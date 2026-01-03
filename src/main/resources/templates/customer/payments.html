@@ -80,6 +80,24 @@
             </div>
         </div>
 
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/customer/payments}" method="get" class="row g-3">
+                    <div class="col-md-10">
+                        <input type="text" name="search" class="form-control" 
+                            placeholder="Tìm kiếm theo mã thanh toán, mã đơn, mô tả..."
+                            th:value="${search}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -98,6 +116,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="p : ${payments}">
+<<<<<<< Updated upstream
                                 <td><code th:text="${p.paymentCode ?: 'N/A'}">PAY-XXX</code></td>
                                 <td>
                                     <code th:text="${p.request.requestCode}">REQ-XXX</code>
@@ -116,11 +135,26 @@
                                     <span class="badge bg-warning" th:if="${p.paymentType.name() == 'COD'}">COD</span>
                                     <span class="badge bg-secondary" th:if="${p.paymentType.name() == 'DEPOSIT'}">Cọc</span>
                                 </td>
+=======
+                                <td><code th:text="${p.paymentCode}">PAY-XXX</code></td>
+                                <td>
+                                    <a th:href="@{/customer/orders/{id}(id=${p.request.id})}" 
+                                       th:text="${p.request.requestCode}">REQ-XXX</a>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" th:if="${p.paymentType.name() == 'SHIPPING_FEE'}">Phí
+                                        ship</span>
+                                    <span class="badge bg-warning" th:if="${p.paymentType.name() == 'COD'}">COD</span>
+                                    <span class="badge bg-secondary" th:if="${p.paymentType.name() == 'DEPOSIT'}">Đặt cọc</span>
+                                </td>
+>>>>>>> Stashed changes
                                 <td th:text="${#numbers.formatDecimal(p.expectedAmount, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</td>
                                 <td th:text="${#numbers.formatDecimal(p.paidAmount ?: 0, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</td>
                                 <td>
                                     <span class="badge bg-success" th:if="${p.status.name() == 'PAID'}">Đã TT</span>
+                                    <span class="badge bg-warning" th:if="${p.status.name() == 'PARTIALLY_PAID'}">TT một phần</span>
                                     <span class="badge bg-danger" th:if="${p.status.name() == 'UNPAID'}">Chưa TT</span>
+<<<<<<< Updated upstream
                                     <span class="badge bg-warning" th:if="${p.status.name() == 'PARTIALLY_PAID'}">Một phần</span>
                                     <span class="badge bg-info" th:if="${p.status.name() == 'COLLECTED_FROM_RECEIVER'}">Đã thu COD</span>
                                 </td>
@@ -130,6 +164,16 @@
                                         <i class="fas fa-money-bill-wave me-1"></i>Thanh toán
                                     </a>
                                     <span class="text-muted small" th:if="${p.status.name() == 'PAID'}">Đã hoàn tất</span>
+=======
+                                    <span class="badge bg-info" th:if="${p.status.name() == 'COLLECTED_FROM_RECEIVER'}">Đã thu COD</span>
+                                    <span class="badge bg-primary" th:if="${p.status.name() == 'PAID_TO_SENDER'}">Đã trả COD</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/customer/orders/{id}/payments(id=${p.request.id})}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>Chi tiết
+                                    </a>
+>>>>>>> Stashed changes
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(payments)}">

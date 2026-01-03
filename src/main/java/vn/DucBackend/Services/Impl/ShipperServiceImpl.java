@@ -142,8 +142,17 @@ public class ShipperServiceImpl implements ShipperService {
             shipper.setCurrentTrip(tripRepository.findById(dto.getCurrentTripId())
                     .orElseThrow(() -> new RuntimeException("Trip not found")));
         }
+<<<<<<< Updated upstream
         shipper.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : false);
         shipper.setIsAvailable(dto.getIsAvailable() != null ? dto.getIsAvailable() : false);
+=======
+        if (dto.getIsActive() != null) {
+            shipper.setIsActive(dto.getIsActive());
+        }
+        if (dto.getIsAvailable() != null) {
+            shipper.setIsAvailable(dto.getIsAvailable());
+        }
+>>>>>>> Stashed changes
         shipper.setUpdatedAt(LocalDateTime.now());
 
         return toDTO(shipperRepository.save(shipper));

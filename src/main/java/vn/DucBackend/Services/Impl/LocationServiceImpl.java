@@ -72,7 +72,35 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<LocationDTO> findAllWarehouses() {
-        return locationRepository.findAllActiveWarehouses().stream()
+        // Try getting all locations first to debug
+        List<Location> allLocations = locationRepository.findAll();
+        System.out.println("DEBUG: Total locations in DB: " + allLocations.size());
+        
+        // Get all warehouses
+        List<Location> allWarehouses = locationRepository.findByLocationType(Location.LocationType.WAREHOUSE);
+        System.out.println("DEBUG: Found " + allWarehouses.size() + " warehouses by type (before filter)");
+        
+        if (allWarehouses.isEmpty()) {
+            // Try getting all and filtering manually
+            allWarehouses = allLocations.stream()
+                    .filter(loc -> loc.getLocationType() == Location.LocationType.WAREHOUSE)
+                    .collect(Collectors.toList());
+            System.out.println("DEBUG: After manual filter by type: " + allWarehouses.size() + " warehouses");
+        }
+        
+        // Filter active ones
+        List<Location> activeWarehouses = allWarehouses.stream()
+                .filter(loc -> {
+                    Boolean active = loc.getIsActive();
+                    boolean result = active != null && active;
+                    System.out.println("DEBUG: Warehouse " + loc.getId() + " (" + loc.getName() + ") isActive=" + active + " -> " + result);
+                    return result;
+                })
+                .collect(Collectors.toList());
+        
+        System.out.println("DEBUG: After filter, " + activeWarehouses.size() + " active warehouses");
+        
+        return activeWarehouses.stream()
                 .map(this::toLocationDTO)
                 .collect(Collectors.toList());
     }
