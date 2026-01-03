@@ -57,6 +57,83 @@
                             </div>
                         </div>
                     </div>
+<<<<<<< Updated upstream
+=======
+
+                    <!-- CARD 2: Thông tin hàng hóa & COD -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-box me-2"></i>Thông tin hàng hóa & COD
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Tên hàng hóa <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="productDescription" class="form-control"
+                                        placeholder="VD: Máy giặt, Thùng sơn..." required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Loại hàng</label>
+                                    <select name="productType" class="form-select">
+                                        <option value="NORMAL">Hàng thông thường</option>
+                                        <option value="FRAGILE">Hàng dễ vỡ</option>
+                                        <option value="FROZEN">Hàng đông lạnh</option>
+                                        <option value="LIQUID">Chất lỏng/Hóa chất</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Số lượng kiện hàng <span class="text-danger">*</span></label>
+                                    <input type="number" name="parcelCount" class="form-control" min="1" value="1" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Trọng lượng (kg)</label>
+                                    <input type="number" name="weight" class="form-control" min="0.1" step="0.1"
+                                        placeholder="0.0">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Kích thước (cm)</label>
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <input type="number" name="lengthCm" class="form-control" min="0.1" step="0.1"
+                                                placeholder="Dài (cm)">
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="widthCm" class="form-control" min="0.1" step="0.1"
+                                                placeholder="Rộng (cm)">
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="heightCm" class="form-control" min="0.1" step="0.1"
+                                                placeholder="Cao (cm)">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Giá trị hàng hóa (VNĐ)</label>
+                                    <input type="number" name="productValue" class="form-control"
+                                        placeholder="Để tính bảo hiểm">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-success"><i
+                                            class="fas fa-hand-holding-usd me-1"></i>Tiền thu hộ (COD)</label>
+                                    <input type="number" name="codAmount" class="form-control border-success"
+                                        placeholder="0" value="0">
+                                    <div class="form-text small">Nhập số tiền cần thu từ người nhận (nếu có).</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Ghi chú cho tài xế</label>
+                                    <textarea name="note" class="form-control" rows="2"
+                                        placeholder="VD: Gọi trước khi giao, hàng nhẹ xếp trên..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+>>>>>>> Stashed changes
                 </div>
 
                 <div class="card shadow-sm mb-4">
@@ -88,6 +165,7 @@
                                 <input type="text" class="form-control" placeholder="cm x cm x cm">
                             </div>
 
+<<<<<<< Updated upstream
                             <div class="col-md-6">
                                 <label class="form-label">Giá trị hàng hóa (VNĐ)</label>
                                 <input type="number" class="form-control" placeholder="Để tính bảo hiểm">
@@ -101,6 +179,31 @@
                             <div class="col-12">
                                 <label class="form-label">Ghi chú cho tài xế</label>
                                 <textarea name="note" class="form-control" rows="2" placeholder="VD: Gọi trước khi giao, hàng nhẹ xếp trên..."></textarea>
+=======
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-truck me-2"></i>Gói vận chuyển</h6>
+                        </div>
+                        <div class="card-body">
+                            <div th:each="serviceType, iterStat : ${serviceTypes}" th:if="${serviceType.isActive == true}">
+                                <div class="form-check mb-3 border rounded p-3" th:classappend="${iterStat.first} ? 'bg-light' : ''">
+                                    <input class="form-check-input" type="radio" name="serviceTypeId" 
+                                        th:id="'srv' + ${serviceType.id}"
+                                        th:value="${serviceType.id}" th:checked="${iterStat.first}">
+                                    <label class="form-check-label w-100" th:for="'srv' + ${serviceType.id}">
+                                        <div class="d-flex justify-content-between fw-bold">
+                                            <span th:text="${serviceType.name}">Tên dịch vụ</span>
+                                            <span class="text-primary" th:if="${serviceType.pricePerKm != null}">
+                                                <span th:text="${#numbers.formatDecimal(serviceType.pricePerKm, 0, 'COMMA', 0, 'POINT')}">0</span>đ/km
+                                            </span>
+                                        </div>
+                                        <small class="text-muted" th:text="${serviceType.description ?: 'Dịch vụ vận chuyển'}">Mô tả</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(serviceTypes)}" class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Chưa có dịch vụ nào khả dụng
+>>>>>>> Stashed changes
                             </div>
                         </div>
                     </div>

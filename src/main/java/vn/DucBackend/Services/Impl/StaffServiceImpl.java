@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.StaffDTO;
+import vn.DucBackend.Entities.Location;
 import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Repositories.LocationRepository;
 import vn.DucBackend.Repositories.StaffRepository;
@@ -38,6 +39,106 @@ public class StaffServiceImpl implements StaffService {
 		return staffRepository.findById(id).map(this::toDTO);
 	}
 
+<<<<<<< Updated upstream
+=======
+	/**
+	 * Tìm kiếm Staff theo keyword (fullName, phone, email)
+	 * Sử dụng bởi: AdminPersonnelController.staffSearch() - GET /admin/staff/search
+	 */
+	@Override
+	public List<StaffDTO> searchStaff(String keyword) {
+		return staffRepository.searchByKeyword(keyword).stream().map(this::toDTO).collect(Collectors.toList());
+	}
+
+	/**
+	 * Tạo Staff mới từ User có sẵn
+	 * Sử dụng bởi: AdminPersonnelController.staffCreate() - POST
+	 * /admin/staff/create
+	 */
+	@Override
+	public StaffDTO createStaff(StaffDTO dto) {
+		Staff staff = new Staff();
+		if (dto.getUserId() != null) {
+			staff.setUser(userRepository.findById(dto.getUserId()).orElse(null));
+		}
+		if (dto.getLocationId() != null) {
+			Location location = locationRepository.findById(dto.getLocationId())
+					.orElseThrow(() -> new RuntimeException("Location not found"));
+			// Validation: Staff phải gắn location có type là WAREHOUSE
+			if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
+				throw new RuntimeException("Staff phải được gắn với location có type là WAREHOUSE!");
+			}
+			staff.setLocation(location);
+		} else {
+			throw new RuntimeException("Staff bắt buộc phải gắn với một location có type là WAREHOUSE!");
+		}
+		staff.setFullName(dto.getFullName());
+		staff.setPhone(dto.getPhone());
+		staff.setEmail(dto.getEmail());
+		staff.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
+		staff.setCreatedAt(dto.getCreatedAt());
+		staff.setUpdatedAt(dto.getUpdatedAt());
+		return toDTO(staffRepository.save(staff));
+	}
+
+	/**
+	 * Cập nhật thông tin Staff
+	 * Sử dụng bởi: AdminPersonnelController.staffUpdate() - POST
+	 * /admin/staff/edit/{id}
+	 */
+	@Override
+	public StaffDTO updateStaff(Long id, StaffDTO dto) {
+		Staff staff = staffRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Staff not found"));
+		if (dto.getFullName() != null)
+			staff.setFullName(dto.getFullName());
+		if (dto.getPhone() != null)
+			staff.setPhone(dto.getPhone());
+		if (dto.getEmail() != null)
+			staff.setEmail(dto.getEmail());
+		if (dto.getLocationId() != null) {
+			Location location = locationRepository.findById(dto.getLocationId())
+					.orElseThrow(() -> new RuntimeException("Location not found"));
+			// Validation: Staff phải gắn location có type là WAREHOUSE
+			if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
+				throw new RuntimeException("Staff phải được gắn với location có type là WAREHOUSE!");
+			}
+			staff.setLocation(location);
+		} else if (staff.getLocation() == null) {
+			throw new RuntimeException("Staff bắt buộc phải gắn với một location có type là WAREHOUSE!");
+		}
+		if (dto.getIsActive() != null)
+			staff.setIsActive(dto.getIsActive());
+		else
+			staff.setIsActive(false);
+		staff.setUpdatedAt(LocalDateTime.now());
+		return toDTO(staffRepository.save(staff));
+	}
+
+	/**
+	 * Xóa Staff theo ID
+	 * Sử dụng bởi: AdminPersonnelController.staffDelete() - POST
+	 * /admin/staff/delete/{id}
+	 */
+	@Override
+	public void deleteStaff(Long id) {
+		staffRepository.deleteById(id);
+	}
+
+	/**
+	 * Bật/tắt trạng thái active của Staff
+	 * Sử dụng bởi: AdminPersonnelController.staffToggleStatus() - POST
+	 * /admin/staff/toggle-status/{id}
+	 */
+	@Override
+	public void toggleStaffStatus(Long id) {
+		Staff staff = staffRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Staff not found"));
+		staff.setIsActive(!staff.getIsActive());
+		staffRepository.save(staff);
+	}
+
+>>>>>>> Stashed changes
 	@Override
 	public Optional<StaffDTO> findByUserId(Long userId) {
 		return staffRepository.findByUserId(userId).map(this::toDTO);
