@@ -39,6 +39,12 @@ public interface TripService {
     /** Repository: tripRepository.findActiveTripsByShipperId() */
     List<TripDTO> findActiveTripsByShipper(Long shipperId);
 
+<<<<<<< Updated upstream
+=======
+    /** Repository: tripRepository.findCompletedTripsByShipper() */
+    List<TripDTO> findCompletedTripsByShipper(Long shipperId);
+
+>>>>>>> Stashed changes
     /** Repository: tripRepository.findByStartTimeBetween() */
     List<TripDTO> findTripsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 

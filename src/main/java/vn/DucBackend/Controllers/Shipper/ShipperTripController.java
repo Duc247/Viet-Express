@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.DTO.ShipperDTO;
 import vn.DucBackend.DTO.TripDTO;
+<<<<<<< Updated upstream
+import vn.DucBackend.Services.ParcelService;
+=======
+>>>>>>> Stashed changes
 
 /**
  * Shipper Trip Controller
@@ -43,7 +47,11 @@ public class ShipperTripController extends ShipperBaseController {
             if ("active".equals(filter)) {
                 trips = tripService.findActiveTripsByShipper(shipper.getId());
             } else if ("history".equals(filter) || "completed".equals(filter)) {
+<<<<<<< Updated upstream
                 trips = tripService.findTripsByShipperId(shipper.getId());
+=======
+                trips = tripService.findCompletedTripsByShipper(shipper.getId());
+>>>>>>> Stashed changes
             } else {
                 trips = tripService.findTripsByShipperId(shipper.getId());
             }
@@ -63,7 +71,18 @@ public class ShipperTripController extends ShipperBaseController {
         addCommonAttributes(model, request, principal);
         Optional<TripDTO> tripOpt = tripService.findTripById(id);
         if (tripOpt.isPresent()) {
+<<<<<<< Updated upstream
+            TripDTO trip = tripOpt.get();
+            model.addAttribute("trip", trip);
+            
+            // Thêm thông tin parcels trong chuyến
+            if (trip.getId() != null) {
+                model.addAttribute("parcels", parcelService.findParcelsByTripId(trip.getId()));
+            }
+            
+=======
             model.addAttribute("trip", tripOpt.get());
+>>>>>>> Stashed changes
             return "shipper/trip/detail";
         } else {
             return "redirect:/shipper/trips";
@@ -75,8 +94,20 @@ public class ShipperTripController extends ShipperBaseController {
      */
     @PostMapping("/trip/{id}/status")
     public String updateTripStatus(@PathVariable("id") Long id, @RequestParam("status") String status,
-            Principal principal) {
+            HttpServletRequest request, Principal principal) {
+        ShipperDTO shipper = getCurrentShipper(principal);
+
         tripService.updateTripStatus(id, status);
+
+        // Ghi log cập nhật trạng thái
+        if (shipper != null) {
+            if ("IN_PROGRESS".equals(status)) {
+                loggingHelper.logTripStarted(shipper.getId(), id, request);
+            } else if ("COMPLETED".equals(status)) {
+                loggingHelper.logTripEnded(shipper.getId(), id, request);
+            }
+        }
+
         return "redirect:/shipper/trip/" + id;
     }
 }

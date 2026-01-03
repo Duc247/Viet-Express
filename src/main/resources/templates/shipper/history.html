@@ -12,32 +12,60 @@
 
         <div
             class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Lịch sử chuyến xe</h1>
+            <h1 class="h2"><i class="fas fa-history me-2"></i>Lịch sử chuyến xe</h1>
         </div>
 
+        <!-- Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h6>Tổng chuyến</h6>
+                        <h3 th:text="${totalTrips ?: 0}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h6>Đã hoàn thành</h6>
+                        <h3 th:text="${completedTrips ?: 0}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h6>Tổng COD đã thu</h6>
+                        <h3 th:text="${totalCod != null ? (#numbers.formatDecimal(totalCod, 0, 'COMMA', 0, 'POINT') + 'đ') : '0đ'}">0đ</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter -->
         <div class="card shadow-sm mb-4">
             <div class="card-body p-2">
-                <form class="row g-2 align-items-center">
+                <form th:action="@{/shipper/history}" method="get" class="row g-2 align-items-center">
                     <div class="col-auto">
-                        <select class="form-select form-select-sm">
-                            <option selected>Tháng này</option>
-                            <option value="LAST_MONTH">Tháng trước</option>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Đã hoàn thành</option>
+                            <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+                            <option value="all" th:selected="${status == 'all'}">Tất cả</option>
                         </select>
                     </div>
                     <div class="col-auto">
-                        <select class="form-select form-select-sm">
-                            <option selected>Tất cả trạng thái</option>
-                            <option value="COMPLETED">Đã hoàn thành</option>
-                            <option value="CANCELLED">Đã hủy</option>
-                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Lọc</button>
                     </div>
                     <div class="col-auto">
-                        <button type="button" class="btn btn-sm btn-primary">Lọc</button>
+                        <a th:href="@{/shipper/history}" class="btn btn-sm btn-secondary">Reset</a>
                     </div>
                 </form>
             </div>
         </div>
 
+        <!-- History Table -->
         <div class="card shadow mb-4">
             <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive">
@@ -47,13 +75,56 @@
                                 <th class="ps-4">Mã chuyến</th>
                                 <th>Ngày chạy</th>
                                 <th>Lộ trình</th>
+                                <th>Loại chuyến</th>
                                 <th>Thu nhập (COD)</th>
                                 <th>Trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="text-center text-muted">
-                                <td colspan="5" class="py-5">
+                            <tr th:each="trip : ${trips}">
+                                <td class="ps-4">
+                                    <code th:text="'TRIP-' + ${trip.id}">TRIP-123</code>
+                                </td>
+                                <td>
+                                    <span th:if="${trip.startedAt != null}" 
+                                          th:text="${#temporals.format(trip.startedAt, 'dd/MM/yyyy HH:mm')}">10/10/2023 08:00</span>
+                                    <span th:if="${trip.startedAt == null}" class="text-muted">Chưa bắt đầu</span>
+                                </td>
+                                <td>
+                                    <strong th:text="${trip.startLocationName}">Hà Nội</strong>
+                                    <i class="fas fa-arrow-right mx-2 text-muted"></i>
+                                    <strong th:text="${trip.endLocationName}">Hải Phòng</strong>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${trip.tripType == 'PICKUP' ? 'bg-primary' : (trip.tripType == 'DELIVERY' ? 'bg-success' : (trip.tripType == 'TRANSFER' ? 'bg-info' : 'bg-warning'))}"
+                                          th:text="${trip.tripType == 'PICKUP' ? 'Lấy hàng' : (trip.tripType == 'DELIVERY' ? 'Giao hàng' : (trip.tripType == 'TRANSFER' ? 'Vận chuyển' : 'Hoàn trả'))}">
+                                        Loại
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong class="text-success" 
+                                            th:text="${trip.codAmount != null ? (#numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + 'đ') : '0đ'}">
+                                        0đ
+                                    </strong>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${trip.status == 'COMPLETED' ? 'bg-success' : (trip.status == 'CANCELLED' ? 'bg-danger' : (trip.status == 'IN_PROGRESS' ? 'bg-warning' : 'bg-secondary'))}"
+                                          th:text="${trip.status == 'COMPLETED' ? 'Hoàn thành' : (trip.status == 'CANCELLED' ? 'Đã hủy' : (trip.status == 'IN_PROGRESS' ? 'Đang thực hiện' : trip.status))}">
+                                        Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/shipper/trip/{id}(id=${trip.id})}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${trips == null || #lists.isEmpty(trips)}" class="text-center text-muted">
+                                <td colspan="7" class="py-5">
                                     <i class="fas fa-history fa-3x mb-3 d-block opacity-50"></i>
                                     Bạn chưa có lịch sử chuyến xe nào
                                 </td>

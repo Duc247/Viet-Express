@@ -7,7 +7,6 @@ import vn.DucBackend.DTO.CaseStudyDTO;
 import vn.DucBackend.Entities.CaseStudy;
 import vn.DucBackend.Repositories.CaseStudyRepository;
 import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.ServiceTypeRepository;
 import vn.DucBackend.Services.CaseStudyService;
 
 import java.text.Normalizer;
@@ -23,7 +22,6 @@ public class CaseStudyServiceImpl implements CaseStudyService {
 
     private final CaseStudyRepository caseStudyRepository;
     private final CustomerRequestRepository requestRepository;
-    private final ServiceTypeRepository serviceTypeRepository;
 
     @Override
     public List<CaseStudyDTO> findAllCaseStudies() {
@@ -65,11 +63,14 @@ public class CaseStudyServiceImpl implements CaseStudyService {
     @Override
     public CaseStudyDTO createCaseStudy(CaseStudyDTO dto) {
         CaseStudy cs = new CaseStudy();
+        // Lấy request và service type từ request (không cần chọn riêng)
         if (dto.getRequestId() != null) {
-            cs.setRequest(requestRepository.findById(dto.getRequestId()).orElse(null));
-        }
-        if (dto.getServiceTypeId() != null) {
-            cs.setServiceType(serviceTypeRepository.findById(dto.getServiceTypeId()).orElse(null));
+            var request = requestRepository.findById(dto.getRequestId()).orElse(null);
+            cs.setRequest(request);
+            // Tự động lấy service type từ request
+            if (request != null && request.getServiceType() != null) {
+                cs.setServiceType(request.getServiceType());
+            }
         }
         cs.setTitle(dto.getTitle());
         cs.setSlug(dto.getSlug() != null ? dto.getSlug() : generateSlug(dto.getTitle()));
@@ -109,14 +110,16 @@ public class CaseStudyServiceImpl implements CaseStudyService {
     @Override
     public CaseStudyDTO toggleFeatured(Long id) {
         CaseStudy cs = caseStudyRepository.findById(id).orElseThrow(() -> new RuntimeException("CaseStudy not found"));
-        cs.setIsFeatured(!cs.getIsFeatured());
+        Boolean current = cs.getIsFeatured();
+        cs.setIsFeatured(current == null ? true : !current);
         return toDTO(caseStudyRepository.save(cs));
     }
 
     @Override
     public CaseStudyDTO togglePublished(Long id) {
         CaseStudy cs = caseStudyRepository.findById(id).orElseThrow(() -> new RuntimeException("CaseStudy not found"));
-        cs.setIsPublished(!cs.getIsPublished());
+        Boolean current = cs.getIsPublished();
+        cs.setIsPublished(current == null ? true : !current);
         return toDTO(caseStudyRepository.save(cs));
     }
 

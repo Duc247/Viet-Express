@@ -9,7 +9,8 @@ import java.util.Optional;
 /**
  * Service interface quản lý CustomerRequest (Yêu cầu/Đơn hàng của khách)
  * 
- * Repository sử dụng: CustomerRequestRepository, CustomerRepository, LocationRepository, ServiceTypeRepository, ParcelRepository
+ * Repository sử dụng: CustomerRequestRepository, CustomerRepository,
+ * LocationRepository, ServiceTypeRepository, ParcelRepository
  * Controller sử dụng: AdminOperationController, CustomerOrderCreateController
  */
 public interface CustomerRequestService {
@@ -47,19 +48,34 @@ public interface CustomerRequestService {
     /** Repository: customerRequestRepository.countByStatus() */
     Long countRequestsByStatus(String status);
 
-    /** Repository: customerRequestRepository.save(), customerRepository.findById(), locationRepository.findById(), serviceTypeRepository.findById() */
+    /**
+     * Repository: customerRequestRepository.save(), customerRepository.findById(),
+     * locationRepository.findById(), serviceTypeRepository.findById()
+     */
     CustomerRequestDTO createRequest(CustomerRequestDTO dto);
 
-    /** Repository: customerRequestRepository.findById(), customerRequestRepository.save() */
+    /**
+     * Repository: customerRequestRepository.findById(),
+     * customerRequestRepository.save()
+     */
     CustomerRequestDTO updateRequest(Long id, CustomerRequestDTO dto);
 
-    /** Repository: customerRequestRepository.findById(), customerRequestRepository.save() */
+    /**
+     * Repository: customerRequestRepository.findById(),
+     * customerRequestRepository.save()
+     */
     CustomerRequestDTO updateRequestStatus(Long id, String status);
 
-    /** Repository: customerRequestRepository.findById(), customerRequestRepository.save() */
+    /**
+     * Repository: customerRequestRepository.findById(),
+     * customerRequestRepository.save()
+     */
     CustomerRequestDTO confirmRequest(Long id);
 
-    /** Repository: customerRequestRepository.findById(), customerRequestRepository.save() */
+    /**
+     * Repository: customerRequestRepository.findById(),
+     * customerRequestRepository.save()
+     */
     CustomerRequestDTO cancelRequest(Long id);
 
     /** Repository: customerRequestRepository.deleteById() */
@@ -71,6 +87,21 @@ public interface CustomerRequestService {
     /** Repository: serviceTypeRepository.findById() - Tính phí ship */
     java.math.BigDecimal calculateShippingFee(Long serviceTypeId, java.math.BigDecimal distanceKm);
 
-    /** Repository: serviceTypeRepository.findById() - Tính thời gian giao dự kiến */
+    /**
+     * Repository: serviceTypeRepository.findById() - Tính thời gian giao dự kiến
+     */
     LocalDateTime calculateEstimatedDeliveryTime(Long serviceTypeId, java.math.BigDecimal distanceKm);
+
+    // ==========================================
+    // MANAGER ASSIGNMENT
+    // ==========================================
+
+    /** Gán manager cho đơn hàng */
+    CustomerRequestDTO assignManager(Long requestId, Long managerId);
+
+    /** Tìm đơn hàng được giao cho manager */
+    List<CustomerRequestDTO> findByAssignedManager(Long managerId);
+
+    /** Đếm số đơn mới được giao cho manager (trong 24h) */
+    Long countNewAssignmentsForManager(Long managerId);
 }

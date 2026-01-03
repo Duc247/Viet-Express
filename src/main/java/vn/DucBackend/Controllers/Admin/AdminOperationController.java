@@ -5,10 +5,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.DTO.*;
+import vn.DucBackend.Repositories.UserRepository;
 import vn.DucBackend.Services.*;
 
 /**
@@ -42,6 +46,8 @@ public class AdminOperationController {
     private ShipperService shipperService;
     @Autowired
     private VehicleService vehicleService;
+    @Autowired
+    private UserRepository userRepository;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -60,6 +66,56 @@ public class AdminOperationController {
         addCommonAttributes(model, request);
         model.addAttribute("requests", customerRequestService.findAllRequests());
         return "admin/request/list";
+    }
+
+    /**
+     * Chi tiết yêu cầu khách hàng
+     * Service: customerRequestService.findRequestById()
+     */
+    @GetMapping("/request/{id}")
+    public String requestDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        CustomerRequestDTO requestDTO = customerRequestService.findRequestById(id).orElse(null);
+        if (requestDTO == null) {
+            return "redirect:/admin/request";
+        }
+        model.addAttribute("customerRequest", requestDTO);
+        // Danh sách managers để gán
+        model.addAttribute("managers", userRepository.findActiveUsersByRole("MANAGER"));
+        return "admin/request/detail";
+    }
+
+    /**
+     * Gán Manager cho đơn hàng
+     */
+    @PostMapping("/request/{id}/assign-manager")
+    public String assignManager(@PathVariable Long id,
+            @RequestParam Long managerId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            customerRequestService.assignManager(id, managerId);
+            redirectAttributes.addFlashAttribute("success", "Đã giao đơn hàng cho Manager thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/request/" + id;
+    }
+
+    /**
+     * Form sửa yêu cầu khách hàng
+     * Service: customerRequestService.findRequestById(),
+     * locationService.findAllLocations()
+     */
+    @GetMapping("/request/{id}/edit")
+    public String requestEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        CustomerRequestDTO requestDTO = customerRequestService.findRequestById(id).orElse(null);
+        if (requestDTO == null) {
+            return "redirect:/admin/request";
+        }
+        model.addAttribute("customerRequest", requestDTO);
+        model.addAttribute("locations", locationService.findAllLocations());
+        return "admin/request/form";
     }
 
     // ==========================================
@@ -113,6 +169,40 @@ public class AdminOperationController {
     public String tripForm(Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
         model.addAttribute("trip", new TripDTO());
+        model.addAttribute("locations", locationService.findAllLocations());
+        model.addAttribute("shippers", shipperService.findAllShippers());
+        model.addAttribute("vehicles", vehicleService.findAll());
+        return "admin/trip/form";
+    }
+
+    /**
+     * Chi tiết chuyến xe
+     * Service: tripService.findTripById()
+     */
+    @GetMapping("/trip/{id}")
+    public String tripDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        TripDTO tripDTO = tripService.findTripById(id).orElse(null);
+        if (tripDTO == null) {
+            return "redirect:/admin/trip";
+        }
+        model.addAttribute("trip", tripDTO);
+        return "admin/trip/detail";
+    }
+
+    /**
+     * Form sửa chuyến xe
+     * Service: tripService.findTripById(), locationService, shipperService,
+     * vehicleService
+     */
+    @GetMapping("/trip/{id}/edit")
+    public String tripEditForm(@PathVariable Long id, Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        TripDTO tripDTO = tripService.findTripById(id).orElse(null);
+        if (tripDTO == null) {
+            return "redirect:/admin/trip";
+        }
+        model.addAttribute("trip", tripDTO);
         model.addAttribute("locations", locationService.findAllLocations());
         model.addAttribute("shippers", shipperService.findAllShippers());
         model.addAttribute("vehicles", vehicleService.findAll());

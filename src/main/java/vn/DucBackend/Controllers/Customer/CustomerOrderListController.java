@@ -47,7 +47,7 @@ public class CustomerOrderListController {
 
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
@@ -92,7 +92,7 @@ public class CustomerOrderListController {
 
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);

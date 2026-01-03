@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{shipper/layout-shipper}">
+
+<head>
+    <title>Hồ sơ của tôi</title>
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-user-circle me-2"></i>Hồ sơ của tôi
+            </h1>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="profile-avatar">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <h2 class="mb-1" th:text="${shipper.fullName}">Tên Shipper</h2>
+                    <p class="mb-2 opacity-75">
+                        <i class="fas fa-phone me-2"></i>
+                        <span th:text="${shipper.phone ?: 'Chưa cập nhật SĐT'}">Phone</span>
+                    </p>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-map me-2"></i>
+                        <span th:text="${shipper.workingArea ?: 'Chưa cập nhật khu vực'}">Working Area</span>
+                    </p>
+                </div>
+                <div class="col-auto text-end">
+                    <span class="badge bg-light text-dark fs-6">
+                        <i class="fas fa-id-badge me-1"></i>ID: <span th:text="${shipper.id}">1</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-edit me-2"></i>Chỉnh sửa thông tin</h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/shipper/profile}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" name="fullName" class="form-control" 
+                                th:value="${shipper.fullName}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="tel" name="phone" class="form-control" 
+                                th:value="${shipper.phone}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Khu vực làm việc</label>
+                            <input type="text" name="workingArea" class="form-control" 
+                                th:value="${shipper.workingArea}" 
+                                placeholder="VD: Hà Nội, TP.HCM...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Vị trí hiện tại</label>
+                            <select name="currentLocationId" class="form-select">
+                                <option value="">-- Chọn vị trí --</option>
+                                <option th:each="location : ${locations}"
+                                    th:value="${location.id}"
+                                    th:text="${location.name}"
+                                    th:selected="${shipper.currentLocationId != null && shipper.currentLocationId == location.id}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Lưu thay đổi
+                        </button>
+                        <a th:href="@{/shipper/dashboard}" class="btn btn-secondary ms-2">
+                            <i class="fas fa-times me-2"></i>Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Info Display -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold"><i class="fas fa-info-circle text-primary me-2"></i>Thông tin cơ bản</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Trạng thái hoạt động</small>
+                            <span th:class="${shipper.isActive ? 'badge bg-success' : 'badge bg-danger'}">
+                                <span th:text="${shipper.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}">Status</span>
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Sẵn sàng nhận đơn</small>
+                            <span th:class="${shipper.isAvailable ? 'badge bg-primary' : 'badge bg-warning text-dark'}">
+                                <span th:text="${shipper.isAvailable ? 'Sẵn sàng' : 'Đang bận'}">Availability</span>
+                            </span>
+                        </div>
+                        <div th:if="${shipper.currentLocationName}">
+                            <small class="text-muted d-block">Vị trí hiện tại</small>
+                            <span class="fw-bold" th:text="${shipper.currentLocationName}">Location</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold"><i class="fas fa-clock text-info me-2"></i>Thông tin hệ thống</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Ngày tạo</small>
+                            <span th:text="${shipper.createdAt != null ? #temporals.format(shipper.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                N/A
+                            </span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Cập nhật lần cuối</small>
+                            <span th:text="${shipper.updatedAt != null ? #temporals.format(shipper.updatedAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                N/A
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+

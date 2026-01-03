@@ -427,7 +427,10 @@ public class AdminPersonnelController {
         addCommonAttributes(model, request);
         model.addAttribute("staff", new StaffDTO());
         model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("locations", locationService.findAllLocations());
+        var warehouses = locationService.findAllWarehouses();
+        System.out.println("DEBUG: findAllWarehouses returned " + warehouses.size() + " warehouses");
+        warehouses.forEach(w -> System.out.println("DEBUG: Warehouse: " + w.getId() + " - " + w.getName()));
+        model.addAttribute("locations", warehouses);
         model.addAttribute("isEdit", false);
         return "admin/staff/form";
     }
@@ -457,7 +460,10 @@ public class AdminPersonnelController {
         addCommonAttributes(model, request);
         model.addAttribute("staff", staffService.findStaffById(id).orElse(null));
         model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("locations", locationService.findAllLocations());
+        var warehouses = locationService.findAllWarehouses();
+        System.out.println("DEBUG: findAllWarehouses returned " + warehouses.size() + " warehouses");
+        warehouses.forEach(w -> System.out.println("DEBUG: Warehouse: " + w.getId() + " - " + w.getName()));
+        model.addAttribute("locations", warehouses);
         model.addAttribute("isEdit", true);
         return "admin/staff/form";
     }

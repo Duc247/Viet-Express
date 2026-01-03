@@ -24,6 +24,7 @@
                                 <th>Trọng lượng</th>
                                 <th>Vị trí hiện tại</th>
                                 <th>Trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,6 +46,10 @@
                                         giao</span>
                                     <span class="badge bg-warning" th:if="${p.status == 'PICKED_UP'}">Đã
                                         lấy</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/parcel/{id}(id=${p.id})}"
+                                        class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(parcels)}">

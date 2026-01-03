@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
+import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.Optional;
@@ -42,6 +43,9 @@ public class ManagerTripController {
     private ShipperRepository shipperRepository;
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private LoggingHelper loggingHelper;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -200,6 +204,7 @@ public class ManagerTripController {
         }
 
         model.addAttribute("trip", tripOpt.get());
+        model.addAttribute("shippers", shipperRepository.findAll());
         return "manager/trip/detail";
     }
 
@@ -235,6 +240,34 @@ public class ManagerTripController {
         return "redirect:/manager/trips/" + id;
     }
 
+    // GÁN SHIPPER VÀO TRIP
+    @PostMapping("/trips/{id}/assign-shipper")
+    public String assignShipperToTrip(
+            @PathVariable("id") Long id,
+            @RequestParam("shipperId") Long shipperId,
+            RedirectAttributes redirectAttributes) {
+
+        Optional<Trip> tripOpt = tripRepository.findById(id);
+        if (tripOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy chuyến!");
+            return "redirect:/manager/trips";
+        }
+
+        Optional<Shipper> shipperOpt = shipperRepository.findById(shipperId);
+        if (shipperOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy tài xế!");
+            return "redirect:/manager/trips/" + id;
+        }
+
+        Trip trip = tripOpt.get();
+        trip.setShipper(shipperOpt.get());
+        tripRepository.save(trip);
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đã gán tài xế " + shipperOpt.get().getFullName() + " vào chuyến!");
+        return "redirect:/manager/trips/" + id;
+    }
+
     // TẠO TRIP
     @PostMapping("/trips/create")
     public String createTrip(
@@ -244,6 +277,7 @@ public class ManagerTripController {
             @RequestParam("startLocationId") Long startLocationId,
             @RequestParam("endLocationId") Long endLocationId,
             @RequestParam(value = "note", required = false) String note,
+            HttpServletRequest httpRequest,
             RedirectAttributes redirectAttributes) {
 
         Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(requestId);
@@ -274,6 +308,10 @@ public class ManagerTripController {
         }
 
         tripRepository.save(trip);
+
+        // Ghi log tạo trip
+        loggingHelper.logTripCreated(null, trip.getId(), tripType, httpRequest);
+
         redirectAttributes.addFlashAttribute("successMessage", "Đã tạo chuyến thành công!");
         return "redirect:/manager/requests/" + requestId + "/trips";
     }

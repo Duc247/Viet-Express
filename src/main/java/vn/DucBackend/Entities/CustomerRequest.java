@@ -89,6 +89,14 @@ public class CustomerRequest {
     @Column(name = "assigned_at")
     private LocalDateTime assignedAt;
 
+    // Manager được giao phụ trách đơn hàng này
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_manager_id")
+    private User assignedManager;
+
+    @Column(name = "manager_assigned_at")
+    private LocalDateTime managerAssignedAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

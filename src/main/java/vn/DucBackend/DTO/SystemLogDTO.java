@@ -11,6 +11,7 @@ public class SystemLogDTO {
     private String actionType;
     private Long actorId;
     private String actorName;
+    private String actorUsername; // Alias for actorName
     private String targetId;
     private String logDetails;
     private String ipAddress;

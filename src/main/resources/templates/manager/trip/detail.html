@@ -100,7 +100,7 @@
                         <h6 class="mb-0 fw-bold"><i class="fas fa-edit me-2"></i>Cập nhật trạng thái</h6>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/manager/trips/{id}/update-status(id=${trip.id})}" method="post">
+                        <form th:action="@{/manager/trips/{id}/status(id=${trip.id})}" method="post">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Trạng thái mới</label>
                                 <select name="newStatus" class="form-select" required>
@@ -118,6 +118,43 @@
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="fas fa-save me-1"></i>Cập nhật
                             </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Card Gán Shipper -->
+                <div class="card shadow-sm mb-4 border-info">
+                    <div class="card-header bg-info bg-opacity-25 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-user-tie me-2"></i>Gán Tài xế</h6>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${trip.shipper != null}" class="alert alert-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Tài xế hiện tại:</strong> <span th:text="${trip.shipper.fullName}">Shipper</span>
+                        </div>
+                        <div th:if="${trip.shipper == null}" class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Chưa gán tài xế!</strong> Shipper sẽ không thấy chuyến này.
+                        </div>
+                        <form th:action="@{/manager/trips/{id}/assign-shipper(id=${trip.id})}" method="post">
+                            <div class="row align-items-end">
+                                <div class="col-md-8 mb-2">
+                                    <label class="form-label fw-bold">Chọn tài xế:</label>
+                                    <select name="shipperId" class="form-select" required>
+                                        <option value="">-- Chọn Shipper --</option>
+                                        <option th:each="s : ${shippers}" th:value="${s.id}"
+                                            th:text="${s.fullName + (s.isAvailable ? ' ✅' : ' (Bận)')}"
+                                            th:selected="${trip.shipper != null && trip.shipper.id == s.id}">
+                                            Shipper
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <button type="submit" class="btn btn-info w-100">
+                                        <i class="fas fa-user-plus me-1"></i>Gán
+                                    </button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>

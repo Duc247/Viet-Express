@@ -18,6 +18,7 @@ import vn.DucBackend.Repositories.CustomerRepository;
 import vn.DucBackend.Repositories.LocationRepository;
 import vn.DucBackend.Repositories.ServiceTypeRepository;
 import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Utils.LoggingHelper;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -41,6 +42,9 @@ public class CustomerOrderCreateController {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private LoggingHelper loggingHelper;
+
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
     }
@@ -58,11 +62,11 @@ public class CustomerOrderCreateController {
         // Kiểm tra session - phải đăng nhập mới được tạo đơn
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         addCommonAttributes(model, request);
-        model.addAttribute("serviceTypes", serviceTypeRepository.findAll());
+        model.addAttribute("serviceTypes", serviceTypeRepository.findByIsActiveTrue());
         model.addAttribute("customerId", customerId);
 
         // Lấy thông tin customer để pre-fill form
@@ -87,6 +91,14 @@ public class CustomerOrderCreateController {
             @RequestParam(value = "distanceKm", required = false) BigDecimal distanceKm,
             @RequestParam(value = "note", required = false) String note,
             @RequestParam(value = "weight", required = false) BigDecimal weight,
+<<<<<<< Updated upstream
+            @RequestParam(value = "parcelCount", defaultValue = "1") Integer parcelCount,
+            @RequestParam(value = "lengthCm", required = false) BigDecimal lengthCm,
+            @RequestParam(value = "widthCm", required = false) BigDecimal widthCm,
+            @RequestParam(value = "heightCm", required = false) BigDecimal heightCm,
+=======
+>>>>>>> Stashed changes
+            HttpServletRequest request,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -94,7 +106,7 @@ public class CustomerOrderCreateController {
         Long sessionCustomerId = getCustomerIdFromSession(session);
         if (sessionCustomerId == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         // Validate số điện thoại người gửi
@@ -149,9 +161,26 @@ public class CustomerOrderCreateController {
             receiver = receiverOpt.get();
         }
 
+<<<<<<< Updated upstream
+        // Validate service type - get from request parameter
+        if (serviceTypeId == null) {
+            // Try to get from serviceType parameter (old format)
+            String serviceTypeStr = request.getParameter("serviceType");
+            if (serviceTypeStr != null) {
+                // Map old service type codes to IDs
+                serviceTypeId = serviceTypeRepository.findByCode(serviceTypeStr)
+                        .map(st -> st.getId())
+                        .orElse(null);
+            }
+        }
+        
+        if (serviceTypeId == null) {
+            serviceTypeId = serviceTypeRepository.findByIsActiveTrue().stream()
+=======
         // Validate service type
         if (serviceTypeId == null) {
             serviceTypeId = serviceTypeRepository.findAll().stream()
+>>>>>>> Stashed changes
                     .findFirst()
                     .map(st -> st.getId())
                     .orElse(null);
@@ -199,6 +228,9 @@ public class CustomerOrderCreateController {
             requestDTO.setDistanceKm(distanceKm);
 
             CustomerRequestDTO createdRequest = customerRequestService.createRequest(requestDTO);
+
+            // Ghi log tạo đơn thành công
+            loggingHelper.logOrderCreated(sender.getId(), createdRequest.getRequestCode(), request);
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Tạo đơn hàng thành công! Mã vận đơn: " + createdRequest.getRequestCode());

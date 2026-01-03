@@ -147,6 +147,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         if (log.getActor() != null) {
             dto.setActorId(log.getActor().getId());
             dto.setActorName(log.getActor().getUsername());
+            dto.setActorUsername(log.getActor().getUsername());
         }
         dto.setTargetId(log.getTargetId());
         dto.setLogDetails(log.getLogDetails());

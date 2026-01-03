@@ -1,6 +1,8 @@
 package vn.DucBackend.Controllers.Manager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -9,8 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
+import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -50,18 +54,38 @@ public class ManagerRequestController {
     private VehicleRepository vehicleRepository;
     @Autowired
     private StaffRepository staffRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private LoggingHelper loggingHelper;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
     }
 
     // ==========================================
-    // QUẢN LÝ YÊU CẦU
+    // QUẢN LÝ YÊU CẦU - CHỈ HIỂN ĐƠN ĐƯỢC GÁN CHO MANAGER NÀY
     // ==========================================
     @GetMapping("/requests")
-    public String requestList(Model model, HttpServletRequest request) {
+    public String requestList(Model model, HttpServletRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
         addCommonAttributes(model, request);
-        model.addAttribute("requests", customerRequestRepository.findAll());
+
+        // Lấy user hiện tại
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+
+        if (currentUser != null) {
+            // Chỉ lấy đơn hàng được gán cho manager này
+            List<CustomerRequest> assignedRequests = customerRequestRepository
+                    .findByAssignedManagerId(currentUser.getId());
+            model.addAttribute("requests", assignedRequests);
+            model.addAttribute("totalRequests", assignedRequests.size());
+        } else {
+            model.addAttribute("requests", java.util.Collections.emptyList());
+            model.addAttribute("totalRequests", 0);
+        }
+
         return "manager/request/requests";
     }
 
@@ -116,7 +140,8 @@ public class ManagerRequestController {
 
     // Chốt đơn → CONFIRMED (chỉ khi receiver đã xác nhận RECEIVER_CONFIRMED)
     @PostMapping("/requests/{id}/confirm")
-    public String confirmRequest(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    public String confirmRequest(@PathVariable("id") Long id, HttpServletRequest httpRequest,
+            RedirectAttributes redirectAttributes) {
         Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
         if (requestOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
@@ -142,7 +167,39 @@ public class ManagerRequestController {
         // Cập nhật trạng thái qua Service → CONFIRMED (cả 2 đã xác nhận)
         customerRequestService.updateRequestStatus(id, "CONFIRMED");
 
+        // Ghi log duyệt đơn
+        loggingHelper.logOrderConfirmed(null, customerRequest.getRequestCode(), httpRequest);
+
         redirectAttributes.addFlashAttribute("successMessage", "Đã chốt đơn thành công!");
+        return "redirect:/manager/requests/" + id;
+    }
+
+    // Force Confirm - Cho phép Manager bypass receiver confirmation
+    @PostMapping("/requests/{id}/force-confirm")
+    public String forceConfirmRequest(@PathVariable("id") Long id, HttpServletRequest httpRequest,
+            RedirectAttributes redirectAttributes) {
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
+            return "redirect:/manager/requests";
+        }
+
+        CustomerRequest customerRequest = requestOpt.get();
+
+        // Kiểm tra có đủ location không
+        if (customerRequest.getSenderLocation() == null || customerRequest.getReceiverLocation() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Cần thiết lập cả điểm lấy hàng và điểm giao trước khi chốt đơn!");
+            return "redirect:/manager/requests/" + id;
+        }
+
+        // Force update → CONFIRMED (bỏ qua kiểm tra receiver)
+        customerRequestService.updateRequestStatus(id, "CONFIRMED");
+
+        // Ghi log duyệt đơn (force)
+        loggingHelper.logOrderConfirmed(null, customerRequest.getRequestCode() + " (Force)", httpRequest);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Đã force chốt đơn thành công!");
         return "redirect:/manager/requests/" + id;
     }
 

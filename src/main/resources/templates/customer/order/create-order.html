@@ -121,22 +121,67 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+<<<<<<< Updated upstream
+                                    <label class="form-label">Số lượng kiện hàng <span class="text-danger">*</span></label>
+                                    <input type="number" name="parcelCount" class="form-control" min="1" value="1" required>
+=======
+                                    <label class="form-label">Số lượng kiện hàng</label>
+                                    <input type="number" name="parcelCount" class="form-control" min="1" step="1"
+                                        placeholder="1" value="1">
+>>>>>>> Stashed changes
+                                </div>
+                                <div class="col-md-4">
                                     <label class="form-label">Trọng lượng (kg)</label>
                                     <input type="number" name="weight" class="form-control" min="0.1" step="0.1"
                                         placeholder="0.0">
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Kích thước (D x R x C)</label>
-                                    <input type="text" name="dimensions" class="form-control"
-                                        placeholder="cm x cm x cm">
+<<<<<<< Updated upstream
+                                <div class="col-md-12">
+                                    <label class="form-label">Kích thước (cm)</label>
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <input type="number" name="lengthCm" class="form-control" min="0.1" step="0.1"
+                                                placeholder="Dài (cm)">
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="widthCm" class="form-control" min="0.1" step="0.1"
+                                                placeholder="Rộng (cm)">
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="heightCm" class="form-control" min="0.1" step="0.1"
+                                                placeholder="Cao (cm)">
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
+=======
+                                <div class="col-md-4">
+>>>>>>> Stashed changes
                                     <label class="form-label">Giá trị hàng hóa (VNĐ)</label>
                                     <input type="number" name="productValue" class="form-control"
                                         placeholder="Để tính bảo hiểm">
                                 </div>
+<<<<<<< Updated upstream
+=======
+                                <div class="col-md-4">
+                                    <label class="form-label">Chiều dài (cm)</label>
+                                    <input type="number" name="length" class="form-control" min="1" step="0.1"
+                                        placeholder="cm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Chiều rộng (cm)</label>
+                                    <input type="number" name="width" class="form-control" min="1" step="0.1"
+                                        placeholder="cm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Chiều cao (cm)</label>
+                                    <input type="number" name="height" class="form-control" min="1" step="0.1"
+                                        placeholder="cm">
+                                </div>
+
+>>>>>>> Stashed changes
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold text-success"><i
                                             class="fas fa-hand-holding-usd me-1"></i>Tiền thu hộ (COD)</label>
@@ -164,38 +209,43 @@
                             <h6 class="m-0 fw-bold text-primary"><i class="fas fa-truck me-2"></i>Gói vận chuyển</h6>
                         </div>
                         <div class="card-body">
-                            <div class="form-check mb-3 border rounded p-3 bg-light">
-                                <input class="form-check-input" type="radio" name="serviceType" id="srv1"
-                                    value="STANDARD" checked>
-                                <label class="form-check-label w-100" for="srv1">
-                                    <div class="d-flex justify-content-between fw-bold">
-                                        <span>Tiêu chuẩn</span>
-                                        <span class="text-primary">Giá tốt</span>
-                                    </div>
-                                    <small class="text-muted">Thời gian: 3-5 ngày</small>
-                                </label>
+<<<<<<< Updated upstream
+                            <div th:each="serviceType, iterStat : ${serviceTypes}" th:if="${serviceType.isActive == true}">
+                                <div class="form-check mb-3 border rounded p-3" th:classappend="${iterStat.first} ? 'bg-light' : ''">
+                                    <input class="form-check-input" type="radio" name="serviceTypeId" 
+                                        th:id="'srv' + ${serviceType.id}"
+                                        th:value="${serviceType.id}" th:checked="${iterStat.first}">
+                                    <label class="form-check-label w-100" th:for="'srv' + ${serviceType.id}">
+                                        <div class="d-flex justify-content-between fw-bold">
+                                            <span th:text="${serviceType.name}">Tên dịch vụ</span>
+                                            <span class="text-primary" th:if="${serviceType.pricePerKm != null}">
+                                                <span th:text="${#numbers.formatDecimal(serviceType.pricePerKm, 0, 'COMMA', 0, 'POINT')}">0</span>đ/km
+                                            </span>
+                                        </div>
+                                        <small class="text-muted" th:text="${serviceType.description ?: 'Dịch vụ vận chuyển'}">Mô tả</small>
+                                    </label>
+                                </div>
                             </div>
-                            <div class="form-check mb-3 border rounded p-3">
-                                <input class="form-check-input" type="radio" name="serviceType" id="srv2"
-                                    value="EXPRESS">
-                                <label class="form-check-label w-100" for="srv2">
-                                    <div class="d-flex justify-content-between fw-bold">
-                                        <span>Giao nhanh</span>
-                                        <span class="text-warning">24-48h</span>
-                                    </div>
-                                    <small class="text-muted">Ưu tiên giao sớm</small>
-                                </label>
+                            <div th:if="${#lists.isEmpty(serviceTypes)}" class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Chưa có dịch vụ nào khả dụng
+=======
+                            <div th:if="${#lists.isEmpty(serviceTypes)}" class="text-center text-muted py-3">
+                                <i class="fas fa-info-circle me-2"></i>Chưa có gói vận chuyển nào
                             </div>
-                            <div class="form-check mb-0 border rounded p-3">
-                                <input class="form-check-input" type="radio" name="serviceType" id="srv3"
-                                    value="SAME_DAY">
-                                <label class="form-check-label w-100" for="srv3">
+                            <div th:each="serviceType, iterStat : ${serviceTypes}" 
+                                 th:class="'form-check mb-3 border rounded p-3' + (${iterStat.first} ? ' bg-light' : '') + (${iterStat.last} ? ' mb-0' : '')">
+                                <input class="form-check-input" type="radio" name="serviceTypeId" 
+                                    th:id="'srv' + ${serviceType.id}" th:value="${serviceType.id}"
+                                    th:checked="${iterStat.first}">
+                                <label class="form-check-label w-100" th:for="'srv' + ${serviceType.id}">
                                     <div class="d-flex justify-content-between fw-bold">
-                                        <span>Giao trong ngày</span>
-                                        <span class="text-danger">Siêu tốc</span>
+                                        <span th:text="${serviceType.name}">Tên dịch vụ</span>
+                                        <span class="text-primary" th:if="${serviceType.pricePerKm != null}" 
+                                              th:text="'Giá: ' + ${#numbers.formatDecimal(serviceType.pricePerKm, 0, 'COMMA', 0, 'POINT')} + 'đ/km'">Giá</span>
                                     </div>
-                                    <small class="text-muted">Nội thành trong ngày</small>
+                                    <small class="text-muted" th:text="${serviceType.description ?: 'Không có mô tả'}">Mô tả</small>
                                 </label>
+>>>>>>> Stashed changes
                             </div>
                         </div>
                     </div>

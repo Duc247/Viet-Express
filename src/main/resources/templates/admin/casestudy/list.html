@@ -12,6 +12,17 @@
             <h1 class="h2"><i class="fas fa-star me-2"></i>Quản lý CaseStudy (Dự án tiêu biểu)</h1>
             <a href="/admin/casestudy/create" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Thêm mới</a>
         </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <div class="card">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -20,35 +31,91 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Tiêu đề</th>
-                                <th>Slug</th>
                                 <th>Khách hàng</th>
-                                <th>Nổi bật</th>
-                                <th>Xuất bản</th>
-                                <th>Thao tác</th>
+                                <th>Loại dịch vụ</th>
+                                <th class="text-center">Nổi bật</th>
+                                <th class="text-center">Xuất bản</th>
+                                <th class="text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="cs : ${caseStudies}">
                                 <td th:text="${cs.id}"></td>
-                                <td th:text="${cs.title}"></td>
-                                <td><code th:text="${cs.slug}"></code></td>
-                                <td th:text="${cs.clientNameDisplay}"></td>
                                 <td>
-                                    <span class="badge bg-warning" th:if="${cs.isFeatured}"><i
-                                            class="fas fa-star"></i></span>
-                                    <span th:unless="${cs.isFeatured}">-</span>
+                                    <strong th:text="${cs.title}"></strong>
+                                    <br /><small class="text-muted" th:text="'/' + ${cs.slug}"></small>
                                 </td>
+                                <td th:text="${cs.clientNameDisplay ?: '-'}"></td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${cs.isPublished}">Đã xuất bản</span>
-                                    <span class="badge bg-secondary" th:unless="${cs.isPublished}">Nháp</span>
+                                    <span class="badge bg-info" th:text="${cs.serviceTypeName ?: '-'}"></span>
                                 </td>
-                                <td>
-                                    <a th:href="@{/admin/casestudy/edit/{id}(id=${cs.id})}"
-                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                <td class="text-center">
+                                    <!-- Toggle Featured -->
+                                    <form th:action="@{/admin/casestudy/{id}/toggle-featured(id=${cs.id})}"
+                                        method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm"
+                                            th:classappend="${cs.isFeatured} ? 'btn-warning' : 'btn-outline-secondary'"
+                                            th:title="${cs.isFeatured} ? 'Bỏ nổi bật' : 'Đánh dấu nổi bật'">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    <!-- Toggle Publish -->
+                                    <form th:action="@{/admin/casestudy/{id}/toggle-publish(id=${cs.id})}" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-sm"
+                                            th:classappend="${cs.isPublished} ? 'btn-success' : 'btn-outline-secondary'"
+                                            th:title="${cs.isPublished} ? 'Hủy xuất bản' : 'Xuất bản'">
+                                            <i th:class="${cs.isPublished} ? 'fas fa-check' : 'fas fa-eye-slash'"></i>
+                                            <span th:text="${cs.isPublished} ? 'Public' : 'Nháp'"></span>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{/admin/casestudy/edit/{id}(id=${cs.id})}"
+                                            class="btn btn-sm btn-outline-primary" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${cs.id}"
+                                            title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" th:id="'deleteModal' + ${cs.id}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Xác nhận xóa</h5>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    Bạn có chắc chắn muốn xóa case study "<strong
+                                                        th:text="${cs.title}"></strong>"?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Hủy</button>
+                                                    <form th:action="@{/admin/casestudy/{id}/delete(id=${cs.id})}"
+                                                        method="post" style="display:inline;">
+                                                        <button type="submit" class="btn btn-danger">Xóa</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(caseStudies)}">
-                                <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu</td>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                                    Chưa có Case Study nào. <a href="/admin/casestudy/create">Tạo mới ngay</a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

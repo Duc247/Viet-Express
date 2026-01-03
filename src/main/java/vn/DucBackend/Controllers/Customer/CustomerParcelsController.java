@@ -58,7 +58,7 @@ public class CustomerParcelsController {
 
         // Phải đăng nhập để xem chi tiết
         if (customerId == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);

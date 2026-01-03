@@ -56,11 +56,33 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Chi nhánh làm
                                 việc</label>
+<<<<<<< Updated upstream
                             <select name="locationId" class="form-select">
                                 <option value="">-- Chọn chi nhánh --</option>
                                 <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
                                     th:selected="${staff?.locationId == loc.id}"></option>
+=======
+                            <select name="locationId" class="form-select" required>
+                                <option value="">-- Chọn chi nhánh --</option>
+                                <option th:each="loc : ${locations}" 
+                                        th:value="${loc.id}" 
+                                        th:text="${loc.name}"
+                                        th:selected="${staff?.locationId != null && staff.locationId.equals(loc.id)}"></option>
+>>>>>>> Stashed changes
                             </select>
+                            <!-- Debug: Show locations count -->
+                            <small class="text-muted" th:if="${locations != null}">
+                                Tìm thấy <span th:text="${#lists.size(locations)}">0</span> chi nhánh
+                            </small>
+                        </div>
+                        <!-- Trạng thái hoạt động -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Trạng thái</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="isActive" value="true"
+                                    th:checked="${staff?.isActive == null || staff?.isActive}" id="isActiveSwitch">
+                                <label class="form-check-label" for="isActiveSwitch">Đang hoạt động</label>
+                            </div>
                         </div>
                         <!-- Trạng thái hoạt động -->
                         <div class="col-md-6 mb-3">

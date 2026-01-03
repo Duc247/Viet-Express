@@ -62,8 +62,22 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         // Search payments
         @Query("SELECT p FROM Payment p WHERE p.request.id = :requestId AND " +
                         "(LOWER(p.paymentCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+<<<<<<< Updated upstream
+                        "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(p.request.requestCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "(p.trip IS NOT NULL AND CAST(p.trip.id AS string) LIKE CONCAT('%', :keyword, '%')))")
+        List<Payment> searchByRequestIdAndKeyword(@Param("requestId") Long requestId, @Param("keyword") String keyword);
+        
+        // Search payments by request code or trip code (for customer payments page)
+        @Query("SELECT p FROM Payment p WHERE p.request.sender.id = :customerId OR p.request.receiver.id = :customerId " +
+                        "AND (LOWER(p.request.requestCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(p.paymentCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "(p.trip IS NOT NULL AND CAST(p.trip.id AS string) LIKE CONCAT('%', :keyword, '%')))")
+        List<Payment> searchByCustomerIdAndKeyword(@Param("customerId") Long customerId, @Param("keyword") String keyword);
+=======
                         "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
         List<Payment> searchByRequestIdAndKeyword(@Param("requestId") Long requestId, @Param("keyword") String keyword);
+>>>>>>> Stashed changes
 
         // Filter by status
         @Query("SELECT p FROM Payment p WHERE p.request.id = :requestId AND p.status = :status")
@@ -90,4 +104,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
         @Query("SELECT COUNT(p) FROM Payment p WHERE p.request.id = :requestId AND p.paymentScope = 'PER_TRIP'")
         Long countPerTripByRequestId(@Param("requestId") Long requestId);
+<<<<<<< Updated upstream
+
+        // Find payments by customer ID (sender) - Fix lazy loading issue
+        @Query("SELECT p FROM Payment p " +
+               "LEFT JOIN FETCH p.request r " +
+               "LEFT JOIN FETCH r.sender " +
+               "WHERE r.sender.id = :customerId")
+        List<Payment> findByRequestSenderId(@Param("customerId") Long customerId);
+=======
+>>>>>>> Stashed changes
 }

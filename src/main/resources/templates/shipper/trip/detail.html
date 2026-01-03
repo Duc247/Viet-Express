@@ -19,6 +19,12 @@
 
         <!-- Trip Details -->
         <div class="card shadow-sm mb-4">
+<<<<<<< Updated upstream
+=======
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin chuyến xe</h6>
+            </div>
+>>>>>>> Stashed changes
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -40,12 +46,88 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="small text-muted text-uppercase">Tiền COD</label>
-                        <p class="mb-0 fw-bold text-success" th:text="${trip.codAmount} + ' VNĐ'">0 VNĐ</p>
+<<<<<<< Updated upstream
+                        <p class="mb-0 fw-bold text-success" 
+                           th:text="${trip.codAmount != null ? (#numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ') : '0 VNĐ'}">0 VNĐ</p>
                     </div>
+                    <div class="col-md-6 mb-3" th:if="${trip.vehicleLicensePlate}">
+                        <label class="small text-muted text-uppercase">Phương tiện</label>
+                        <p class="mb-0 fw-bold" th:text="${trip.vehicleLicensePlate}">--</p>
+                    </div>
+                    <div class="col-md-6 mb-3" th:if="${trip.tripType}">
+                        <label class="small text-muted text-uppercase">Loại chuyến</label>
+                        <p class="mb-0">
+                            <span class="badge" 
+                                  th:classappend="${trip.tripType == 'PICKUP' ? 'bg-primary' : (trip.tripType == 'DELIVERY' ? 'bg-success' : (trip.tripType == 'TRANSFER' ? 'bg-info' : 'bg-warning'))}"
+                                  th:text="${trip.tripType == 'PICKUP' ? 'Lấy hàng' : (trip.tripType == 'DELIVERY' ? 'Giao hàng' : (trip.tripType == 'TRANSFER' ? 'Vận chuyển' : 'Hoàn trả'))}">
+                                Loại chuyến
+                            </span>
+                        </p>
+                    </div>
+=======
+                        <p class="mb-0 fw-bold text-success" th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">0 VNĐ</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small text-muted text-uppercase">Loại chuyến</label>
+                        <p class="mb-0">
+                            <span th:if="${trip.tripType == 'PICKUP'}" class="badge bg-success">🚚 Lấy hàng</span>
+                            <span th:if="${trip.tripType == 'TRANSFER'}" class="badge bg-info">🔄 Trung chuyển</span>
+                            <span th:if="${trip.tripType == 'DELIVERY'}" class="badge bg-warning text-dark">📦 Giao hàng</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3" th:if="${trip.vehicleLicensePlate != null}">
+                        <label class="small text-muted text-uppercase">Phương tiện</label>
+                        <p class="mb-0 fw-bold" th:text="${trip.vehicleLicensePlate}">Biển số xe</p>
+                    </div>
+>>>>>>> Stashed changes
                 </div>
             </div>
         </div>
 
+<<<<<<< Updated upstream
+        <!-- Parcels in Trip -->
+        <div class="card shadow-sm mb-4" th:if="${parcels != null && !#lists.isEmpty(parcels)}">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-box me-2"></i>Kiện hàng trong chuyến</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã kiện</th>
+                                <th>Mô tả</th>
+                                <th>Trọng lượng</th>
+                                <th>COD</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="parcel : ${parcels}">
+                                <td><code th:text="${parcel.parcelCode}">PARCEL-XXX</code></td>
+                                <td th:text="${parcel.description ?: '-'}">Mô tả</td>
+                                <td th:text="${parcel.weightKg != null ? (parcel.weightKg + ' kg') : '-'}">-</td>
+                                <td th:text="${parcel.codAmount != null ? (#numbers.formatDecimal(parcel.codAmount, 0, 'COMMA', 0, 'POINT') + 'đ') : '0đ'}">0đ</td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${parcel.status == 'DELIVERED' ? 'bg-success' : (parcel.status == 'IN_TRANSIT' ? 'bg-info' : (parcel.status == 'OUT_FOR_DELIVERY' ? 'bg-warning' : 'bg-secondary'))}"
+                                          th:text="${parcel.status}">Status</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4" th:if="${parcels == null || #lists.isEmpty(parcels)}">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-box-open fa-2x mb-2 d-block opacity-50"></i>
+                Chưa có kiện hàng nào trong chuyến này
+            </div>
+        </div>
+
+=======
+>>>>>>> Stashed changes
         <!-- Actions -->
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
             <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post"

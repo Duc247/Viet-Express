@@ -12,14 +12,32 @@
 
         <h2 class="h4 mb-4 fw-bold border-bottom pb-2">Bàn làm việc quản lý</h2>
 
+        <!-- Thông báo đơn hàng mới được giao -->
+        <div th:if="${hasNewAssignments}" class="alert alert-warning alert-dismissible fade show mb-4 shadow-sm"
+            role="alert">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-bell fa-2x text-warning animate__animated animate__swing animate__infinite"></i>
+                </div>
+                <div>
+                    <strong class="d-block">📢 Thông báo mới!</strong>
+                    <span th:text="${newAssignmentMessage}">Bạn có đơn hàng mới được giao!</span>
+                </div>
+                <a href="/manager/requests" class="btn btn-warning btn-sm ms-auto">
+                    <i class="fas fa-eye me-1"></i>Xem ngay
+                </a>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <div class="row g-4 mb-5">
             <div class="col-md-3">
                 <div class="card bg-danger text-white shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-white-50 text-uppercase">Tổng yêu cầu</h6>
-                                <h2 class="fw-bold mb-0" th:text="${totalRequests ?: 0}">0</h2>
+                                <h6 class="text-white-50 text-uppercase">Đơn hàng của tôi</h6>
+                                <h2 class="fw-bold mb-0" th:text="${requestCount ?: 0}">0</h2>
                             </div>
                             <i class="fas fa-bell fa-3x opacity-50"></i>
                         </div>
