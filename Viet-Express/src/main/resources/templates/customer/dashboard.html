@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{customer/layout-customer}">
+
+<head>
+    <title>Dashboard - Khách Hàng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f9ff !important;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Welcome Header */
+        .welcome-header {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(13, 148, 136, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .welcome-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .avatar-circle {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .welcome-text h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .welcome-text p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .btn-create-new {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.75rem;
+            background: white;
+            color: #0d9488;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-create-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            background: #f0fdf4;
+            color: #0d9488;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--accent-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            font-size: 1.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-color);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            background: var(--accent-bg);
+            color: var(--accent-color);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Color Schemes */
+        .stat-card:nth-child(1) {
+            --accent-color: #7c3aed;
+            --accent-bg: #f5f3ff;
+        }
+
+        .stat-card:nth-child(2) {
+            --accent-color: #0891b2;
+            --accent-bg: #ecfeff;
+        }
+
+        .stat-card:nth-child(3) {
+            --accent-color: #059669;
+            --accent-bg: #d1fae5;
+        }
+
+        .stat-card:nth-child(4) {
+            --accent-color: #ea580c;
+            --accent-bg: #ffedd5;
+        }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header::before {
+            content: '';
+            width: 5px;
+            height: 32px;
+            background: linear-gradient(180deg, #0d9488, #14b8a6);
+            border-radius: 10px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        /* Orders Panel */
+        .orders-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .orders-card-header {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            padding: 1.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-view-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-view-all:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(3px);
+            color: white;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .orders-table thead th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .orders-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+
+        .orders-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .orders-table tbody td {
+            padding: 1.25rem 1.5rem;
+            font-size: 0.9375rem;
+        }
+
+        .order-id {
+            font-weight: 700;
+            color: #0d9488;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .order-id::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #0d9488;
+            border-radius: 50%;
+        }
+
+        .order-date {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .order-description {
+            color: #1e293b;
+            font-weight: 500;
+            max-width: 280px;
+        }
+
+        .route-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .location-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .location-pill i {
+            color: #0d9488;
+            font-size: 0.875rem;
+        }
+
+        .arrow-icon {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .status-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-confirmed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-in-transit {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .status-delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-returned {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-pay {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 2.5rem;
+        }
+
+        .empty-text {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .btn-create-first {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-create-first:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .welcome-header {
+                padding: 1.75rem;
+            }
+
+            .welcome-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .avatar-circle {
+                width: 56px;
+                height: 56px;
+                font-size: 1.5rem;
+            }
+
+            .btn-create-new {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .orders-card-header {
+                padding: 1.5rem;
+            }
+
+            .orders-table thead th,
+            .orders-table tbody td {
+                padding: 1rem;
+            }
+
+            .route-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="dashboard-container">
+            <!-- Welcome Header -->
+            <div class="welcome-header">
+                <div class="welcome-content">
+                    <div class="welcome-left">
+                        <div class="avatar-circle">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="welcome-text">
+                            <h1>Xin chào, Quý khách!</h1>
+                            <p>Tổng quan tình hình vận chuyển của bạn hôm nay.</p>
+                        </div>
+                    </div>
+                    <a href="/customer/create-order" class="btn-create-new">
+                        <i class="fas fa-plus"></i>
+                        <span>Tạo đơn vận chuyển mới</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <!-- Tổng số đơn -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Tổng số đơn</div>
+                            <div class="stat-value" th:text="${totalOrders != null ? totalOrders : 0}">247</div>
+                            <span class="stat-badge">Đã tạo</span>
+                        </div>
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Đang giao -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Đang giao</div>
+                            <div class="stat-value" th:text="${inTransitOrders != null ? inTransitOrders : 0}">18</div>
+                            <span class="stat-badge">Thực tế</span>
+                        </div>
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-truck-loading"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hoàn thành -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Hoàn thành</div>
+                            <div class="stat-value" th:text="${deliveredOrders != null ? deliveredOrders : 0}">215</div>
+                            <span class="stat-badge">Đã giao</span>
+                        </div>
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tiền chưa thanh toán -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Tiền chưa thanh toán</div>
+                            <div class="stat-value"
+                                th:text="${totalUnpaid != null ? #numbers.formatDecimal(totalUnpaid, 0, 'COMMA', 0, 'POINT') + 'đ' : '0đ'}">
+                                45,250,000đ
+                            </div>
+                        </div>
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Header -->
+            <div class="section-header">
+                <h2 class="section-title">Yêu cầu gần đây</h2>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="orders-card">
+                <div class="orders-card-header">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h3 class="header-title">Đơn hàng của tôi</h3>
+                    </div>
+                    <a href="/customer/orders" class="btn-view-all">
+                        <span>Tất cả đơn hàng</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Ngày tạo</th>
+                                <th>Mô tả</th>
+                                <th>Lộ trình (Từ - Đến)</th>
+                                <th>Trạng thái</th>
+                                <th style="text-align: right;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop through recentOrders -->
+                            <tr th:each="order : ${recentOrders}">
+                                <td>
+                                    <div class="order-id" th:text="${order.requestCode}">REQ-20240103-001</div>
+                                </td>
+                                <td>
+                                    <div class="order-date"
+                                        th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                        03/01/2024 10:30
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="order-description" th:text="${order.parcelDescription}">
+                                        Thiết bị điện tử - Laptop Dell XPS 15
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="route-container">
+                                        <div class="location-pill">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span
+                                                th:text="${order.senderLocation != null ? order.senderLocation.name : '-'}">
+                                                TP. Hồ Chí Minh
+                                            </span>
+                                        </div>
+                                        <i class="fas fa-long-arrow-alt-right arrow-icon"></i>
+                                        <div class="location-pill">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span
+                                                th:text="${order.receiverLocation != null ? order.receiverLocation.name : '-'}">
+                                                Hà Nội
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${order.status.name() == 'PENDING'}"
+                                        class="status-label status-pending">Chờ xác nhận</span>
+                                    <span th:if="${order.status.name() == 'CONFIRMED'}"
+                                        class="status-label status-confirmed">Đã xác nhận</span>
+                                    <span th:if="${order.status.name() == 'IN_TRANSIT'}"
+                                        class="status-label status-in-transit">Đang vận chuyển</span>
+                                    <span th:if="${order.status.name() == 'DELIVERED'}"
+                                        class="status-label status-delivered">Thành công</span>
+                                    <span th:if="${order.status.name() == 'RETURNED'}"
+                                        class="status-label status-returned">Hoàn trả</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a th:href="@{'/customer/orders/' + ${order.id} + '/payments'}" class="btn-pay">
+                                        <i class="fas fa-credit-card"></i>
+                                        <span>Thanh toán</span>
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <!-- Empty state -->
+                            <tr th:if="${#lists.isEmpty(recentOrders)}">
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-box-open"></i>
+                                        </div>
+                                        <p class="empty-text">Quý khách chưa có đơn hàng nào.</p>
+                                        <a href="/customer/create-order" class="btn-create-first">
+                                            <i class="fas fa-plus"></i>
+                                            <span>Tạo ngay</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{customer/layout-customer}">
+
+<head>
+    <title>Chi tiết kiện hàng</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-boxes me-2"></i>Chi tiết kiện hàng</h2>
+            <a th:href="@{/customer/orders/{id}(id=${order.id})}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+
+        <!-- Order Info Summary -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body py-2">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <span class="text-muted">Đơn hàng:</span>
+                        <code class="ms-1" th:text="${order.requestCode}">REQ-XXX</code>
+                        <span class="ms-3 text-muted">Mô tả:</span>
+                        <span class="ms-1" th:text="${order.parcelDescription ?: '-'}">Hàng hóa</span>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="badge bg-primary" th:text="${'Tổng: ' + totalParcels + ' kiện'}">Tổng: 0
+                            kiện</span>
+                        <span class="badge bg-success" th:text="${'Đã giao: ' + deliveredParcels}">Đã giao: 0</span>
+                        <span class="badge bg-warning" th:text="${'Đang giao: ' + inDeliveryParcels}">Đang giao:
+                            0</span>
+                        <span class="badge bg-secondary" th:text="${'Còn lại: ' + pendingParcels}">Còn lại: 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form th:action="@{/customer/orders/{id}/parcels(id=${order.id})}" method="get" class="row g-3">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" name="search"
+                                placeholder="Tìm theo mã kiện, mô tả..." th:value="${search}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="status">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="CREATED" th:selected="${status == 'CREATED'}">Mới tạo</option>
+                            <option value="PICKED_UP" th:selected="${status == 'PICKED_UP'}">Đã lấy hàng</option>
+                            <option value="IN_WAREHOUSE" th:selected="${status == 'IN_WAREHOUSE'}">Trong kho</option>
+                            <option value="IN_TRANSIT" th:selected="${status == 'IN_TRANSIT'}">Đang vận chuyển</option>
+                            <option value="OUT_FOR_DELIVERY" th:selected="${status == 'OUT_FOR_DELIVERY'}">Đang giao
+                            </option>
+                            <option value="DELIVERED" th:selected="${status == 'DELIVERED'}">Đã giao</option>
+                            <option value="FAILED" th:selected="${status == 'FAILED'}">Thất bại</option>
+                            <option value="RETURNED" th:selected="${status == 'RETURNED'}">Hoàn trả</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-1"></i>Lọc
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-2" th:if="${search != null || status != null}">
+                    <a th:href="@{/customer/orders/{id}/parcels(id=${order.id})}"
+                        class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                    </a>
+                    <span class="text-muted ms-2" th:text="${'Tìm thấy ' + #lists.size(parcels) + ' kết quả'}">Tìm thấy
+                        0 kết quả</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parcels List -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Danh sách kiện hàng</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 20%">Mã kiện</th>
+                                <th style="width: 30%">Mô tả</th>
+                                <th style="width: 10%">Trọng lượng</th>
+                                <th style="width: 15%">COD</th>
+                                <th style="width: 10%">Trạng thái</th>
+                                <th style="width: 10%">Vị trí</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p, iterStat : ${parcels}">
+                                <td th:text="${iterStat.count}">1</td>
+                                <td><code th:text="${p.parcelCode}">PCL-XXX</code></td>
+                                <td>
+                                    <span th:text="${p.description ?: '-'}">Mô tả</span>
+                                </td>
+                                <td th:text="${p.weightKg != null ? p.weightKg + ' kg' : '-'}">1 kg</td>
+                                <td>
+                                    <span th:if="${p.codAmount != null && p.codAmount > 0}"
+                                        th:text="${#numbers.formatDecimal(p.codAmount, 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                        class="text-danger">0đ</span>
+                                    <span th:if="${p.codAmount == null || p.codAmount == 0}" class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:if="${p.status.name() == 'CREATED'}">Mới
+                                        tạo</span>
+                                    <span class="badge bg-info" th:if="${p.status.name() == 'PICKED_UP'}">Đã lấy</span>
+                                    <span class="badge bg-primary" th:if="${p.status.name() == 'IN_WAREHOUSE'}">Trong
+                                        kho</span>
+                                    <span class="badge bg-primary" th:if="${p.status.name() == 'IN_TRANSIT'}">Vận
+                                        chuyển</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${p.status.name() == 'OUT_FOR_DELIVERY'}">Đang giao</span>
+                                    <span class="badge bg-success" th:if="${p.status.name() == 'DELIVERED'}">Đã
+                                        giao</span>
+                                    <span class="badge bg-danger" th:if="${p.status.name() == 'FAILED'}">Thất bại</span>
+                                    <span class="badge bg-dark" th:if="${p.status.name() == 'RETURNED'}">Hoàn trả</span>
+                                </td>
+                                <td>
+                                    <small th:text="${p.currentLocation?.name ?: '-'}" class="text-muted">Kho A</small>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(parcels)}">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                                    Không tìm thấy kiện hàng nào
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

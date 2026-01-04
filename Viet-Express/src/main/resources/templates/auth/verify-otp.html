@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/master-layout}">
+<head>
+    <title>Xác thực OTP - Logistic  </title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-success text-white text-center">
+                        <h4 class="mb-0">Xác Thực OTP</h4>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                            <p class="text-muted">
+                                Mã xác minh 6 số đã được gửi đến email của bạn. <br>
+                                Vui lòng kiểm tra hòm thư (cả mục Spam).
+                            </p>
+                        </div>
+
+                        <form th:action="@{/auth/verify-otp}" method="post">
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nhập mã OTP</label>
+                                <input type="text" name="otp" class="form-control text-center fs-4 letter-spacing-2" 
+                                       placeholder="------" maxlength="6" required pattern="[0-9]{6}">
+                                <div class="form-text text-center">Mã có hiệu lực trong 5 phút</div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">Xác nhận</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer text-center bg-light py-3">
+                        <small>Bạn chưa nhận được mã? 
+                            <a href="#" class="text-decoration-none fw-bold">Gửi lại (60s)</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style layout:fragment="css">
+    .letter-spacing-2 {
+        letter-spacing: 5px;
+        font-weight: bold;
+    }
+</style>
+
+</body>
+</html>

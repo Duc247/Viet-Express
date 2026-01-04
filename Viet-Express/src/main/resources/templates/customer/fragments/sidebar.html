@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <nav th:fragment="sidebar" class="sidebar">
+        <div class="py-3">
+            <!-- User Info -->
+            <div class="text-center px-3 mb-4 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 1.5rem; color: white;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h6 class="text-white mb-1">
+                    Xin chào, <span th:if="${session.customerName}" th:text="${session.customerName}"></span><span
+                        th:unless="${session.customerName}" th:text="${session.username} ?: 'Khách hàng'"></span>
+                </h6>
+                <small style="color: rgba(255,255,255,0.5);">Khách hàng</small>
+            </div>
+
+            <div class="sidebar-heading">MENU CHÍNH</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/customer/dashboard') ? 'active' : ''}" th:href="@{/customer/dashboard}">
+                        <i class="fas fa-home"></i> Tổng quan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/customer/create-order') ? 'active' : ''}" th:href="@{/customer/create-order}">
+                        <i class="fas fa-plus-circle"></i> Tạo đơn hàng
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/customer/orders') ? 'active' : ''}" th:href="@{/customer/orders}">
+                        <i class="fas fa-box-open"></i> Đơn hàng của tôi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/customer/tracking') ? 'active' : ''}" th:href="@{/customer/tracking}">
+                        <i class="fas fa-map-marker-alt"></i> Theo dõi đơn
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/customer/payments') ? 'active' : ''}" th:href="@{/customer/payments}">
+                        <i class="fas fa-credit-card"></i> Thanh toán
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-heading">TÀI KHOẢN</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/customer/profile') ? 'active' : ''}" th:href="@{/customer/profile}">
+                        <i class="fas fa-user-cog"></i> Hồ sơ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/auth/logout}" method="post" class="m-0">
+                        <button type="submit" class="nav-link text-start w-100" style="border: none; background: none; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</body>
+
+</html>

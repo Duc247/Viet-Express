@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{manager/layout-manager}">
+
+<head>
+    <title>Chi tiết thanh toán - Manager</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1"><i class="fas fa-money-bill me-2"></i>Chi tiết thanh toán</h2>
+                <code class="fs-6" th:text="${payment.paymentCode ?: 'N/A'}">PAY-XXX</code>
+            </div>
+            <a href="/manager/payments" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin thanh
+                            toán</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th width="40%">Mã payment:</th>
+                                <td><code th:text="${payment.paymentCode ?: '-'}">PAY-XXX</code></td>
+                            </tr>
+                            <tr>
+                                <th>Mã đơn hàng:</th>
+                                <td>
+                                    <a th:href="@{/manager/requests/{id}(id=${payment.request.id})}"
+                                        th:text="${payment.request?.requestCode}">REQ-XXX</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Loại:</th>
+                                <td>
+                                    <span class="badge bg-primary"
+                                        th:if="${payment.paymentType.name() == 'SHIPPING_FEE'}">💵 Phí vận chuyển</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${payment.paymentType.name() == 'COD'}">📦 Thu hộ COD</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Người trả:</th>
+                                <td th:text="${payment.payerType?.name() ?: '-'}">SENDER</td>
+                            </tr>
+                            <tr>
+                                <th>Người nhận tiền:</th>
+                                <td th:text="${payment.receiverType?.name() ?: '-'}">COMPANY</td>
+                            </tr>
+                            <tr>
+                                <th>Mô tả:</th>
+                                <td th:text="${payment.description ?: '-'}">Mô tả</td>
+                            </tr>
+                            <tr>
+                                <th>Số tiền cần thu:</th>
+                                <td class="fw-bold text-primary fs-5"
+                                    th:text="${#numbers.formatDecimal(payment.expectedAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫</td>
+                            </tr>
+                            <tr>
+                                <th>Đã thanh toán:</th>
+                                <td class="fw-bold text-success"
+                                    th:text="${#numbers.formatDecimal(payment.paidAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫</td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>
+                                    <span class="badge bg-danger" th:if="${payment.status.name() == 'UNPAID'}">Chưa
+                                        thanh toán</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${payment.status.name() == 'PARTIALLY_PAID'}">Đã đặt cọc</span>
+                                    <span class="badge bg-success" th:if="${payment.status.name() == 'PAID'}">Đã thanh
+                                        toán đủ</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ngày tạo:</th>
+                                <td th:text="${#temporals.format(payment.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success bg-opacity-25 py-3">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-edit me-2"></i>Cập nhật thanh toán</h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/manager/payments/{id}/update(id=${payment.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Số tiền đã thanh toán (VNĐ)</label>
+                                <input type="number" name="paidAmount" class="form-control" required min="0"
+                                    th:value="${payment.paidAmount}">
+                                <small class="text-muted">Cần thu: <span
+                                        th:text="${#numbers.formatDecimal(payment.expectedAmount ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span>₫</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Trạng thái</label>
+                                <select name="newStatus" class="form-select" required>
+                                    <option value="UNPAID" th:selected="${payment.status.name() == 'UNPAID'}">Chưa thanh
+                                        toán</option>
+                                    <option value="PARTIALLY_PAID"
+                                        th:selected="${payment.status.name() == 'PARTIALLY_PAID'}">Đã đặt cọc</option>
+                                    <option value="PAID" th:selected="${payment.status.name() == 'PAID'}">Đã thanh toán
+                                        đủ</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-save me-1"></i>Cập nhật
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

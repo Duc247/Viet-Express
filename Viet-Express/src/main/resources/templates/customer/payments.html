@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{customer/layout-customer}">
+
+<head>
+    <title>Thanh toán</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <h2 class="mb-4"><i class="fas fa-credit-card me-2"></i>Lịch sử thanh toán</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h6>Đã thanh toán</h6>
+                        <h3>0 đ</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h6>Chờ thanh toán</h6>
+                        <h3>0 đ</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h6>COD cần thu</h6>
+                        <h3>0 đ</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã thanh toán</th>
+                                <th>Mã đơn</th>
+                                <th>Loại</th>
+                                <th>Số tiền</th>
+                                <th>Đã TT</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${payments}">
+                                <td><code th:text="${p.paymentCode}"></code></td>
+                                <td><code th:text="${p.request.requestCode}"></code></td>
+                                <td>
+                                    <span class="badge bg-info" th:if="${p.paymentType.name() == 'SHIPPING_FEE'}">Phí
+                                        ship</span>
+                                    <span class="badge bg-warning" th:if="${p.paymentType.name() == 'COD'}">COD</span>
+                                </td>
+                                <td th:text="${p.expectedAmount + 'đ'}"></td>
+                                <td th:text="${p.paidAmount + 'đ'}"></td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${p.status.name() == 'PAID'}">Đã TT</span>
+                                    <span class="badge bg-danger" th:if="${p.status.name() == 'UNPAID'}">Chưa TT</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" th:if="${p.status.name() == 'UNPAID'}">Thanh
+                                        toán</button>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(payments)}">
+                                <td colspan="7" class="text-center text-muted py-4">Chưa có giao dịch nào</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

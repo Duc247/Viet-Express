@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{manager/layout-manager}">
+
+<head>
+    <title>Thanh toán - Request</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1"><i class="fas fa-money-bill me-2"></i>Thanh toán</h2>
+                <span class="text-muted">Đơn: </span>
+                <a th:href="@{/manager/requests/{id}(id=${order.id})}" th:text="${order.requestCode}">REQ-XXX</a>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPaymentModal">
+                    <i class="fas fa-plus me-1"></i>Tạo mới
+                </button>
+                <a th:href="@{/manager/requests/{id}(id=${order.id})}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form th:action="@{/manager/requests/{id}/payments(id=${order.id})}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" name="keyword" class="form-control" placeholder="Mã, mô tả..."
+                            th:value="${keyword}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Loại</label>
+                        <select name="type" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="SHIPPING_FEE" th:selected="${type == 'SHIPPING_FEE'}">Phí ship</option>
+                            <option value="COD" th:selected="${type == 'COD'}">COD</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="UNPAID" th:selected="${status == 'UNPAID'}">Chưa TT</option>
+                            <option value="PARTIALLY_PAID" th:selected="${status == 'PARTIALLY_PAID'}">Đã cọc</option>
+                            <option value="PAID" th:selected="${status == 'PAID'}">Đã TT</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill"><i class="fas fa-search"></i></button>
+                        <a th:href="@{/manager/requests/{id}/payments(id=${order.id})}"
+                            class="btn btn-outline-secondary"><i class="fas fa-redo"></i></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-success">Danh sách thanh toán</h6>
+                <span class="badge bg-success" th:text="${paymentsPage.totalItems} + ' khoản'">0 khoản</span>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Mã</th>
+                                <th>Loại</th>
+                                <th>Số tiền</th>
+                                <th>Đã TT</th>
+                                <th>Trạng thái</th>
+                                <th>Mô tả</th>
+                                <th class="text-end pe-4">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(paymentsPage.content)}" class="text-center text-muted">
+                                <td colspan="7" class="py-4">Không tìm thấy khoản thanh toán</td>
+                            </tr>
+                            <tr th:each="p : ${paymentsPage.content}">
+                                <td class="ps-4"><code th:text="${p.paymentCode ?: '-'}">PAY-XXX</code></td>
+                                <td>
+                                    <span class="badge bg-primary" th:if="${p.paymentType.name() == 'SHIPPING_FEE'}">Phí
+                                        ship</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${p.paymentType.name() == 'COD'}">COD</span>
+                                </td>
+                                <td class="fw-bold"
+                                    th:text="${#numbers.formatDecimal(p.expectedAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫</td>
+                                <td
+                                    th:text="${#numbers.formatDecimal(p.paidAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫</td>
+                                <td>
+                                    <span class="badge bg-danger" th:if="${p.status.name() == 'UNPAID'}">Chưa TT</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${p.status.name() == 'PARTIALLY_PAID'}">Đã cọc</span>
+                                    <span class="badge bg-success" th:if="${p.status.name() == 'PAID'}">Đã TT</span>
+                                </td>
+                                <td th:text="${#strings.abbreviate(p.description ?: '-', 20)}">Mô tả</td>
+                                <td class="text-end pe-4">
+                                    <a th:href="@{/manager/payments/{pid}(pid=${p.id})}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Pagination -->
+            <div class="card-footer" th:if="${paymentsPage.totalPages > 1}">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <li class="page-item" th:classappend="${!paymentsPage.hasPrevious ? 'disabled' : ''}">
+                            <a class="page-link"
+                                th:href="@{/manager/requests/{id}/payments(id=${order.id}, page=${paymentsPage.currentPage - 1}, keyword=${keyword}, status=${status}, type=${type})}">«</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(1, paymentsPage.totalPages)}" class="page-item"
+                            th:classappend="${i == paymentsPage.currentPage ? 'active' : ''}">
+                            <a class="page-link"
+                                th:href="@{/manager/requests/{id}/payments(id=${order.id}, page=${i}, keyword=${keyword}, status=${status}, type=${type})}"
+                                th:text="${i}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${!paymentsPage.hasNext ? 'disabled' : ''}">
+                            <a class="page-link"
+                                th:href="@{/manager/requests/{id}/payments(id=${order.id}, page=${paymentsPage.currentPage + 1}, keyword=${keyword}, status=${status}, type=${type})}">»</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Modal: Tạo Payment -->
+        <div class="modal fade" id="createPaymentModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="fas fa-money-bill me-2"></i>Tạo Payment</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/manager/payments/create}" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="requestId" th:value="${order.id}">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Loại khoản tiền</label>
+                                    <select name="paymentType" class="form-select" required>
+                                        <option value="SHIPPING_FEE">💵 Phí vận chuyển</option>
+                                        <option value="COD">📦 Thu hộ COD</option>
+                                        <option value="DEPOSIT">💰 Tiền cọc</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Số tiền (VNĐ)</label>
+                                    <input type="number" name="expectedAmount" class="form-control" required min="0"
+                                        placeholder="500000">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Phạm vi thanh toán</label>
+                                    <select name="paymentScope" class="form-select" required>
+                                        <option value="FULL_REQUEST">📋 Toàn bộ đơn hàng</option>
+                                        <option value="PER_TRIP">🚚 Theo chuyến vận chuyển</option>
+                                    </select>
+                                    <small class="text-muted">Chọn chuyến trong trang chi tiết đơn</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Người trả tiền</label>
+                                    <select name="payerType" class="form-select" required>
+                                        <option value="SENDER">👤 Người gửi</option>
+                                        <option value="RECEIVER">📬 Người nhận</option>
+                                        <option value="COMPANY">🏢 Công ty</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nhận tiền</label>
+                                    <select name="receiverType" class="form-select" required>
+                                        <option value="COMPANY">🏢 Công ty</option>
+                                        <option value="SENDER">👤 Người gửi (hoàn lại)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Mô tả</label>
+                                    <input type="text" name="description" class="form-control" placeholder="Ghi chú">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-success">Tạo Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

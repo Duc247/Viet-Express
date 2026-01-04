@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/master-layout}">
+<head>
+    <title>Về Chúng Tôi - Logistics</title>
+    <style>
+        .about-hero {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.9) 100%),
+                        url('/images/container2.jpg') center/cover no-repeat;
+            padding: 5rem 0;
+            color: white;
+        }
+        .about-hero h1 { font-weight: 800; }
+        
+        .story-section { padding: 5rem 0; }
+        .story-img {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .check-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .stats-gradient {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 4rem 0;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-text {
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .contact-section { padding: 5rem 0; }
+        .contact-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .contact-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-color: transparent;
+        }
+        .contact-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .team-section { 
+            padding: 5rem 0;
+            background: #f8fafc;
+        }
+        .team-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .team-card img {
+            height: 260px;
+            object-fit: cover;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <!-- Hero Section -->
+    <section class="about-hero text-center">
+        <div class="container py-4">
+            <span class="badge bg-white text-primary mb-3 px-3 py-2">
+                <i class="fas fa-star me-1"></i> Về Chúng Tôi
+            </span>
+            <h1 class="display-4 mb-3">Câu chuyện Logistics</h1>
+            <p class="lead mb-0 opacity-90">Hành trình 10 năm kiến tạo giải pháp vận tải hàng đầu Việt Nam</p>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="story-section">
+        <div class="container">
+            <div class="row align-items-center gx-5">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="/images/container2.jpg" 
+                         alt="About Us" class="img-fluid story-img"
+                         onerror="this.src='https://images.unsplash.com/photo-1494412574643-35d324688133?w=800'">
+                </div>
+                <div class="col-lg-6">
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">
+                        <i class="fas fa-history me-1"></i> Câu chuyện của chúng tôi
+                    </span>
+                    <h2 class="fw-bold mb-4" style="font-size: 2.25rem;">Kết nối mọi nẻo đường, nâng tầm giá trị Việt</h2>
+                    <p class="text-muted mb-4 fs-5">
+                        Thành lập từ năm 2015, Logistics khởi đầu với vỏn vẹn 5 chiếc xe tải nhỏ. Bằng sự tận tâm và uy tín, chúng tôi đã vươn lên trở thành đối tác tin cậy của hơn 500 doanh nghiệp lớn nhỏ trên toàn quốc.
+                    </p>
+                    
+                    <div class="check-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Uy tín hàng đầu</h6>
+                            <small class="text-muted">Cam kết giao hàng đúng hẹn 99%</small>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <div class="check-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">An toàn tuyệt đối</h6>
+                            <small class="text-muted">Bảo hiểm hàng hóa 100%</small>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <div class="check-icon"><i class="fas fa-headset"></i></div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Hỗ trợ 24/7</h6>
+                            <small class="text-muted">Đội ngũ CSKH luôn sẵn sàng</small>
+                        </div>
+                    </div>
+                    
+                    <a th:href="@{/public/request}" class="btn btn-primary btn-lg px-4 mt-4">
+                        <i class="fas fa-paper-plane me-2"></i>Gửi Yêu Cầu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-gradient">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-value">10+</div>
+                        <div class="stat-text">Năm kinh nghiệm</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-value">250+</div>
+                        <div class="stat-text">Đầu xe các loại</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-value">15K</div>
+                        <div class="stat-text">Đơn hàng / tháng</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-value">98%</div>
+                        <div class="stat-text">Khách hàng hài lòng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Info Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">
+                    <i class="fas fa-phone-alt me-1"></i> Liên Hệ & Hỗ Trợ
+                </span>
+                <h2 class="fw-bold">Thông Tin Doanh Nghiệp</h2>
+                <p class="text-muted">Liên hệ ngay với chúng tôi để được tư vấn miễn phí</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h5 class="fw-bold">Hotline</h5>
+                        <p class="text-muted mb-0" th:text="${systemConfig?.hotline} ?: '1900 xxxx'">1900 xxxx</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h5 class="fw-bold">Email Hỗ Trợ</h5>
+                        <p class="text-muted mb-0" th:text="${systemConfig?.email} ?: 'support@logistics.vn'">support@logistics.vn</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h5 class="fw-bold">Địa Chỉ Trụ Sở</h5>
+                        <p class="text-muted mb-0" th:text="${systemConfig?.address} ?: 'Hà Nội, Việt Nam'">Hà Nội, Việt Nam</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h5 class="fw-bold">Giờ Làm Việc</h5>
+                        <p class="text-muted mb-0">Thứ 2 - Thứ 7<br>8:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map Section -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
+                        <div class="ratio ratio-21x9">
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d59587.97785449771!2d105.80194413012996!3d21.022736016916158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab9bd9861ca1%3A0xe7887f7b72ca17a9!2zSMOgIE7hu5lpLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1703123456789!5m2!1svi!2s" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+</div>
+</body>
+</html>
