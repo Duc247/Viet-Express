@@ -40,10 +40,11 @@
                     <div class="card-body">
                         <p><strong>Mã yêu cầu:</strong> <code th:text="${customerRequest.requestCode}">REQ-XXX</code>
                         </p>
-                        <p><strong>Người gửi:</strong> <span th:text="${customerRequest.sender?.name ?: 'N/A'}">Nguyễn
+                        <p><strong>Người gửi:</strong> <span th:text="${customerRequest.sender?.fullName ?: customerRequest.sender?.name ?: 'N/A'}">Nguyễn
                                 Văn A</span></p>
                         <p><strong>SĐT:</strong> <span
                                 th:text="${customerRequest.sender?.phone ?: '-'}">0901234567</span></p>
+                        <p><strong>Địa chỉ gửi:</strong> <span th:text="${customerRequest.senderLocation?.addressText ?: '-'}">-</span></p>
                         <p><strong>Mô tả hàng:</strong> <span th:text="${customerRequest.parcelDescription ?: '-'}">Hàng
                                 hóa</span></p>
                         <p><strong>COD:</strong> <span
@@ -83,51 +84,58 @@
             <!-- Form tạo kiện hàng -->
             <div class="col-lg-7">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white py-3">
+                    <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
                         <h6 class="m-0 fw-bold"><i class="fas fa-plus-circle me-2"></i>Tạo kiện hàng mới</h6>
+                        <button type="button" class="btn btn-light btn-sm" onclick="addParcelRow()">
+                            <i class="fas fa-plus me-1"></i>Thêm kiện
+                        </button>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/staff/requests/{id}/create-parcel(id=${customerRequest.id})}" method="post">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mô tả kiện hàng <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" name="description" class="form-control"
-                                    placeholder="VD: Laptop Dell, Thùng 1/3..." required>
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Tiền COD (VNĐ)</label>
-                                    <input type="number" name="codAmount" class="form-control" placeholder="0"
-                                        value="0">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Trọng lượng (kg)</label>
-                                    <input type="number" name="weightKg" class="form-control" step="0.1"
-                                        placeholder="0.0">
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-4">
-                                    <label class="form-label">Dài (cm)</label>
-                                    <input type="number" name="lengthCm" class="form-control" step="0.1"
-                                        placeholder="0">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Rộng (cm)</label>
-                                    <input type="number" name="widthCm" class="form-control" step="0.1" placeholder="0">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Cao (cm)</label>
-                                    <input type="number" name="heightCm" class="form-control" step="0.1"
-                                        placeholder="0">
+                        <form th:action="@{/staff/requests/{id}/create-parcels(id=${customerRequest.id})}" method="post">
+                            <div id="parcel-container">
+                                <!-- Kiện hàng 1 -->
+                                <div class="parcel-row border rounded p-3 mb-3 bg-light" data-index="0">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-primary">Kiện hàng #1</span>
+                                        <button type="button" class="btn btn-outline-danger btn-sm d-none remove-btn" onclick="removeParcelRow(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold">Mô tả kiện hàng <span class="text-danger">*</span></label>
+                                        <input type="text" name="descriptions" class="form-control"
+                                            placeholder="VD: Laptop Dell, Thùng 1/3..." required>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label small">Tiền COD (VNĐ)</label>
+                                            <input type="number" name="codAmounts" class="form-control form-control-sm" placeholder="0" value="0">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small">Trọng lượng (kg)</label>
+                                            <input type="number" name="weightKgs" class="form-control form-control-sm" step="0.1" placeholder="0.0">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mt-1">
+                                        <div class="col-4">
+                                            <label class="form-label small">Dài (cm)</label>
+                                            <input type="number" name="lengthCms" class="form-control form-control-sm" step="0.1" placeholder="0">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label small">Rộng (cm)</label>
+                                            <input type="number" name="widthCms" class="form-control form-control-sm" step="0.1" placeholder="0">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label small">Cao (cm)</label>
+                                            <input type="number" name="heightCms" class="form-control form-control-sm" step="0.1" placeholder="0">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="d-grid mt-4">
                                 <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="fas fa-box me-2"></i>Tạo Kiện Hàng
+                                    <i class="fas fa-boxes me-2"></i>Tạo Tất Cả Kiện Hàng
                                 </button>
                             </div>
                         </form>
@@ -137,6 +145,88 @@
         </div>
 
     </div>
+
+    <!-- JavaScript để thêm/xóa kiện hàng -->
+    <th:block layout:fragment="js">
+    <script>
+        let parcelIndex = 1;
+
+        function addParcelRow() {
+            parcelIndex++;
+            const container = document.getElementById('parcel-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'parcel-row border rounded p-3 mb-3 bg-light';
+            newRow.dataset.index = parcelIndex - 1;
+            newRow.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-primary">Kiện hàng #${parcelIndex}</span>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-btn" onclick="removeParcelRow(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold">Mô tả kiện hàng <span class="text-danger">*</span></label>
+                    <input type="text" name="descriptions" class="form-control"
+                        placeholder="VD: Laptop Dell, Thùng ${parcelIndex}/..." required>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small">Tiền COD (VNĐ)</label>
+                        <input type="number" name="codAmounts" class="form-control form-control-sm" placeholder="0" value="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Trọng lượng (kg)</label>
+                        <input type="number" name="weightKgs" class="form-control form-control-sm" step="0.1" placeholder="0.0">
+                    </div>
+                </div>
+                <div class="row g-2 mt-1">
+                    <div class="col-4">
+                        <label class="form-label small">Dài (cm)</label>
+                        <input type="number" name="lengthCms" class="form-control form-control-sm" step="0.1" placeholder="0">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label small">Rộng (cm)</label>
+                        <input type="number" name="widthCms" class="form-control form-control-sm" step="0.1" placeholder="0">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label small">Cao (cm)</label>
+                        <input type="number" name="heightCms" class="form-control form-control-sm" step="0.1" placeholder="0">
+                    </div>
+                </div>
+            `;
+            container.appendChild(newRow);
+            updateRemoveButtons();
+        }
+
+        function removeParcelRow(button) {
+            const row = button.closest('.parcel-row');
+            row.remove();
+            updateParcelNumbers();
+            updateRemoveButtons();
+        }
+
+        function updateParcelNumbers() {
+            const rows = document.querySelectorAll('.parcel-row');
+            rows.forEach((row, index) => {
+                const badge = row.querySelector('.badge');
+                badge.textContent = `Kiện hàng #${index + 1}`;
+            });
+            parcelIndex = rows.length;
+        }
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.parcel-row');
+            rows.forEach((row, index) => {
+                const removeBtn = row.querySelector('.remove-btn');
+                if (rows.length === 1) {
+                    removeBtn.classList.add('d-none');
+                } else {
+                    removeBtn.classList.remove('d-none');
+                }
+            });
+        }
+    </script>
+    </th:block>
 </body>
 
 </html>

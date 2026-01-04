@@ -103,4 +103,66 @@ public interface PaymentService {
 
     /** Tạo mã thanh toán tự động */
     String generatePaymentCode(Long requestId);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy tất cả Payment entities */
+    java.util.List<vn.DucBackend.Entities.Payment> getAllPaymentEntities();
+
+    /** Lấy Payment entity theo ID */
+    vn.DucBackend.Entities.Payment getPaymentEntityById(Long id);
+
+    /** Tìm payments theo request ID - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Payment> findPaymentsByRequestIdEntities(Long requestId);
+
+    /** Lưu Payment entity */
+    vn.DucBackend.Entities.Payment savePaymentEntity(vn.DucBackend.Entities.Payment payment);
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    /** Tìm payments theo senderId - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Payment> findByRequestSenderIdEntities(Long senderId);
+
+    /** Tính tổng expected amount theo request ID */
+    java.math.BigDecimal sumExpectedAmountByRequestId(Long requestId);
+
+    /** Tính tổng paid amount theo request ID */
+    java.math.BigDecimal sumPaidAmountByRequestId(Long requestId);
+
+    /** Đếm payments theo request ID */
+    Long countByRequestId(Long requestId);
+
+    /** Đếm payments đã thanh toán theo request ID */
+    Long countPaidByRequestId(Long requestId);
+
+    /** Đếm payments chưa thanh toán theo request ID */
+    Long countUnpaidByRequestId(Long requestId);
+
+    /** Đếm payments thanh toán một phần theo request ID */
+    Long countPartiallyPaidByRequestId(Long requestId);
+
+    /** Đếm payments phí vận chuyển theo request ID */
+    Long countShippingFeeByRequestId(Long requestId);
+
+    /** Đếm payments COD theo request ID */
+    Long countCodByRequestId(Long requestId);
+
+    /** Tìm payments theo sender và receiver customer ID */
+    java.util.List<vn.DucBackend.Entities.Payment> findPaymentsByCustomerIdEntities(Long customerId);
+
+    /** Tìm payments theo request và keyword */
+    java.util.List<vn.DucBackend.Entities.Payment> searchByRequestIdAndKeyword(Long requestId, String keyword);
+
+    /** Tìm payments theo request và status - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndStatusEntities(Long requestId, String status);
+
+    /** Tìm payments theo request và type - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndTypeEntities(Long requestId, String type);
+
+    /** Tìm payments theo request và scope - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndScopeEntities(Long requestId, String scope);
 }

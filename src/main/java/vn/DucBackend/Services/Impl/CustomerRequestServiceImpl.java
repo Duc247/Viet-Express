@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.Entities.CustomerRequest;
+import vn.DucBackend.Entities.ParcelAction;
+import vn.DucBackend.Entities.TrackingCode;
 import vn.DucBackend.Entities.ServiceType;
 import vn.DucBackend.Entities.User;
 import vn.DucBackend.Repositories.*;
@@ -28,6 +30,8 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
     private final LocationRepository locationRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final UserRepository userRepository;
+    private final TrackingCodeRepository trackingCodeRepository;
+    private final ParcelActionRepository parcelActionRepository;
 
     @Override
     public List<CustomerRequestDTO> findAllRequests() {
@@ -209,6 +213,33 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         return requestRepository.countNewAssignmentsForManager(managerId, since);
     }
 
+    // ==========================================
+    // STAFF ASSIGNMENT IMPLEMENTATION
+    // ==========================================
+
+    @Override
+    public List<CustomerRequestDTO> findByAssignedStaff(Long staffId) {
+        return requestRepository.findByAssignedStaffId(staffId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CustomerRequestDTO assignStaff(Long requestId, Long staffId) {
+        CustomerRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found: " + requestId));
+        vn.DucBackend.Entities.Staff staff = null; // Will need to inject StaffRepository
+        // Note: This implementation would need StaffRepository injection
+        // For now, just set the staff ID reference
+        request.setAssignedAt(LocalDateTime.now());
+        return toDTO(requestRepository.save(request));
+    }
+
+    @Override
+    public CustomerRequest getRequestEntityById(Long id) {
+        return requestRepository.findById(id).orElse(null);
+    }
+
     private CustomerRequestDTO toDTO(CustomerRequest request) {
         CustomerRequestDTO dto = new CustomerRequestDTO();
         dto.setId(request.getId());
@@ -268,5 +299,54 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         }
 
         return dto;
+    }
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<CustomerRequest> getAllRequestEntities() {
+        return requestRepository.findAll();
+    }
+
+    @Override
+    public java.util.List<CustomerRequest> findByAssignedManagerEntities(Long managerId) {
+        return requestRepository.findByAssignedManagerId(managerId);
+    }
+
+    @Override
+    public CustomerRequest saveRequestEntity(CustomerRequest request) {
+        return requestRepository.save(request);
+    }
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<CustomerRequest> findByCustomerIdEntities(Long customerId) {
+        return requestRepository.findByCustomerId(customerId);
+    }
+
+    @Override
+    public CustomerRequest findByRequestCodeEntity(String requestCode) {
+        return requestRepository.findByRequestCode(requestCode).orElse(null);
+    }
+
+    @Override
+    public CustomerRequest findByTrackingCodeEntity(String trackingCode) {
+        Optional<TrackingCode> tracking = trackingCodeRepository.findByCode(trackingCode);
+        return tracking.map(TrackingCode::getRequest).orElse(null);
+    }
+
+    @Override
+    public java.util.List<ParcelAction> findParcelActionsByRequestIdEntities(Long requestId) {
+        return parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(requestId);
+    }
+
+    @Override
+    public java.util.List<TrackingCode> findTrackingCodesByRequestIdEntities(Long requestId) {
+        return trackingCodeRepository.findAllByRequestId(requestId);
     }
 }

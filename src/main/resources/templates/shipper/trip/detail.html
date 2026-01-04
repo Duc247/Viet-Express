@@ -8,113 +8,257 @@
 
 <body>
 
-    <div layout:fragment="content" th:if="${trip != null}">
-
-        <div class="d-flex align-items-center mb-3">
-            <a href="/shipper/trips" class="btn btn-light me-2 rounded-circle"><i class="fas fa-arrow-left"></i></a>
-            <h5 class="mb-0 fw-bold">Chi tiết chuyến xe #<span th:text="${trip.id}">123</span></h5>
-            <span class="badge ms-2" th:text="${trip.status}"
-                th:classappend="${trip.status == 'IN_PROGRESS' || trip.status == 'ASSIGNED' ? 'bg-warning text-dark' : (trip.status == 'COMPLETED' ? 'bg-success' : 'bg-secondary')}">STATUS</span>
-        </div>
-
-        <!-- Trip Details -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white py-3">
-                <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin chuyến xe</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted text-uppercase">Điểm đi</label>
-                        <h6 class="fw-bold" th:text="${trip.startLocationName}">Hà Nội</h6>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted text-uppercase">Điểm đến</label>
-                        <h6 class="fw-bold" th:text="${trip.endLocationName}">Hải Phòng</h6>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted text-uppercase">Bắt đầu lúc</label>
-                        <p class="mb-0"
-                            th:text="${#temporals.format(trip.startedAt, 'HH:mm dd/MM/yyyy')} ?: 'Chưa bắt đầu'">--</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted text-uppercase">Ghi chú</label>
-                        <p class="mb-0" th:text="${trip.note} ?: 'Không có ghi chú'">--</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted text-uppercase">Tiền COD</label>
-                        <p class="mb-0 fw-bold text-success" th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">0 VNĐ</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small text-muted text-uppercase">Loại chuyến</label>
-                        <p class="mb-0">
-                            <span th:if="${trip.tripType == 'PICKUP'}" class="badge bg-success">🚚 Lấy hàng</span>
-                            <span th:if="${trip.tripType == 'TRANSFER'}" class="badge bg-info">🔄 Trung chuyển</span>
-                            <span th:if="${trip.tripType == 'DELIVERY'}" class="badge bg-warning text-dark">📦 Giao hàng</span>
-                        </p>
-                    </div>
-                    <div class="col-md-6 mb-3" th:if="${trip.vehicleLicensePlate != null}">
-                        <label class="small text-muted text-uppercase">Phương tiện</label>
-                        <p class="mb-0 fw-bold" th:text="${trip.vehicleLicensePlate}">Biển số xe</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-            <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post"
-                th:if="${trip.status == 'ASSIGNED'}">
-                <input type="hidden" name="status" value="IN_PROGRESS">
-                <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-play me-2"></i>Bắt đầu
-                    chuyến</button>
-            </form>
-
-            <button class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#updateStatusModal"
-                th:if="${trip.status == 'IN_PROGRESS'}">
-                <i class="fas fa-check-circle me-2"></i>Cập nhật / Hoàn thành
-            </button>
-        </div>
-
-        <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold">Cập nhật trạng thái</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Trạng thái mới</label>
-                                <select class="form-select" name="status">
-                                    <option value="COMPLETED">Đã hoàn thành</option>
-                                    <option value="CANCELLED">Hủy chuyến</option>
-                                    <option value="IN_PROGRESS">Đang thực hiện</option>
-                                </select>
-                            </div>
-                            <!-- Placeholder for advanced features -->
-                            <div class="alert alert-info py-2 small">
-                                <i class="fas fa-info-circle me-1"></i> Tính năng tải ảnh và cập nhật COD sẽ được cập
-                                nhật sau.
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                            <button type="submit" class="btn btn-primary fw-bold">Lưu thay đổi</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div layout:fragment="content" th:if="${trip == null}">
-        <div class="alert alert-warning text-center" role="alert">
+    <div layout:fragment="content">
+        <!-- Hiển thị khi không tìm thấy chuyến xe -->
+        <div th:if="${trip == null}" class="alert alert-warning text-center" role="alert">
             <i class="fas fa-exclamation-triangle me-2"></i> Không tìm thấy thông tin chuyến xe.
+            <div class="mt-3">
+                <a href="/shipper/trips" class="btn btn-outline-warning">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+            </div>
+        </div>
+
+        <!-- Hiển thị chi tiết chuyến xe -->
+        <div th:if="${trip != null}">
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-4">
+                <a href="/shipper/trips" class="btn btn-light me-2 rounded-circle shadow-sm">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h5 class="mb-0 fw-bold">Chi tiết chuyến xe #<span th:text="${trip.id}">123</span></h5>
+                    <small class="text-muted" th:text="${trip.createdAt != null ? 'Tạo lúc: ' + #temporals.format(trip.createdAt, 'HH:mm dd/MM/yyyy') : ''}"></small>
+                </div>
+                <span class="badge ms-auto fs-6" th:text="${trip.status}"
+                    th:classappend="${trip.status == 'IN_PROGRESS' ? 'bg-primary' : (trip.status == 'ASSIGNED' ? 'bg-warning text-dark' : (trip.status == 'COMPLETED' ? 'bg-success' : (trip.status == 'CANCELLED' ? 'bg-danger' : 'bg-secondary')))}">STATUS</span>
+            </div>
+
+            <!-- Thông tin chuyến xe -->
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header bg-gradient py-3" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <h6 class="mb-0 fw-bold text-white"><i class="fas fa-route me-2"></i>Thông tin chuyến xe</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Loại chuyến -->
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center justify-content-center p-3 rounded" style="background: #fffbeb;">
+                                <span th:if="${trip.tripType == 'PICKUP'}" class="badge bg-success fs-6 px-4 py-2">🚚 CHUYẾN LẤY HÀNG</span>
+                                <span th:if="${trip.tripType == 'TRANSFER'}" class="badge bg-info fs-6 px-4 py-2">🔄 CHUYẾN TRUNG CHUYỂN</span>
+                                <span th:if="${trip.tripType == 'DELIVERY'}" class="badge bg-warning text-dark fs-6 px-4 py-2">📦 CHUYẾN GIAO HÀNG</span>
+                                <span th:if="${trip.tripType == null}" class="badge bg-secondary fs-6 px-4 py-2">❓ Chưa xác định</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Điểm đi - Điểm đến -->
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
+                                <div class="text-center flex-fill">
+                                    <i class="fas fa-map-marker-alt text-success fs-4 mb-1"></i>
+                                    <label class="d-block small text-muted text-uppercase">Điểm đi</label>
+                                    <h6 class="fw-bold mb-0" th:text="${trip.startLocationName} ?: 'Chưa xác định'">Hà Nội</h6>
+                                </div>
+                                <div class="px-3">
+                                    <i class="fas fa-long-arrow-alt-right text-muted fs-3"></i>
+                                </div>
+                                <div class="text-center flex-fill">
+                                    <i class="fas fa-flag-checkered text-danger fs-4 mb-1"></i>
+                                    <label class="d-block small text-muted text-uppercase">Điểm đến</label>
+                                    <h6 class="fw-bold mb-0" th:text="${trip.endLocationName} ?: 'Chưa xác định'">Hải Phòng</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thời gian -->
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded h-100">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                <label class="small text-muted text-uppercase">Bắt đầu lúc</label>
+                                <p class="mb-0 fw-bold mt-1" th:text="${trip.startedAt != null ? #temporals.format(trip.startedAt, 'HH:mm dd/MM/yyyy') : 'Chưa bắt đầu'}">--</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded h-100">
+                                <i class="fas fa-flag text-success me-2"></i>
+                                <label class="small text-muted text-uppercase">Hoàn thành lúc</label>
+                                <p class="mb-0 fw-bold mt-1" th:text="${trip.endedAt != null ? #temporals.format(trip.endedAt, 'HH:mm dd/MM/yyyy') : 'Chưa hoàn thành'}">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Phương tiện -->
+                        <div class="col-md-6 mb-3" th:if="${trip.vehicleLicensePlate != null}">
+                            <div class="p-3 bg-light rounded h-100">
+                                <i class="fas fa-truck text-info me-2"></i>
+                                <label class="small text-muted text-uppercase">Phương tiện</label>
+                                <p class="mb-0 fw-bold mt-1" th:text="${trip.vehicleLicensePlate}">Biển số xe</p>
+                            </div>
+                        </div>
+
+                        <!-- Tiền COD -->
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded h-100">
+                                <i class="fas fa-money-bill-wave text-success me-2"></i>
+                                <label class="small text-muted text-uppercase">Tiền COD cần thu</label>
+                                <p class="mb-0 fw-bold mt-1 text-success fs-5" th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">0 VNĐ</p>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú -->
+                        <div class="col-12 mb-3" th:if="${trip.note != null and !trip.note.isEmpty()}">
+                            <div class="p-3 bg-warning bg-opacity-10 border-start border-warning border-3 rounded">
+                                <i class="fas fa-sticky-note text-warning me-2"></i>
+                                <label class="small text-muted text-uppercase">Ghi chú quan trọng</label>
+                                <p class="mb-0 mt-1" th:text="${trip.note}">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách kiện hàng trong chuyến -->
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header bg-gradient py-3" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0 fw-bold text-white"><i class="fas fa-boxes me-2"></i>Danh sách kiện hàng</h6>
+                        <span class="badge bg-light text-primary" th:text="${parcels != null ? parcels.size() + ' kiện' : '0 kiện'}">0 kiện</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Có kiện hàng -->
+                    <div th:if="${parcels != null and !parcels.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã kiện</th>
+                                        <th>Mô tả</th>
+                                        <th>Trọng lượng</th>
+                                        <th>COD</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="parcel : ${parcels}">
+                                        <td>
+                                            <code class="text-primary fw-bold" th:text="${parcel.parcelCode}">PKG001</code>
+                                        </td>
+                                        <td th:text="${parcel.description} ?: 'Không có mô tả'">Hàng hóa</td>
+                                        <td>
+                                            <span th:if="${parcel.weightKg != null}" th:text="${parcel.weightKg + ' kg'}">-- kg</span>
+                                            <span th:if="${parcel.weightKg == null}" class="text-muted">--</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-success" th:if="${parcel.codAmount != null}" 
+                                                th:text="${#numbers.formatDecimal(parcel.codAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">0đ</span>
+                                            <span th:if="${parcel.codAmount == null}" class="text-muted">0đ</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:if="${parcel.status == 'CREATED'}">Mới tạo</span>
+                                            <span class="badge bg-info" th:if="${parcel.status == 'IN_WAREHOUSE'}">Trong kho</span>
+                                            <span class="badge bg-primary" th:if="${parcel.status == 'IN_TRANSIT'}">Đang vận chuyển</span>
+                                            <span class="badge bg-warning text-dark" th:if="${parcel.status == 'PICKED_UP'}">Đã lấy</span>
+                                            <span class="badge bg-success" th:if="${parcel.status == 'DELIVERED'}">Đã giao</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Tổng kết -->
+                        <div class="card-footer bg-light">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Tổng kiện</small>
+                                    <strong th:text="${parcels.size()}">0</strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Tổng COD</small>
+                                    <strong class="text-success" th:text="${#numbers.formatDecimal(parcels.?[codAmount != null].![codAmount].stream().reduce(0, (a, b) -> a.add(b)), 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Tổng KG</small>
+                                    <strong th:text="${parcels.?[weightKg != null].![weightKg].stream().reduce(0, (a, b) -> a.add(b)) + ' kg'}">0 kg</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Không có kiện hàng -->
+                    <div th:if="${parcels == null or parcels.isEmpty()}" class="text-center py-5">
+                        <i class="fas fa-box-open fa-3x text-muted opacity-50 mb-3"></i>
+                        <p class="text-muted mb-0">Chưa có kiện hàng nào trong chuyến này</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-grid gap-2 mb-4">
+                <!-- Bắt đầu chuyến -->
+                <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post"
+                    th:if="${trip.status == 'ASSIGNED'}">
+                    <input type="hidden" name="status" value="IN_PROGRESS">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">
+                        <i class="fas fa-play me-2"></i>Bắt đầu chuyến xe
+                    </button>
+                </form>
+
+                <!-- Cập nhật/Hoàn thành chuyến -->
+                <button class="btn btn-success btn-lg w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#updateStatusModal"
+                    th:if="${trip.status == 'IN_PROGRESS'}">
+                    <i class="fas fa-check-circle me-2"></i>Cập nhật / Hoàn thành chuyến
+                </button>
+                
+                <!-- Chuyến đã hoàn thành -->
+                <div th:if="${trip.status == 'COMPLETED'}" class="alert alert-success text-center mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Chuyến xe đã hoàn thành</strong>
+                    <span th:if="${trip.endedAt != null}" th:text="' lúc ' + #temporals.format(trip.endedAt, 'HH:mm dd/MM/yyyy')"></span>
+                </div>
+                
+                <!-- Chuyến đã hủy -->
+                <div th:if="${trip.status == 'CANCELLED'}" class="alert alert-danger text-center mb-0">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Chuyến xe đã bị hủy</strong>
+                </div>
+            </div>
+
+            <!-- Modal cập nhật trạng thái -->
+            <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Cập nhật trạng thái</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form th:action="@{/shipper/trip/{id}/status(id=${trip.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Trạng thái mới</label>
+                                    <select class="form-select form-select-lg" name="status">
+                                        <option value="COMPLETED">✅ Đã hoàn thành chuyến</option>
+                                        <option value="IN_PROGRESS">🚚 Đang thực hiện</option>
+                                        <option value="CANCELLED">❌ Hủy chuyến</option>
+                                    </select>
+                                </div>
+                                <div class="alert alert-info py-2 small mb-0">
+                                    <i class="fas fa-info-circle me-1"></i> 
+                                    Khi hoàn thành chuyến, hệ thống sẽ tự động cập nhật vị trí và trạng thái kiện hàng.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-success fw-bold">
+                                    <i class="fas fa-save me-1"></i> Lưu thay đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
 </body>
 
 </html>

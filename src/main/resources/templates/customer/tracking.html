@@ -44,16 +44,13 @@
                 <!-- Thông tin cơ bản -->
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <p><strong>Người gửi:</strong> <span th:text="${order.sender?.fullName ?: order.sender?.name}">-</span></p>
-                        <p><strong>Từ:</strong> <span th:text="${order.senderLocation?.name}">-</span></p>
-                        <p class="text-muted small mb-0" th:if="${order.senderLocation?.addressText}"
-                            th:text="${order.senderLocation.addressText}">Địa chỉ</p>
+                        <p><strong>Người gửi:</strong> <span th:text="${order.sender?.fullName ?: order.sender?.name ?: '-'}">-</span></p>
+                        <p><strong>Địa chỉ gửi:</strong> <span th:text="${order.senderLocation?.addressText ?: '-'}">-</span></p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Người nhận:</strong> <span th:text="${order.receiver?.fullName ?: order.receiver?.name}">-</span></p>
-                        <p><strong>Đến:</strong> <span th:text="${order.receiverLocation?.name}">-</span></p>
-                        <p class="text-muted small mb-0" th:if="${order.receiverLocation?.addressText}"
-                            th:text="${order.receiverLocation.addressText}">Địa chỉ</p>
+                        <p><strong>Người nhận:</strong> <span th:text="${order.receiver?.fullName ?: order.receiver?.name ?: '-'}">-</span></p>
+                        <p><strong>Địa chỉ nhận:</strong> <span th:text="${order.receiverLocation?.addressText ?: '-'}">-</span></span>
+                        </p>
                     </div>
                 </div>
 

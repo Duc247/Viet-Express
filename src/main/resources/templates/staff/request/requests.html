@@ -55,9 +55,9 @@
                                     <code class="text-primary" th:text="${req.requestCode}">REQ-XXX</code>
                                 </td>
                                 <td>
-                                    <strong th:text="${req.sender?.name ?: 'N/A'}">Nguyễn Văn A</strong>
+                                    <strong th:text="${req.senderName ?: 'N/A'}">Nguyễn Văn A</strong>
                                     <br>
-                                    <small class="text-muted" th:text="${req.sender?.phone ?: ''}">0901234567</small>
+                                    <small class="text-muted" th:text="${req.senderPhone ?: ''}">0901234567</small>
                                 </td>
                                 <td>
                                     <span th:text="${req.parcelDescription ?: 'Chưa có mô tả'}">Hàng hóa</span>

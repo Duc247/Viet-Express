@@ -4,144 +4,829 @@
 
 <head>
     <title>Manager Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Background */
+        .dashboard-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 30%, #eef2ff 60%, #f5f3ff 100%);
+            position: relative;
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+
+        .dashboard-wrapper::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            border-radius: 24px;
+            box-shadow:
+                0 20px 50px rgba(99, 102, 241, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header-bg-decoration {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .header-glow {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 256px;
+            height: 256px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05), transparent);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .header-content-wrapper {
+            position: relative;
+            padding: 2rem;
+        }
+
+        .header-main-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header-icon-box {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .header-icon-box i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .header-text h1 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-text p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #10b981;
+            padding: 0.875rem 1.75rem;
+            border-radius: 50px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .status-badge i {
+            font-size: 1.25rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card-inner {
+            padding: 1.5rem;
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            line-height: 1;
+            transition: all 0.3s;
+        }
+
+        .stat-icon-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card:hover .stat-icon-box {
+            transform: rotate(-6deg) scale(1.1);
+        }
+
+        .stat-icon-box i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .stat-action {
+            padding-top: 1rem;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .action-link:hover {
+            gap: 1rem;
+        }
+
+        .action-link i {
+            font-size: 1rem;
+        }
+
+        /* Stat Card Colors */
+        .stat-card-red .stat-value {
+            color: #dc2626;
+        }
+
+        .stat-card-red .stat-icon-box {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .stat-card-red .action-link {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        .stat-card-red .action-link:hover {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+        }
+
+        .stat-card-blue .stat-value {
+            color: #2563eb;
+        }
+
+        .stat-card-blue .stat-icon-box {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        }
+
+        .stat-card-blue .action-link {
+            color: #2563eb;
+            background: #dbeafe;
+        }
+
+        .stat-card-blue .action-link:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .stat-card-cyan .stat-value {
+            color: #0891b2;
+        }
+
+        .stat-card-cyan .stat-icon-box {
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+        }
+
+        .stat-card-cyan .action-link {
+            color: #0891b2;
+            background: #cffafe;
+        }
+
+        .stat-card-cyan .action-link:hover {
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.25);
+        }
+
+        .stat-card-green .stat-value {
+            color: #059669;
+        }
+
+        .stat-card-green .stat-icon-box {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+
+        .stat-card-green .action-link {
+            color: #059669;
+            background: #d1fae5;
+        }
+
+        .stat-card-green .action-link:hover {
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .info-header {
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-header-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .info-header-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .info-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .info-header-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .info-header-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .info-header-title {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .view-all-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .view-all-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(4px);
+        }
+
+        .view-all-btn i {
+            font-size: 1rem;
+        }
+
+        /* Info Card Colors */
+        .info-card-red .info-header {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .info-card-blue .info-header {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        }
+
+        .info-body {
+            padding: 2.5rem;
+        }
+
+        .info-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 200px;
+        }
+
+        .display-icon {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .display-icon::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            opacity: 0.5;
+            filter: blur(12px);
+            z-index: -1;
+        }
+
+        .display-icon i {
+            font-size: 3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .display-text {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .display-count {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .display-empty {
+            font-size: 1.25rem;
+            color: #94a3b8;
+        }
+
+        /* Display Icon Colors */
+        .display-icon-red {
+            background: #fee2e2;
+            box-shadow: 0 12px 36px rgba(220, 38, 38, 0.2);
+        }
+
+        .display-icon-red::before {
+            background: #fecaca;
+        }
+
+        .display-icon-red i {
+            color: #dc2626;
+        }
+
+        .display-count-red {
+            color: #dc2626;
+        }
+
+        .display-icon-blue {
+            background: #dbeafe;
+            box-shadow: 0 12px 36px rgba(37, 99, 235, 0.2);
+        }
+
+        .display-icon-blue::before {
+            background: #bfdbfe;
+        }
+
+        .display-icon-blue i {
+            color: #2563eb;
+        }
+
+        .display-count-blue {
+            color: #2563eb;
+        }
+
+        .display-icon-gray {
+            background: #f1f5f9;
+        }
+
+        .display-icon-gray i {
+            color: #94a3b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-wrapper {
+                padding: 1rem;
+            }
+
+            .header-content-wrapper {
+                padding: 1.5rem;
+            }
+
+            .header-main-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .status-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-text h1 {
+                font-size: 1.75rem;
+            }
+
+            .header-text p {
+                font-size: 0.875rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-icon-box {
+                width: 56px;
+                height: 56px;
+            }
+
+            .header-icon-box i {
+                font-size: 1.75rem;
+            }
+
+            .header-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2.25rem;
+            }
+
+            .stat-icon-box {
+                width: 56px;
+                height: 56px;
+            }
+
+            .stat-icon-box i {
+                font-size: 1.75rem;
+            }
+
+            .display-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .display-icon i {
+                font-size: 2.5rem;
+            }
+
+            .display-count {
+                font-size: 2rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+    </style>
 </head>
 
 <body>
-
     <div layout:fragment="content">
-
-        <h2 class="h4 mb-4 fw-bold border-bottom pb-2">Bàn làm việc quản lý</h2>
-
-        <!-- Thông báo đơn hàng mới được giao -->
-        <div th:if="${hasNewAssignments}" class="alert alert-warning alert-dismissible fade show mb-4 shadow-sm"
-            role="alert">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <i class="fas fa-bell fa-2x text-warning animate__animated animate__swing animate__infinite"></i>
-                </div>
-                <div>
-                    <strong class="d-block">📢 Thông báo mới!</strong>
-                    <span th:text="${newAssignmentMessage}">Bạn có đơn hàng mới được giao!</span>
-                </div>
-                <a href="/manager/requests" class="btn btn-warning btn-sm ms-auto">
-                    <i class="fas fa-eye me-1"></i>Xem ngay
-                </a>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <div class="row g-4 mb-5">
-            <div class="col-md-3">
-                <div class="card bg-danger text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 text-uppercase">Đơn hàng của tôi</h6>
-                                <h2 class="fw-bold mb-0" th:text="${requestCount ?: 0}">0</h2>
+        <div class="dashboard-wrapper">
+            <div class="dashboard-container">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-bg-decoration"></div>
+                    <div class="header-glow"></div>
+                    <div class="header-content-wrapper">
+                        <div class="header-main-row">
+                            <div class="header-left">
+                                <div class="header-icon-box">
+                                    <i class="fas fa-gauge-high"></i>
+                                </div>
+                                <div class="header-text">
+                                    <h1>Bàn làm việc quản lý</h1>
+                                    <p>Tổng quan hoạt động hệ thống logistics</p>
+                                </div>
                             </div>
-                            <i class="fas fa-bell fa-3x opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 text-end">
-                        <a href="/manager/requests" class="text-white text-decoration-none small">Xử lý ngay <i
-                                class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card bg-primary text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 text-uppercase">Tổng kiện hàng</h6>
-                                <h2 class="fw-bold mb-0" th:text="${totalParcels ?: 0}">0</h2>
-                            </div>
-                            <i class="fas fa-boxes fa-3x opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 text-end">
-                        <a href="/manager/parcels" class="text-white text-decoration-none small">Xem chi tiết <i
-                                class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card bg-info text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 text-uppercase">Tổng chuyến xe</h6>
-                                <h2 class="fw-bold mb-0" th:text="${totalTrips ?: 0}">0</h2>
-                            </div>
-                            <i class="fas fa-truck-moving fa-3x opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 text-end">
-                        <a href="/manager/trip-planning" class="text-white text-decoration-none small">Xem chi tiết <i
-                                class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card bg-success text-white shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 text-uppercase">Tổng tài xế</h6>
-                                <h2 class="fw-bold mb-0" th:text="${totalShippers ?: 0}">0</h2>
-                            </div>
-                            <i class="fas fa-user-check fa-3x opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 text-end">
-                        <a href="/manager/shippers" class="text-white text-decoration-none small">Xem chi tiết <i
-                                class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="card shadow border-0 h-100">
-                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold text-danger"><i class="fas fa-exclamation-circle me-2"></i>Yêu cầu gần
-                            đây</h6>
-                        <a href="/manager/requests" class="btn btn-sm btn-outline-secondary">Xem tất cả</a>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item text-center text-muted py-5" th:if="${totalRequests == 0}">
-                                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-25"></i>
-                                Không có yêu cầu nào
-                            </div>
-                            <div class="list-group-item" th:if="${totalRequests > 0}">
-                                <span class="text-primary fw-bold" th:text="${totalRequests}">0</span> yêu cầu đang chờ
-                                xử lý
+                            <div class="status-badge">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Hệ thống hoạt động tốt</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-lg-6">
-                <div class="card shadow border-0 h-100">
-                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-shipping-fast me-2"></i>Chuyến xe đang
-                            chạy</h6>
-                        <a href="/manager/trip-planning" class="btn btn-sm btn-outline-secondary">Xem tất cả</a>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item text-center text-muted py-5" th:if="${totalTrips == 0}">
-                                <i class="fas fa-road fa-2x mb-2 d-block opacity-25"></i>
-                                Chưa có chuyến xe nào
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <!-- Tổng yêu cầu -->
+                    <div class="stat-card stat-card-red">
+                        <div class="stat-card-inner">
+                            <div class="stat-top">
+                                <div class="stat-info">
+                                    <div class="stat-label">TỔNG YÊU CẦU</div>
+                                    <div class="stat-value" th:text="${totalRequests ?: 0}">0</div>
+                                </div>
+                                <div class="stat-icon-box">
+                                    <i class="fas fa-bell"></i>
+                                </div>
                             </div>
-                            <div class="list-group-item" th:if="${totalTrips > 0}">
-                                <span class="text-info fw-bold" th:text="${totalTrips}">0</span> chuyến trong hệ thống
+                            <div class="stat-action">
+                                <a href="/manager/requests" th:href="@{/manager/requests}" class="action-link">
+                                    <span>Xử lý ngay</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tổng kiện hàng -->
+                    <div class="stat-card stat-card-blue">
+                        <div class="stat-card-inner">
+                            <div class="stat-top">
+                                <div class="stat-info">
+                                    <div class="stat-label">TỔNG KIỆN HÀNG</div>
+                                    <div class="stat-value" th:text="${totalParcels ?: 0}">0</div>
+                                </div>
+                                <div class="stat-icon-box">
+                                    <i class="fas fa-boxes"></i>
+                                </div>
+                            </div>
+                            <div class="stat-action">
+                                <a href="/manager/parcels" th:href="@{/manager/parcels}" class="action-link">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tổng chuyến xe -->
+                    <div class="stat-card stat-card-cyan">
+                        <div class="stat-card-inner">
+                            <div class="stat-top">
+                                <div class="stat-info">
+                                    <div class="stat-label">TỔNG CHUYẾN XE</div>
+                                    <div class="stat-value" th:text="${totalTrips ?: 0}">0</div>
+                                </div>
+                                <div class="stat-icon-box">
+                                    <i class="fas fa-truck-moving"></i>
+                                </div>
+                            </div>
+                            <div class="stat-action">
+                                <a href="/manager/trip-planning" th:href="@{/manager/trip-planning}"
+                                    class="action-link">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tổng tài xế -->
+                    <div class="stat-card stat-card-green">
+                        <div class="stat-card-inner">
+                            <div class="stat-top">
+                                <div class="stat-info">
+                                    <div class="stat-label">TỔNG TÀI XẾ</div>
+                                    <div class="stat-value" th:text="${totalShippers ?: 0}">0</div>
+                                </div>
+                                <div class="stat-icon-box">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                            </div>
+                            <div class="stat-action">
+                                <a href="/manager/shippers" th:href="@{/manager/shippers}" class="action-link">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="info-grid">
+                    <!-- Yêu cầu gần đây -->
+                    <div class="info-card info-card-red">
+                        <div class="info-header">
+                            <div class="info-header-bg"></div>
+                            <div class="info-header-content">
+                                <div class="info-header-left">
+                                    <div class="info-header-icon">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </div>
+                                    <h3 class="info-header-title">Yêu cầu gần đây</h3>
+                                </div>
+                                <a href="/manager/requests" th:href="@{/manager/requests}" class="view-all-btn">
+                                    <span>Xem tất cả</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="info-body">
+                            <div class="info-display">
+                                <!-- Có yêu cầu -->
+                                <div th:if="${totalRequests != null and totalRequests > 0}">
+                                    <div class="display-icon display-icon-red">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <p class="display-text">Có</p>
+                                    <div class="display-count display-count-red">
+                                        <span th:text="${totalRequests}">12</span> yêu cầu
+                                    </div>
+                                    <p class="display-text">đang chờ xử lý</p>
+                                </div>
+                                <!-- Không có yêu cầu -->
+                                <div th:if="${totalRequests == null or totalRequests == 0}">
+                                    <div class="display-icon display-icon-gray">
+                                        <i class="fas fa-inbox"></i>
+                                    </div>
+                                    <p class="display-empty">Không có yêu cầu nào</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chuyến xe đang chạy -->
+                    <div class="info-card info-card-blue">
+                        <div class="info-header">
+                            <div class="info-header-bg"></div>
+                            <div class="info-header-content">
+                                <div class="info-header-left">
+                                    <div class="info-header-icon">
+                                        <i class="fas fa-shipping-fast"></i>
+                                    </div>
+                                    <h3 class="info-header-title">Chuyến xe đang chạy</h3>
+                                </div>
+                                <a href="/manager/trip-planning" th:href="@{/manager/trip-planning}"
+                                    class="view-all-btn">
+                                    <span>Xem tất cả</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="info-body">
+                            <div class="info-display">
+                                <!-- Có chuyến xe -->
+                                <div th:if="${totalTrips != null and totalTrips > 0}">
+                                    <div class="display-icon display-icon-blue">
+                                        <i class="fas fa-truck-moving"></i>
+                                    </div>
+                                    <p class="display-text">Có</p>
+                                    <div class="display-count display-count-blue">
+                                        <span th:text="${totalTrips}">28</span> chuyến
+                                    </div>
+                                    <p class="display-text">trong hệ thống</p>
+                                </div>
+                                <!-- Không có chuyến xe -->
+                                <div th:if="${totalTrips == null or totalTrips == 0}">
+                                    <div class="display-icon display-icon-gray">
+                                        <i class="fas fa-road"></i>
+                                    </div>
+                                    <p class="display-empty">Chưa có chuyến xe nào</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -149,7 +834,6 @@
             </div>
         </div>
     </div>
-
 </body>
 
 </html>

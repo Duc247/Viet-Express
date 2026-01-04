@@ -11,28 +11,28 @@ import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Entities.Payment;
 import vn.DucBackend.Entities.PaymentTransaction;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.PaymentRepository;
 import vn.DucBackend.Repositories.PaymentTransactionRepository;
+import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Services.PaymentService;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Controller xử lý chi tiết thanh toán cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerPaymentsController {
 
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private CustomerRequestService customerRequestService;
 
     @Autowired
-    private PaymentRepository paymentRepository;
+    private PaymentService paymentService;
 
     @Autowired
     private PaymentTransactionRepository paymentTransactionRepository;
@@ -70,29 +70,17 @@ public class CustomerPaymentsController {
             return "redirect:/auth/login";
         }
 
-        // Lấy tất cả requests mà customer là sender hoặc receiver
-        List<CustomerRequest> customerRequests = customerRequestRepository.findBySenderId(customerId);
-        List<CustomerRequest> receiverRequests = customerRequestRepository.findByReceiverId(customerId);
-        
-        // Gộp và loại bỏ trùng lặp
-        java.util.Set<Long> requestIds = new java.util.HashSet<>();
-        customerRequests.forEach(cr -> requestIds.add(cr.getId()));
-        receiverRequests.forEach(cr -> requestIds.add(cr.getId()));
+        // Lấy tất cả payments từ customer (sender hoặc receiver)
+        List<Payment> allPayments = paymentService.findPaymentsByCustomerIdEntities(customerId);
 
-        // Lấy tất cả payments từ các requests này
-        List<Payment> allPayments = new java.util.ArrayList<>();
-        for (Long requestId : requestIds) {
-            List<Payment> payments = paymentRepository.findByRequestId(requestId);
-            // Pre-fetch relationships để tránh lazy loading exception
-            payments.forEach(p -> {
-                if (p.getRequest() != null) {
-                    p.getRequest().getRequestCode();
-                    if (p.getRequest().getSender() != null) p.getRequest().getSender().getName();
-                    if (p.getRequest().getReceiver() != null) p.getRequest().getReceiver().getName();
-                }
-            });
-            allPayments.addAll(payments);
-        }
+        // Pre-fetch relationships để tránh lazy loading exception
+        allPayments.forEach(p -> {
+            if (p.getRequest() != null) {
+                p.getRequest().getRequestCode();
+                if (p.getRequest().getSender() != null) p.getRequest().getSender().getName();
+                if (p.getRequest().getReceiver() != null) p.getRequest().getReceiver().getName();
+            }
+        });
 
         // Filter by search keyword if provided
         if (search != null && !search.trim().isEmpty()) {
@@ -158,14 +146,12 @@ public class CustomerPaymentsController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
 
-        if (orderOpt.isEmpty()) {
+        if (order == null) {
             model.addAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Kiểm tra quyền xem - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -183,49 +169,46 @@ public class CustomerPaymentsController {
 
         if (search != null && !search.trim().isEmpty()) {
             // Search by keyword (code, description)
-            payments = paymentRepository.searchByRequestIdAndKeyword(id, search.trim());
+            payments = paymentService.searchByRequestIdAndKeyword(id, search.trim());
             model.addAttribute("search", search);
         } else if (status != null && !status.isEmpty()) {
             // Filter by status
             try {
-                Payment.PaymentStatus paymentStatus = Payment.PaymentStatus.valueOf(status);
-                payments = paymentRepository.findByRequestIdAndStatus(id, paymentStatus);
+                payments = paymentService.findByRequestIdAndStatusEntities(id, status);
             } catch (IllegalArgumentException e) {
-                payments = paymentRepository.findByRequestId(id);
+                payments = paymentService.findPaymentsByRequestIdEntities(id);
             }
             model.addAttribute("status", status);
         } else if (type != null && !type.isEmpty()) {
             // Filter by payment type
             try {
-                Payment.PaymentType paymentType = Payment.PaymentType.valueOf(type);
-                payments = paymentRepository.findByRequestIdAndPaymentType(id, paymentType);
+                payments = paymentService.findByRequestIdAndTypeEntities(id, type);
             } catch (IllegalArgumentException e) {
-                payments = paymentRepository.findByRequestId(id);
+                payments = paymentService.findPaymentsByRequestIdEntities(id);
             }
             model.addAttribute("type", type);
         } else if (scope != null && !scope.isEmpty()) {
             // Filter by payment scope
             try {
-                Payment.PaymentScope paymentScope = Payment.PaymentScope.valueOf(scope);
-                payments = paymentRepository.findByRequestIdAndScope(id, paymentScope);
+                payments = paymentService.findByRequestIdAndScopeEntities(id, scope);
             } catch (IllegalArgumentException e) {
-                payments = paymentRepository.findByRequestId(id);
+                payments = paymentService.findPaymentsByRequestIdEntities(id);
             }
             model.addAttribute("scope", scope);
         } else {
             // Get all payments
-            payments = paymentRepository.findByRequestId(id);
+            payments = paymentService.findPaymentsByRequestIdEntities(id);
         }
 
         model.addAttribute("payments", payments);
 
         // Summary statistics
-        Long totalPayments = paymentRepository.countByRequestId(id);
-        Long paidPayments = paymentRepository.countPaidByRequestId(id);
-        Long unpaidPayments = paymentRepository.countUnpaidByRequestId(id);
-        Long partiallyPaidPayments = paymentRepository.countPartiallyPaidByRequestId(id);
-        Long shippingFeeCount = paymentRepository.countShippingFeeByRequestId(id);
-        Long codCount = paymentRepository.countCodByRequestId(id);
+        Long totalPayments = paymentService.countByRequestId(id);
+        Long paidPayments = paymentService.countPaidByRequestId(id);
+        Long unpaidPayments = paymentService.countUnpaidByRequestId(id);
+        Long partiallyPaidPayments = paymentService.countPartiallyPaidByRequestId(id);
+        Long shippingFeeCount = paymentService.countShippingFeeByRequestId(id);
+        Long codCount = paymentService.countCodByRequestId(id);
 
         model.addAttribute("totalPayments", totalPayments != null ? totalPayments : 0L);
         model.addAttribute("paidPayments", paidPayments != null ? paidPayments : 0L);
@@ -235,8 +218,8 @@ public class CustomerPaymentsController {
         model.addAttribute("codCount", codCount != null ? codCount : 0L);
 
         // Amount statistics
-        BigDecimal totalExpected = paymentRepository.sumExpectedAmountByRequestId(id);
-        BigDecimal totalPaid = paymentRepository.sumPaidAmountByRequestId(id);
+        BigDecimal totalExpected = paymentService.sumExpectedAmountByRequestId(id);
+        BigDecimal totalPaid = paymentService.sumPaidAmountByRequestId(id);
         BigDecimal remaining = (totalExpected != null ? totalExpected : BigDecimal.ZERO)
                 .subtract(totalPaid != null ? totalPaid : BigDecimal.ZERO);
 
@@ -269,13 +252,12 @@ public class CustomerPaymentsController {
             return ResponseEntity.status(401).body("Vui lòng đăng nhập");
         }
 
-        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        Payment payment = paymentService.getPaymentEntityById(paymentId);
 
-        if (paymentOpt.isEmpty()) {
+        if (payment == null) {
             return ResponseEntity.notFound().build();
         }
 
-        Payment payment = paymentOpt.get();
         CustomerRequest order = payment.getRequest();
 
         // Kiểm tra quyền - phải là sender hoặc receiver
@@ -322,15 +304,13 @@ public class CustomerPaymentsController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+            Payment payment = paymentService.getPaymentEntityById(paymentId);
 
-            if (paymentOpt.isEmpty()) {
+            if (payment == null) {
                 response.put("success", false);
                 response.put("message", "Không tìm thấy khoản thanh toán!");
                 return ResponseEntity.badRequest().body(response);
             }
-
-            Payment payment = paymentOpt.get();
 
             // Kiểm tra nếu đã thanh toán rồi
             if (payment.getStatus() == Payment.PaymentStatus.PAID) {
@@ -343,7 +323,7 @@ public class CustomerPaymentsController {
             payment.setPaidAmount(payment.getExpectedAmount());
             payment.setStatus(Payment.PaymentStatus.PAID);
 
-            paymentRepository.save(payment);
+            paymentService.savePaymentEntity(payment);
 
             response.put("success", true);
             response.put("message", "Thanh toán thành công!");

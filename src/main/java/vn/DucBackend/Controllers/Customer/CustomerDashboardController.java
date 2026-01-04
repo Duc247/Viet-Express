@@ -9,23 +9,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.PaymentRepository;
+import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Services.PaymentService;
 
 import java.util.List;
 
 /**
  * Controller xử lý Dashboard cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerDashboardController {
 
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private CustomerRequestService customerRequestService;
 
     @Autowired
-    private PaymentRepository paymentRepository;
+    private PaymentService paymentService;
 
     private Long getCustomerIdFromSession(HttpSession session) {
         Object customerId = session.getAttribute("customerId");
@@ -44,7 +45,7 @@ public class CustomerDashboardController {
         }
 
         // 1. Lấy danh sách đơn hàng gần đây
-        List<CustomerRequest> recentOrders = customerRequestRepository.findByCustomerId(customerId);
+        List<CustomerRequest> recentOrders = customerRequestService.findByCustomerIdEntities(customerId);
 
         // 2. Tính toán thống kê
         long totalOrders = recentOrders.size();
@@ -53,8 +54,7 @@ public class CustomerDashboardController {
         long deliveredOrders = recentOrders.stream().filter(o -> "DELIVERED".equals(o.getStatus().name())).count();
 
         // 3. Tính toán tiền nợ (Tổng Cần trả - Tổng Đã trả)
-        // Sử dụng query method với JOIN FETCH để tránh LazyInitializationException
-        java.math.BigDecimal totalUnpaid = paymentRepository.findByRequestSenderId(customerId).stream()
+        java.math.BigDecimal totalUnpaid = paymentService.findByRequestSenderIdEntities(customerId).stream()
                 .map(p -> p.getExpectedAmount()
                         .subtract(p.getPaidAmount() != null ? p.getPaidAmount() : java.math.BigDecimal.ZERO))
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);

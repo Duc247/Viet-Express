@@ -12,24 +12,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Entities.Parcel;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.ParcelRepository;
+import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Services.ParcelService;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controller xử lý chi tiết kiện hàng cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerParcelsController {
 
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private CustomerRequestService customerRequestService;
 
     @Autowired
-    private ParcelRepository parcelRepository;
+    private ParcelService parcelService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -61,14 +61,12 @@ public class CustomerParcelsController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
 
-        if (orderOpt.isEmpty()) {
+        if (order == null) {
             model.addAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Kiểm tra quyền xem - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -86,29 +84,28 @@ public class CustomerParcelsController {
 
         if (search != null && !search.trim().isEmpty()) {
             // Search by keyword
-            parcels = parcelRepository.searchByRequestIdAndKeyword(id, search.trim());
+            parcels = parcelService.searchByRequestIdAndKeyword(id, search.trim());
             model.addAttribute("search", search);
         } else if (status != null && !status.isEmpty()) {
             // Filter by status
             try {
-                Parcel.ParcelStatus parcelStatus = Parcel.ParcelStatus.valueOf(status);
-                parcels = parcelRepository.findByRequestIdAndStatus(id, parcelStatus);
+                parcels = parcelService.findByRequestIdAndStatusEntities(id, status);
             } catch (IllegalArgumentException e) {
-                parcels = parcelRepository.findByRequestId(id);
+                parcels = parcelService.findByRequestIdEntities(id);
             }
             model.addAttribute("status", status);
         } else {
             // Get all parcels
-            parcels = parcelRepository.findByRequestId(id);
+            parcels = parcelService.findByRequestIdEntities(id);
         }
 
         model.addAttribute("parcels", parcels);
 
         // Summary statistics
-        Long totalParcels = parcelRepository.countByRequestId(id);
-        Long deliveredParcels = parcelRepository.countDeliveredByRequestId(id);
-        Long inDeliveryParcels = parcelRepository.countInDeliveryByRequestId(id);
-        Long pendingParcels = parcelRepository.countPendingByRequestId(id);
+        Long totalParcels = parcelService.countByRequestId(id);
+        Long deliveredParcels = parcelService.countDeliveredByRequestId(id);
+        Long inDeliveryParcels = parcelService.countInDeliveryByRequestId(id);
+        Long pendingParcels = parcelService.countPendingByRequestId(id);
 
         model.addAttribute("totalParcels", totalParcels != null ? totalParcels : 0L);
         model.addAttribute("deliveredParcels", deliveredParcels != null ? deliveredParcels : 0L);

@@ -7,11 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
-import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.PaginationUtil;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -25,10 +23,6 @@ public class ManagerLocationController {
     // Services cho business logic
     @Autowired
     private LocationService locationService;
-
-    // Repositories cho template data
-    @Autowired
-    private LocationRepository locationRepository;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -45,7 +39,7 @@ public class ManagerLocationController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        java.util.List<Location> locations = locationRepository.findAll();
+        java.util.List<Location> locations = locationService.getAllLocationEntities();
 
         // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -74,12 +68,12 @@ public class ManagerLocationController {
     public String locationDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        Optional<Location> locationOpt = locationRepository.findById(id);
-        if (locationOpt.isEmpty()) {
+        Location location = locationService.getLocationEntityById(id);
+        if (location == null) {
             return "redirect:/manager/locations";
         }
 
-        model.addAttribute("location", locationOpt.get());
+        model.addAttribute("location", location);
         return "manager/location/detail";
     }
 
@@ -102,7 +96,7 @@ public class ManagerLocationController {
             location.setWarehouseCode("WH-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase());
         }
 
-        locationRepository.save(location);
+        locationService.saveLocationEntity(location);
         redirectAttributes.addFlashAttribute("successMessage", "Đã tạo địa điểm mới thành công!");
 
         if (returnToRequestId != null) {
@@ -122,13 +116,12 @@ public class ManagerLocationController {
             @RequestParam(value = "isActive", required = false) Boolean isActive,
             RedirectAttributes redirectAttributes) {
 
-        Optional<Location> locationOpt = locationRepository.findById(id);
-        if (locationOpt.isEmpty()) {
+        Location location = locationService.getLocationEntityById(id);
+        if (location == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy địa điểm!");
             return "redirect:/manager/locations";
         }
 
-        Location location = locationOpt.get();
         location.setName(name);
         location.setAddressText(addressText);
         location.setLocationType(Location.LocationType.valueOf(locationType));
@@ -136,22 +129,21 @@ public class ManagerLocationController {
         location.setDescription(description);
         location.setIsActive(isActive != null ? isActive : true);
 
-        locationRepository.save(location);
+        locationService.saveLocationEntity(location);
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật địa điểm thành công!");
         return "redirect:/manager/locations/" + id;
     }
 
     @PostMapping("/locations/{id}/delete")
     public String deleteLocation(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        Optional<Location> locationOpt = locationRepository.findById(id);
-        if (locationOpt.isEmpty()) {
+        Location location = locationService.getLocationEntityById(id);
+        if (location == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy địa điểm!");
             return "redirect:/manager/locations";
         }
 
-        Location location = locationOpt.get();
         location.setIsActive(false);
-        locationRepository.save(location);
+        locationService.saveLocationEntity(location);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã vô hiệu hóa địa điểm!");
         return "redirect:/manager/locations";

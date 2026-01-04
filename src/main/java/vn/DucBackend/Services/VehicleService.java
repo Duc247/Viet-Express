@@ -61,4 +61,11 @@ public interface VehicleService {
      * Repository: vehicleRepository.findById(), vehicleRepository.save()
      */
     void toggleStatus(Long id);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy tất cả Vehicle entities */
+    java.util.List<vn.DucBackend.Entities.Vehicle> getAllVehicleEntities();
 }

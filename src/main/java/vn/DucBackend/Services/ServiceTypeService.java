@@ -66,4 +66,20 @@ public interface ServiceTypeService {
      * Repository: serviceTypeRepository.findById(), serviceTypeRepository.save()
      */
     void toggleStatus(Long id);
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    /**
+     * Lấy tất cả ServiceType entities đang active
+     * Repository: serviceTypeRepository.findByIsActiveTrue()
+     */
+    java.util.List<vn.DucBackend.Entities.ServiceType> findActiveEntities();
+
+    /**
+     * Lấy ServiceType entity theo code
+     * Repository: serviceTypeRepository.findByCode()
+     */
+    java.util.Optional<vn.DucBackend.Entities.ServiceType> findEntityByCode(String code);
 }

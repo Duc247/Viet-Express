@@ -1,6 +1,7 @@
 package vn.DucBackend.Services.Impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.UserDTO;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final ShipperRepository shipperRepository;
     private final StaffRepository staffRepository;
     private final LocationRepository locationRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Lấy danh sách tất cả User
@@ -90,7 +92,8 @@ public class UserServiceImpl implements UserService {
         // Tạo User
         User user = new User();
         user.setUsername(dto.getUsername());
-        user.setPassword(dto.getPassword());
+        // Hash password với BCrypt
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
         user.setFullName(dto.getFullName());
@@ -168,7 +171,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO updatePassword(Long id, String newPassword) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setPassword(newPassword); // Should be encoded in production
+        // Hash password với BCrypt
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdatedAt(LocalDateTime.now());
         return toDTO(userRepository.save(user));
     }
@@ -212,9 +216,15 @@ public class UserServiceImpl implements UserService {
     public boolean validatePassword(Long id, String password) {
         User user = userRepository.findById(id).orElse(null);
         if (user != null) {
-            return user.getPassword().equals(password); // Should use encoder in production
+            // Verify password với BCrypt
+            return passwordEncoder.matches(password, user.getPassword());
         }
         return false;
+    }
+
+    @Override
+    public User getUserEntityByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     private UserDTO toDTO(User user) {

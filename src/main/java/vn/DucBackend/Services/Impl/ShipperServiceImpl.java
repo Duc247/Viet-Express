@@ -110,8 +110,13 @@ public class ShipperServiceImpl implements ShipperService {
         shipper.setCreatedAt(dto.getCreatedAt());
         shipper.setUpdatedAt(dto.getUpdatedAt());
         if (dto.getCurrentLocationId() != null) {
-            shipper.setCurrentLocation(locationRepository.findById(dto.getCurrentLocationId())
-                    .orElseThrow(() -> new RuntimeException("Location not found")));
+            Location location = locationRepository.findById(dto.getCurrentLocationId())
+                    .orElseThrow(() -> new RuntimeException("Location not found"));
+            // Shipper chỉ được gán vào location có type là WAREHOUSE
+            if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
+                throw new RuntimeException("Shipper chỉ có thể làm việc tại địa điểm có loại WAREHOUSE!");
+            }
+            shipper.setCurrentLocation(location);
         }
         if (dto.getCurrentTripId() != null) {
             shipper.setCurrentTrip(tripRepository.findById(dto.getCurrentTripId())
@@ -135,8 +140,13 @@ public class ShipperServiceImpl implements ShipperService {
         if (dto.getWorkingArea() != null)
             shipper.setWorkingArea(dto.getWorkingArea());
         if (dto.getCurrentLocationId() != null) {
-            shipper.setCurrentLocation(locationRepository.findById(dto.getCurrentLocationId())
-                    .orElseThrow(() -> new RuntimeException("Location not found")));
+            Location location = locationRepository.findById(dto.getCurrentLocationId())
+                    .orElseThrow(() -> new RuntimeException("Location not found"));
+            // Shipper chỉ được gán vào location có type là WAREHOUSE
+            if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
+                throw new RuntimeException("Shipper chỉ có thể làm việc tại địa điểm có loại WAREHOUSE!");
+            }
+            shipper.setCurrentLocation(location);
         }
         if (dto.getCurrentTripId() != null) {
             shipper.setCurrentTrip(tripRepository.findById(dto.getCurrentTripId())
@@ -163,8 +173,13 @@ public class ShipperServiceImpl implements ShipperService {
     @Override
     public ShipperDTO updateShipperLocation(Long id, Long locationId) {
         Shipper shipper = shipperRepository.findById(id).orElseThrow(() -> new RuntimeException("Shipper not found"));
-        shipper.setCurrentLocation(locationRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found")));
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+        // Shipper chỉ được gán vào location có type là WAREHOUSE
+        if (location.getLocationType() != Location.LocationType.WAREHOUSE) {
+            throw new RuntimeException("Shipper chỉ có thể làm việc tại địa điểm có loại WAREHOUSE!");
+        }
+        shipper.setCurrentLocation(location);
         return toDTO(shipperRepository.save(shipper));
     }
 
@@ -231,5 +246,19 @@ public class ShipperServiceImpl implements ShipperService {
         dto.setCreatedAt(shipper.getCreatedAt());
         dto.setUpdatedAt(shipper.getUpdatedAt());
         return dto;
+    }
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<Shipper> getAllShipperEntities() {
+        return shipperRepository.findAll();
+    }
+
+    @Override
+    public Shipper getShipperEntityById(Long id) {
+        return shipperRepository.findById(id).orElse(null);
     }
 }

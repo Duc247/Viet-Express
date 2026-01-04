@@ -168,4 +168,18 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setUpdatedAt(customer.getUpdatedAt());
         return dto;
     }
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    @Override
+    public Customer getCustomerEntityById(Long id) {
+        return customerRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Customer getCustomerEntityByPhone(String phone) {
+        return customerRepository.findByPhone(phone).orElse(null);
+    }
 }

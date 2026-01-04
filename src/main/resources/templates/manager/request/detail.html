@@ -85,13 +85,13 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-user me-1 text-success"></i>Người gửi:</strong>
-                                <p class="mb-0 ms-3" th:text="${order.sender?.name ?: 'N/A'}">Tên</p>
-                                <small class="text-muted ms-3" th:text="${order.sender?.phone}">SĐT</small>
+                                <p class="mb-0 ms-3">Họ tên: <span th:text="${order.sender?.fullName ?: order.sender?.name ?: 'N/A'}">Tên</span></p>
+                                <p class="mb-0 ms-3 text-muted">Địa chỉ: <span th:text="${order.senderLocation?.addressText ?: '-'}">-</span></p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-user me-1 text-primary"></i>Người nhận:</strong>
-                                <p class="mb-0 ms-3" th:text="${order.receiver?.name ?: 'Chưa có'}">Tên</p>
-                                <small class="text-muted ms-3" th:text="${order.receiver?.phone}">SĐT</small>
+                                <p class="mb-0 ms-3">Họ tên: <span th:text="${order.receiver?.fullName ?: order.receiver?.name ?: 'Chưa có'}">Tên</span></p>
+                                <p class="mb-0 ms-3 text-muted">Địa chỉ: <span th:text="${order.receiverLocation?.addressText ?: '-'}">-</span></p>
                             </div>
                         </div>
                         <div class="row">

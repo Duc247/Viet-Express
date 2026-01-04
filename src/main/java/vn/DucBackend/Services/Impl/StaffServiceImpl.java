@@ -190,4 +190,22 @@ public class StaffServiceImpl implements StaffService {
 		dto.setUpdatedAt(staff.getUpdatedAt());
 		return dto;
 	}
+
+	// ==========================================
+	// Methods cho Staff Controllers
+	// ==========================================
+
+	@Override
+	public Staff getStaffEntityById(Long id) {
+		return staffRepository.findById(id).orElse(null);
+	}
+
+	// ==========================================
+	// Methods cho Manager Controllers
+	// ==========================================
+
+	@Override
+	public java.util.List<Staff> getAllStaffEntities() {
+		return staffRepository.findAll();
+	}
 }

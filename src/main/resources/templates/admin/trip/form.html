@@ -33,14 +33,14 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Shipper</label>
-                            <select class="form-select" th:field="*{shipper}">
+                            <select class="form-select" th:field="*{shipperId}">
                                 <option value="">-- Chưa phân công --</option>
                                 <option th:each="s : ${shippers}" th:value="${s.id}" th:text="${s.fullName}"></option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Phương tiện</label>
-                            <select class="form-select" th:field="*{vehicle}">
+                            <select class="form-select" th:field="*{vehicleId}">
                                 <option value="">-- Chưa phân công --</option>
                                 <option th:each="v : ${vehicles}" th:value="${v.id}" th:text="${v.licensePlate}">
                                 </option>
@@ -51,7 +51,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Điểm đi <span class="text-danger">*</span></label>
-                            <select class="form-select" th:field="*{startLocation}" required>
+                            <select class="form-select" th:field="*{startLocationId}" required>
                                 <option value="">-- Chọn điểm đi --</option>
                                 <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}">
                                 </option>
@@ -59,7 +59,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Điểm đến <span class="text-danger">*</span></label>
-                            <select class="form-select" th:field="*{endLocation}" required>
+                            <select class="form-select" th:field="*{endLocationId}" required>
                                 <option value="">-- Chọn điểm đến --</option>
                                 <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}">
                                 </option>

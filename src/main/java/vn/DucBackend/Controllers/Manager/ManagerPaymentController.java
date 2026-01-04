@@ -7,12 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
-import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,14 +24,10 @@ public class ManagerPaymentController {
     // Services cho business logic
     @Autowired
     private PaymentService paymentService;
-
-    // Repositories cho template data
     @Autowired
-    private PaymentRepository paymentRepository;
+    private CustomerRequestService customerRequestService;
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
-    @Autowired
-    private TripRepository tripRepository;
+    private TripService tripService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -54,13 +48,11 @@ public class ManagerPaymentController {
             @RequestParam(value = "description", required = false) String description,
             RedirectAttributes redirectAttributes) {
 
-        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(requestId);
-        if (requestOpt.isEmpty()) {
+        CustomerRequest customerRequest = customerRequestService.getRequestEntityById(requestId);
+        if (customerRequest == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
             return "redirect:/manager/requests";
         }
-
-        CustomerRequest customerRequest = requestOpt.get();
 
         // ==========================================
         // VALIDATION: Không được tạo payment vượt quá số tiền còn lại
@@ -73,7 +65,7 @@ public class ManagerPaymentController {
         BigDecimal totalOrderFees = shippingFee.add(codAmount);
 
         // Tính tổng số tiền đã tạo payment trước đó
-        java.util.List<Payment> existingPayments = paymentRepository.findByRequestId(requestId);
+        java.util.List<Payment> existingPayments = paymentService.findPaymentsByRequestIdEntities(requestId);
         BigDecimal totalExistingPayments = existingPayments.stream()
                 .map(p -> p.getExpectedAmount() != null ? p.getExpectedAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -109,10 +101,13 @@ public class ManagerPaymentController {
 
         // Nếu scope là PER_TRIP và có tripId thì gắn trip
         if (paymentScope.equals("PER_TRIP") && tripId != null) {
-            tripRepository.findById(tripId).ifPresent(payment::setTrip);
+            Trip trip = tripService.getTripEntityById(tripId);
+            if (trip != null) {
+                payment.setTrip(trip);
+            }
         }
 
-        paymentRepository.save(payment);
+        paymentService.savePaymentEntity(payment);
         redirectAttributes.addFlashAttribute("successMessage", "Đã tạo thanh toán thành công!");
         return "redirect:/manager/requests/" + requestId + "/payments";
     }
@@ -129,7 +124,7 @@ public class ManagerPaymentController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        java.util.List<Payment> payments = paymentRepository.findAll();
+        java.util.List<Payment> payments = paymentService.getAllPaymentEntities();
 
         // Lọc
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -158,12 +153,12 @@ public class ManagerPaymentController {
     public String paymentDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        Optional<Payment> paymentOpt = paymentRepository.findById(id);
-        if (paymentOpt.isEmpty()) {
+        Payment payment = paymentService.getPaymentEntityById(id);
+        if (payment == null) {
             return "redirect:/manager/payments";
         }
 
-        model.addAttribute("payment", paymentOpt.get());
+        model.addAttribute("payment", payment);
         return "manager/payment/detail";
     }
 
@@ -177,15 +172,14 @@ public class ManagerPaymentController {
         // Sử dụng Service cho update status
         paymentService.updatePaymentStatus(id, newStatus);
 
-        Optional<Payment> paymentOpt = paymentRepository.findById(id);
-        if (paymentOpt.isEmpty()) {
+        Payment payment = paymentService.getPaymentEntityById(id);
+        if (payment == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thanh toán!");
             return "redirect:/manager/payments";
         }
 
-        Payment payment = paymentOpt.get();
         payment.setPaidAmount(paidAmount);
-        paymentRepository.save(payment);
+        paymentService.savePaymentEntity(payment);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật thanh toán!");
         return "redirect:/manager/payments/" + id;

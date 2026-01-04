@@ -82,4 +82,45 @@ public interface TripService {
 
     /** Repository: tripRepository.deleteById() */
     void deleteTrip(Long id);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy tất cả Trip entities */
+    java.util.List<vn.DucBackend.Entities.Trip> getAllTripEntities();
+
+    /** Lấy Trip entity theo ID */
+    vn.DucBackend.Entities.Trip getTripEntityById(Long id);
+
+    /** Tìm trips theo request ID - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Trip> findTripsByRequestIdEntities(Long requestId);
+
+    /** Lưu Trip entity */
+    vn.DucBackend.Entities.Trip saveTripEntity(vn.DucBackend.Entities.Trip trip);
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    /** Đếm trips theo request ID */
+    Long countTripsByRequestId(Long requestId);
+
+    /** Đếm trips đã hoàn thành theo request ID */
+    Long countCompletedTripsByRequestId(Long requestId);
+
+    /** Đếm trips đang chạy theo request ID */
+    Long countInProgressTripsByRequestId(Long requestId);
+
+    /** Đếm trips đã tạo theo request ID */
+    Long countCreatedTripsByRequestId(Long requestId);
+
+    /** Tìm trips theo request và keyword */
+    java.util.List<vn.DucBackend.Entities.Trip> searchTripsByRequestIdAndKeyword(Long requestId, String keyword);
+
+    /** Tìm trips theo request và status - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Trip> findTripsByRequestIdAndStatusEntities(Long requestId, String status);
+
+    /** Tìm trips theo request và type - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Trip> findTripsByRequestIdAndTypeEntities(Long requestId, String type);
 }

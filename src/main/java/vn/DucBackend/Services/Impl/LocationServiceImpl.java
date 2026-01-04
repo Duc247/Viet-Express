@@ -265,4 +265,23 @@ public class LocationServiceImpl implements LocationService {
         dto.setCreatedAt(route.getCreatedAt());
         return dto;
     }
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    @Override
+    public Location getLocationEntityById(Long id) {
+        return locationRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public java.util.List<Location> getAllLocationEntities() {
+        return locationRepository.findAll();
+    }
+
+    @Override
+    public Location saveLocationEntity(Location location) {
+        return locationRepository.save(location);
+    }
 }

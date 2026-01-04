@@ -658,12 +658,22 @@
                         btnSimulate.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
                     }
 
+                    // Get CSRF token from meta tags
+                    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                    // Build headers with CSRF token
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    if (csrfToken && csrfHeader) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+
                     // Call API to update payment status
                     fetch('/customer/api/payments/' + currentPaymentId + '/simulate-pay', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
+                        headers: headers
                     })
                         .then(function (response) {
                             return response.json();

@@ -6,8 +6,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import vn.DucBackend.Entities.*;
-import vn.DucBackend.Repositories.*;
+import vn.DucBackend.DTO.ParcelDTO;
+import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Services.*;
 
 import java.math.BigDecimal;
@@ -15,21 +15,16 @@ import java.util.List;
 
 /**
  * Staff Warehouse Controller - Quản lý kho, xem hàng trong kho
- * Sử dụng Service layer cho business logic
+ * Chỉ sử dụng Service layer - không gọi Repository trực tiếp
  */
 @Controller
 @RequestMapping("/staff")
 public class StaffWarehouseController {
 
-    // Services cho business logic
     @Autowired
     private ParcelService parcelService;
-
-    // Repositories cho template data
     @Autowired
-    private ParcelRepository parcelRepository;
-    @Autowired
-    private StaffRepository staffRepository;
+    private StaffService staffService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -59,22 +54,21 @@ public class StaffWarehouseController {
         addCommonAttributes(model, request);
 
         Long staffId = getStaffIdFromSession(session);
-        Staff staff = staffId != null ? staffRepository.findById(staffId).orElse(null) : null;
+        Staff staff = staffId != null ? staffService.getStaffEntityById(staffId) : null;
 
-        List<Parcel> parcels;
+        List<ParcelDTO> parcels;
 
         if (staff != null && staff.getLocation() != null) {
-            // Lấy kiện hàng IN_WAREHOUSE trong kho của staff
-            parcels = parcelRepository.findByCurrentLocationIdAndStatus(
-                    staff.getLocation().getId(), Parcel.ParcelStatus.IN_WAREHOUSE);
+            // Lấy kiện hàng IN_WAREHOUSE trong kho của staff - Sử dụng Service
+            parcels = parcelService.findByLocationIdAndStatus(staff.getLocation().getId(), "IN_WAREHOUSE");
             model.addAttribute("warehouseName", staff.getLocation().getName());
         } else {
             // Fallback: lấy tất cả IN_WAREHOUSE
-            parcels = parcelRepository.findByStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
+            parcels = parcelService.findParcelsByStatus("IN_WAREHOUSE");
             model.addAttribute("warehouseName", "Tất cả kho");
         }
 
-        // Áp dụng filter
+        // Áp dụng filter theo mô tả/mã kiện
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.toLowerCase();
             parcels = parcels.stream()
@@ -85,23 +79,7 @@ public class StaffWarehouseController {
 
         if (requestId != null) {
             parcels = parcels.stream()
-                    .filter(p -> p.getRequest() != null && requestId.equals(p.getRequest().getId()))
-                    .toList();
-        }
-
-        if (senderPhone != null && !senderPhone.trim().isEmpty()) {
-            parcels = parcels.stream()
-                    .filter(p -> p.getRequest() != null && p.getRequest().getSender() != null
-                            && p.getRequest().getSender().getPhone() != null
-                            && p.getRequest().getSender().getPhone().contains(senderPhone))
-                    .toList();
-        }
-
-        if (receiverPhone != null && !receiverPhone.trim().isEmpty()) {
-            parcels = parcels.stream()
-                    .filter(p -> p.getRequest() != null && p.getRequest().getReceiver() != null
-                            && p.getRequest().getReceiver().getPhone() != null
-                            && p.getRequest().getReceiver().getPhone().contains(receiverPhone))
+                    .filter(p -> requestId.equals(p.getRequestId()))
                     .toList();
         }
 

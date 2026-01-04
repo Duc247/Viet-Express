@@ -76,7 +76,9 @@
                                 <td>
                                     <span class="badge bg-warning" th:if="${r.status == 'PENDING'}">Chờ xác
                                         nhận</span>
-                                    <span class="badge bg-info" th:if="${r.status == 'CONFIRMED'}">Đã xác
+                                    <span class="badge bg-info" th:if="${r.status == 'RECEIVER_CONFIRMED'}">Người nhận
+                                        đã xác nhận</span>
+                                    <span class="badge bg-success" th:if="${r.status == 'CONFIRMED'}">Đã xác
                                         nhận</span>
                                     <span class="badge bg-secondary" th:if="${r.status == 'PICKUP_ASSIGNED'}">Phân công
                                         lấy</span>

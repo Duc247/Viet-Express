@@ -20,6 +20,7 @@ public interface StaffService {
     /** Repository: staffRepository.findAll() */
     List<StaffDTO> findAllStaff();
 
+
     /** Repository: staffRepository.findById() */
     Optional<StaffDTO> findStaffById(Long id);
 
@@ -62,4 +63,18 @@ public interface StaffService {
 
     /** Repository: staffRepository.existsByUserId() */
     boolean existsByUserId(Long userId);
+
+    // ==========================================
+    // Methods cho Staff Controllers
+    // ==========================================
+
+    /** Lấy Staff entity theo ID (cho dashboard, parcel operations) */
+    vn.DucBackend.Entities.Staff getStaffEntityById(Long id);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy tất cả Staff entities */
+    java.util.List<vn.DucBackend.Entities.Staff> getAllStaffEntities();
 }

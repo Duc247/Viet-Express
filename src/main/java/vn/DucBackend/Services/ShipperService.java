@@ -73,4 +73,14 @@ public interface ShipperService {
 
     /** Repository: shipperRepository.findById(), shipperRepository.save() */
     void toggleShipperStatus(Long id);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy tất cả Shipper entities */
+    java.util.List<vn.DucBackend.Entities.Shipper> getAllShipperEntities();
+
+    /** Lấy Shipper entity theo ID */
+    vn.DucBackend.Entities.Shipper getShipperEntityById(Long id);
 }

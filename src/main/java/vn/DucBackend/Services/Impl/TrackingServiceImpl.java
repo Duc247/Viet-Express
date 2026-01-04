@@ -37,7 +37,7 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public Optional<TrackingCodeDTO> findByRequestId(Long requestId) {
-        return trackingCodeRepository.findByRequestId(requestId).map(this::toTrackingCodeDTO);
+        return trackingCodeRepository.findFirstByRequestId(requestId).map(this::toTrackingCodeDTO);
     }
 
     @Override

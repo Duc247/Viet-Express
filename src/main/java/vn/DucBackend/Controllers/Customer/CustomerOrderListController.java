@@ -10,20 +10,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
+import vn.DucBackend.Services.CustomerRequestService;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.List;
 
 /**
  * Controller xử lý danh sách và tìm kiếm đơn hàng cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerOrderListController {
 
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private CustomerRequestService customerRequestService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -50,7 +51,7 @@ public class CustomerOrderListController {
             return "redirect:/auth/login";
         }
 
-        List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
+        List<CustomerRequest> orders = customerRequestService.findByCustomerIdEntities(customerId);
 
         // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -95,7 +96,7 @@ public class CustomerOrderListController {
             return "redirect:/auth/login";
         }
 
-        List<CustomerRequest> orders = customerRequestRepository.findByCustomerId(customerId);
+        List<CustomerRequest> orders = customerRequestService.findByCustomerIdEntities(customerId);
         model.addAttribute("orders", orders);
 
         return "customer/order/history";

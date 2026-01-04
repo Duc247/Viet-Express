@@ -136,6 +136,20 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
         serviceTypeRepository.save(serviceType);
     }
 
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<ServiceType> findActiveEntities() {
+        return serviceTypeRepository.findByIsActiveTrue();
+    }
+
+    @Override
+    public java.util.Optional<ServiceType> findEntityByCode(String code) {
+        return serviceTypeRepository.findByCode(code);
+    }
+
     private ServiceTypeDTO toDTO(ServiceType serviceType) {
         ServiceTypeDTO dto = new ServiceTypeDTO();
         dto.setId(serviceType.getId());

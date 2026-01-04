@@ -45,4 +45,14 @@ public interface CustomerService {
 
     /** Repository: customerRepository.deleteById() */
     void deleteCustomer(Long id);
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    /** Lấy Customer entity theo ID */
+    vn.DucBackend.Entities.Customer getCustomerEntityById(Long id);
+
+    /** Lấy Customer entity theo số điện thoại */
+    vn.DucBackend.Entities.Customer getCustomerEntityByPhone(String phone);
 }

@@ -266,4 +266,136 @@ public class PaymentServiceImpl implements PaymentService {
         dto.setCreatedAt(txn.getCreatedAt());
         return dto;
     }
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<Payment> getAllPaymentEntities() {
+        return paymentRepository.findAll();
+    }
+
+    @Override
+    public Payment getPaymentEntityById(Long id) {
+        return paymentRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public java.util.List<Payment> findPaymentsByRequestIdEntities(Long requestId) {
+        return paymentRepository.findByRequestId(requestId);
+    }
+
+    @Override
+    public Payment savePaymentEntity(Payment payment) {
+        return paymentRepository.save(payment);
+    }
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<Payment> findByRequestSenderIdEntities(Long senderId) {
+        return paymentRepository.findByRequestSenderId(senderId);
+    }
+
+    @Override
+    public java.math.BigDecimal sumExpectedAmountByRequestId(Long requestId) {
+        java.math.BigDecimal result = paymentRepository.sumExpectedAmountByRequestId(requestId);
+        return result != null ? result : java.math.BigDecimal.ZERO;
+    }
+
+    @Override
+    public java.math.BigDecimal sumPaidAmountByRequestId(Long requestId) {
+        java.math.BigDecimal result = paymentRepository.sumPaidAmountByRequestId(requestId);
+        return result != null ? result : java.math.BigDecimal.ZERO;
+    }
+
+    @Override
+    public Long countByRequestId(Long requestId) {
+        return paymentRepository.countByRequestId(requestId);
+    }
+
+    @Override
+    public Long countPaidByRequestId(Long requestId) {
+        return paymentRepository.countPaidByRequestId(requestId);
+    }
+
+    @Override
+    public Long countUnpaidByRequestId(Long requestId) {
+        return paymentRepository.countUnpaidByRequestId(requestId);
+    }
+
+    @Override
+    public Long countPartiallyPaidByRequestId(Long requestId) {
+        return paymentRepository.countPartiallyPaidByRequestId(requestId);
+    }
+
+    @Override
+    public Long countShippingFeeByRequestId(Long requestId) {
+        return paymentRepository.countShippingFeeByRequestId(requestId);
+    }
+
+    @Override
+    public Long countCodByRequestId(Long requestId) {
+        return paymentRepository.countCodByRequestId(requestId);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Payment> findPaymentsByCustomerIdEntities(Long customerId) {
+        // Lấy payments từ tất cả requests mà customer là sender hoặc receiver
+        java.util.List<vn.DucBackend.Entities.Payment> allPayments = new java.util.ArrayList<>();
+        
+        // Lấy requests theo sender
+        java.util.List<vn.DucBackend.Entities.CustomerRequest> senderRequests = 
+            requestRepository.findBySenderId(customerId);
+        for (vn.DucBackend.Entities.CustomerRequest req : senderRequests) {
+            allPayments.addAll(paymentRepository.findByRequestId(req.getId()));
+        }
+        
+        // Lấy requests theo receiver (chỉ thêm nếu chưa có)
+        java.util.List<vn.DucBackend.Entities.CustomerRequest> receiverRequests = 
+            requestRepository.findByReceiverId(customerId);
+        java.util.Set<Long> existingPaymentIds = allPayments.stream()
+            .map(vn.DucBackend.Entities.Payment::getId)
+            .collect(java.util.stream.Collectors.toSet());
+            
+        for (vn.DucBackend.Entities.CustomerRequest req : receiverRequests) {
+            java.util.List<vn.DucBackend.Entities.Payment> payments = paymentRepository.findByRequestId(req.getId());
+            for (vn.DucBackend.Entities.Payment p : payments) {
+                if (!existingPaymentIds.contains(p.getId())) {
+                    allPayments.add(p);
+                }
+            }
+        }
+        
+        return allPayments;
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Payment> searchByRequestIdAndKeyword(Long requestId, String keyword) {
+        return paymentRepository.searchByRequestIdAndKeyword(requestId, keyword);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndStatusEntities(Long requestId, String status) {
+        vn.DucBackend.Entities.Payment.PaymentStatus paymentStatus = 
+            vn.DucBackend.Entities.Payment.PaymentStatus.valueOf(status);
+        return paymentRepository.findByRequestIdAndStatus(requestId, paymentStatus);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndTypeEntities(Long requestId, String type) {
+        vn.DucBackend.Entities.Payment.PaymentType paymentType = 
+            vn.DucBackend.Entities.Payment.PaymentType.valueOf(type);
+        return paymentRepository.findByRequestIdAndPaymentType(requestId, paymentType);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndScopeEntities(Long requestId, String scope) {
+        vn.DucBackend.Entities.Payment.PaymentScope paymentScope = 
+            vn.DucBackend.Entities.Payment.PaymentScope.valueOf(scope);
+        return paymentRepository.findByRequestIdAndScope(requestId, paymentScope);
+    }
 }

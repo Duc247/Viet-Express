@@ -12,35 +12,27 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
-import vn.DucBackend.Repositories.*;
+import vn.DucBackend.Services.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  * Controller xử lý chi tiết đơn hàng cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerOrderDetailController {
 
+    // Services cho business logic
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
-
+    private CustomerRequestService customerRequestService;
     @Autowired
-    private ParcelRepository parcelRepository;
-
+    private ParcelService parcelService;
     @Autowired
-    private PaymentRepository paymentRepository;
-
+    private PaymentService paymentService;
     @Autowired
-    private TrackingCodeRepository trackingCodeRepository;
-
-    @Autowired
-    private ParcelActionRepository parcelActionRepository;
-
-    @Autowired
-    private TripRepository tripRepository;
+    private TripService tripService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -66,14 +58,12 @@ public class CustomerOrderDetailController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
 
-        if (orderOpt.isEmpty()) {
+        if (order == null) {
             model.addAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Kiểm tra quyền xem - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -87,17 +77,17 @@ public class CustomerOrderDetailController {
         model.addAttribute("order", order);
         model.addAttribute("isSender", isSender);
         model.addAttribute("isReceiver", isReceiver);
-        model.addAttribute("parcels", parcelRepository.findByRequestId(id));
-        model.addAttribute("trackingCodes", trackingCodeRepository.findByRequestId(id));
-        model.addAttribute("parcelActions", parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(id));
-        model.addAttribute("payments", paymentRepository.findByRequestId(id));
-        model.addAttribute("trips", tripRepository.findTripsByRequestId(id));
+        model.addAttribute("parcels", parcelService.findByRequestIdEntities(id));
+        model.addAttribute("trackingCodes", customerRequestService.findTrackingCodesByRequestIdEntities(id));
+        model.addAttribute("parcelActions", customerRequestService.findParcelActionsByRequestIdEntities(id));
+        model.addAttribute("payments", paymentService.findPaymentsByRequestIdEntities(id));
+        model.addAttribute("trips", tripService.findTripsByRequestIdEntities(id));
 
         // Parcel summary statistics
-        Long totalParcels = parcelRepository.countByRequestId(id);
-        Long deliveredParcels = parcelRepository.countDeliveredByRequestId(id);
-        Long inDeliveryParcels = parcelRepository.countInDeliveryByRequestId(id);
-        Long pendingParcels = parcelRepository.countPendingByRequestId(id);
+        Long totalParcels = parcelService.countByRequestId(id);
+        Long deliveredParcels = parcelService.countDeliveredByRequestId(id);
+        Long inDeliveryParcels = parcelService.countInDeliveryByRequestId(id);
+        Long pendingParcels = parcelService.countPendingByRequestId(id);
 
         model.addAttribute("totalParcels", totalParcels != null ? totalParcels : 0L);
         model.addAttribute("deliveredParcels", deliveredParcels != null ? deliveredParcels : 0L);
@@ -105,10 +95,10 @@ public class CustomerOrderDetailController {
         model.addAttribute("pendingParcels", pendingParcels != null ? pendingParcels : 0L);
 
         // Trip summary statistics
-        Long totalTrips = tripRepository.countTripsByRequestId(id);
-        Long completedTrips = tripRepository.countCompletedTripsByRequestId(id);
-        Long inProgressTrips = tripRepository.countInProgressTripsByRequestId(id);
-        Long pendingTrips = tripRepository.countCreatedTripsByRequestId(id);
+        Long totalTrips = tripService.countTripsByRequestId(id);
+        Long completedTrips = tripService.countCompletedTripsByRequestId(id);
+        Long inProgressTrips = tripService.countInProgressTripsByRequestId(id);
+        Long pendingTrips = tripService.countCreatedTripsByRequestId(id);
 
         model.addAttribute("totalTrips", totalTrips != null ? totalTrips : 0L);
         model.addAttribute("completedTrips", completedTrips != null ? completedTrips : 0L);
@@ -122,8 +112,8 @@ public class CustomerOrderDetailController {
         }
         model.addAttribute("completionPercentage", completionPercentage);
 
-        BigDecimal totalExpected = paymentRepository.sumExpectedAmountByRequestId(id);
-        BigDecimal totalPaid = paymentRepository.sumPaidAmountByRequestId(id);
+        BigDecimal totalExpected = paymentService.sumExpectedAmountByRequestId(id);
+        BigDecimal totalPaid = paymentService.sumPaidAmountByRequestId(id);
 
         model.addAttribute("totalExpected", totalExpected != null ? totalExpected : BigDecimal.ZERO);
         model.addAttribute("totalPaid", totalPaid != null ? totalPaid : BigDecimal.ZERO);
@@ -133,12 +123,12 @@ public class CustomerOrderDetailController {
         model.addAttribute("remainingAmount", remaining);
 
         // Payment summary statistics
-        Long totalPayments = paymentRepository.countByRequestId(id);
-        Long paidPayments = paymentRepository.countPaidByRequestId(id);
-        Long unpaidPayments = paymentRepository.countUnpaidByRequestId(id);
-        Long partiallyPaidPayments = paymentRepository.countPartiallyPaidByRequestId(id);
-        Long shippingFeeCount = paymentRepository.countShippingFeeByRequestId(id);
-        Long codCount = paymentRepository.countCodByRequestId(id);
+        Long totalPayments = paymentService.countByRequestId(id);
+        Long paidPayments = paymentService.countPaidByRequestId(id);
+        Long unpaidPayments = paymentService.countUnpaidByRequestId(id);
+        Long partiallyPaidPayments = paymentService.countPartiallyPaidByRequestId(id);
+        Long shippingFeeCount = paymentService.countShippingFeeByRequestId(id);
+        Long codCount = paymentService.countCodByRequestId(id);
 
         model.addAttribute("totalPayments", totalPayments != null ? totalPayments : 0L);
         model.addAttribute("paidPayments", paidPayments != null ? paidPayments : 0L);
@@ -161,13 +151,11 @@ public class CustomerOrderDetailController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
-        if (orderOpt.isEmpty()) {
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
+        if (order == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Chỉ receiver mới được xác nhận
         boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
@@ -184,7 +172,7 @@ public class CustomerOrderDetailController {
 
         // Receiver xác nhận → RECEIVER_CONFIRMED (chờ Manager chốt đơn)
         order.setStatus(CustomerRequest.RequestStatus.RECEIVER_CONFIRMED);
-        customerRequestRepository.save(order);
+        customerRequestService.saveRequestEntity(order);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã xác nhận nhận hàng! Chờ quản lý chốt đơn.");
         return "redirect:/customer/orders/" + id;
@@ -200,13 +188,11 @@ public class CustomerOrderDetailController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
-        if (orderOpt.isEmpty()) {
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
+        if (order == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Chỉ receiver mới được từ chối
         boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
@@ -223,7 +209,7 @@ public class CustomerOrderDetailController {
 
         // Chuyển sang CANCELLED
         order.setStatus(CustomerRequest.RequestStatus.CANCELLED);
-        customerRequestRepository.save(order);
+        customerRequestService.saveRequestEntity(order);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối đơn hàng.");
         return "redirect:/customer/orders";
@@ -248,13 +234,11 @@ public class CustomerOrderDetailController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
-        if (orderOpt.isEmpty()) {
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
+        if (order == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Chỉ sender mới được chỉnh sửa
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -292,13 +276,11 @@ public class CustomerOrderDetailController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
-        if (orderOpt.isEmpty()) {
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
+        if (order == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Chỉ sender mới được chỉnh sửa
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -329,7 +311,7 @@ public class CustomerOrderDetailController {
             order.setDescription(description);
         }
 
-        customerRequestRepository.save(order);
+        customerRequestService.saveRequestEntity(order);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật đơn hàng thành công!");
         return "redirect:/customer/orders/" + id;
@@ -347,13 +329,11 @@ public class CustomerOrderDetailController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
-        if (orderOpt.isEmpty()) {
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
+        if (order == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Chỉ sender mới được hủy
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -371,7 +351,7 @@ public class CustomerOrderDetailController {
         }
 
         order.setStatus(CustomerRequest.RequestStatus.CANCELLED);
-        customerRequestRepository.save(order);
+        customerRequestService.saveRequestEntity(order);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng.");
         return "redirect:/customer/orders";

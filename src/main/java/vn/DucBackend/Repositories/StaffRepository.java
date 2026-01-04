@@ -14,6 +14,8 @@ import java.util.Optional;
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
 
+    List<Staff> findAll();
+
     Optional<Staff> findByUserId(Long userId);
 
     List<Staff> findByIsActiveTrue();

@@ -6,7 +6,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
-import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.PaginationUtil;
 
@@ -22,10 +21,6 @@ public class ManagerShipperController {
     @Autowired
     private ShipperService shipperService;
 
-    // Repositories cho template data
-    @Autowired
-    private ShipperRepository shipperRepository;
-
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
     }
@@ -40,7 +35,7 @@ public class ManagerShipperController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        java.util.List<Shipper> shippers = shipperRepository.findAll();
+        java.util.List<Shipper> shippers = shipperService.getAllShipperEntities();
 
         // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {

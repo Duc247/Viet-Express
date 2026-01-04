@@ -42,8 +42,14 @@
                             <tr th:each="r : ${requests}">
                                 <td class="ps-4"><code class="text-primary fw-bold"
                                         th:text="${r.requestCode}">REQ-XXX</code></td>
-                                <td th:text="${r.sender?.name ?: 'N/A'}">Người gửi</td>
-                                <td th:text="${r.receiver?.name ?: 'N/A'}">Người nhận</td>
+                                <td>
+                                    <span th:text="${r.sender?.fullName ?: r.sender?.name ?: 'N/A'}">Người gửi</span>
+                                    <br><small class="text-muted" th:text="${r.senderLocation?.addressText ?: '-'}">-</small>
+                                </td>
+                                <td>
+                                    <span th:text="${r.receiver?.fullName ?: r.receiver?.name ?: 'N/A'}">Người nhận</span>
+                                    <br><small class="text-muted" th:text="${r.receiverLocation?.addressText ?: '-'}">-</small>
+                                </td>
                                 <td>
                                     <span th:text="${#strings.abbreviate(r.parcelDescription ?: '-', 30)}">Mô tả</span>
                                 </td>

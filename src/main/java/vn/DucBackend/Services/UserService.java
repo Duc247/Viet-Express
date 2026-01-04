@@ -64,4 +64,7 @@ public interface UserService {
 
     /** Repository: userRepository.findById() */
     boolean validatePassword(Long id, String password);
+
+    /** Lấy User entity theo username (cho controllers) */
+    vn.DucBackend.Entities.User getUserEntityByUsername(String username);
 }

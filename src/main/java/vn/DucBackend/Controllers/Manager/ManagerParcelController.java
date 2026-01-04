@@ -7,11 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
-import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.PaginationUtil;
-
-import java.util.Optional;
 
 /**
  * Manager Parcel Controller - Quản lý kiện hàng
@@ -26,12 +23,6 @@ public class ManagerParcelController {
     private ParcelService parcelService;
     @Autowired
     private LocationService locationService;
-
-    // Repositories cho template data
-    @Autowired
-    private ParcelRepository parcelRepository;
-    @Autowired
-    private LocationRepository locationRepository;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -48,7 +39,7 @@ public class ManagerParcelController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        java.util.List<Parcel> parcels = parcelRepository.findAll();
+        java.util.List<Parcel> parcels = parcelService.getAllParcelEntities();
 
         // Lọc theo keyword
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -78,13 +69,13 @@ public class ManagerParcelController {
     public String parcelDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        Optional<Parcel> parcelOpt = parcelRepository.findById(id);
-        if (parcelOpt.isEmpty()) {
+        Parcel parcel = parcelService.getParcelEntityById(id);
+        if (parcel == null) {
             return "redirect:/manager/parcels";
         }
 
-        model.addAttribute("parcel", parcelOpt.get());
-        model.addAttribute("locations", locationRepository.findAll());
+        model.addAttribute("parcel", parcel);
+        model.addAttribute("locations", locationService.getAllLocationEntities());
         return "manager/parcel/detail";
     }
 
@@ -95,19 +86,13 @@ public class ManagerParcelController {
             @RequestParam("newStatus") String newStatus,
             RedirectAttributes redirectAttributes) {
 
-        // Sử dụng Service cho update
-        parcelService.updateParcelStatus(id, newStatus);
+        // Sử dụng Service cho update location và status
+        var result = parcelService.updateParcelLocation(id, locationId, newStatus);
 
-        // Cập nhật location
-        Optional<Parcel> parcelOpt = parcelRepository.findById(id);
-        if (parcelOpt.isEmpty()) {
+        if (result == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy kiện hàng!");
             return "redirect:/manager/parcels";
         }
-
-        Parcel parcel = parcelOpt.get();
-        locationRepository.findById(locationId).ifPresent(parcel::setCurrentLocation);
-        parcelRepository.save(parcel);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật kiện hàng!");
         return "redirect:/manager/parcels/" + id;

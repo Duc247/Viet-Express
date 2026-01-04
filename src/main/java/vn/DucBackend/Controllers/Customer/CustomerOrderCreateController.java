@@ -14,17 +14,14 @@ import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.Entities.Customer;
 import vn.DucBackend.Entities.Location;
-import vn.DucBackend.Repositories.CustomerRepository;
-import vn.DucBackend.Repositories.LocationRepository;
-import vn.DucBackend.Repositories.ServiceTypeRepository;
-import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.LoggingHelper;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  * Controller xử lý tạo đơn hàng mới cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
@@ -34,13 +31,13 @@ public class CustomerOrderCreateController {
     private CustomerRequestService customerRequestService;
 
     @Autowired
-    private LocationRepository locationRepository;
+    private LocationService locationService;
 
     @Autowired
-    private ServiceTypeRepository serviceTypeRepository;
+    private ServiceTypeService serviceTypeService;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private CustomerService customerService;
 
     @Autowired
     private LoggingHelper loggingHelper;
@@ -66,13 +63,14 @@ public class CustomerOrderCreateController {
         }
 
         addCommonAttributes(model, request);
-        model.addAttribute("serviceTypes", serviceTypeRepository.findByIsActiveTrue());
+        model.addAttribute("serviceTypes", serviceTypeService.findActiveEntities());
         model.addAttribute("customerId", customerId);
 
         // Lấy thông tin customer để pre-fill form
-        customerRepository.findById(customerId).ifPresent(customer -> {
+        Customer customer = customerService.getCustomerEntityById(customerId);
+        if (customer != null) {
             model.addAttribute("currentCustomer", customer);
-        });
+        }
 
         return "customer/order/create-order";
     }
@@ -136,26 +134,24 @@ public class CustomerOrderCreateController {
         }
 
         // Tìm sender theo số điện thoại
-        Optional<Customer> senderOpt = customerRepository.findByPhone(senderPhone.trim());
-        if (senderOpt.isEmpty()) {
+        Customer sender = customerService.getCustomerEntityByPhone(senderPhone.trim());
+        if (sender == null) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Không tìm thấy khách hàng với số điện thoại người gửi: " + senderPhone);
             return "redirect:/customer/create-order";
         }
-        Customer sender = senderOpt.get();
 
         // Tìm receiver theo số điện thoại (hoặc dùng sender nếu cùng SĐT)
         Customer receiver;
         if (receiverPhone.trim().equals(senderPhone.trim())) {
             receiver = sender; // Người nhận = người gửi
         } else {
-            Optional<Customer> receiverOpt = customerRepository.findByPhone(receiverPhone.trim());
-            if (receiverOpt.isEmpty()) {
+            receiver = customerService.getCustomerEntityByPhone(receiverPhone.trim());
+            if (receiver == null) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "Không tìm thấy khách hàng với số điện thoại người nhận: " + receiverPhone);
                 return "redirect:/customer/create-order";
             }
-            receiver = receiverOpt.get();
         }
 
         // Validate service type - get from request parameter
@@ -164,14 +160,14 @@ public class CustomerOrderCreateController {
             String serviceTypeStr = request.getParameter("serviceType");
             if (serviceTypeStr != null && !serviceTypeStr.trim().isEmpty()) {
                 // Map old service type codes to IDs
-                serviceTypeId = serviceTypeRepository.findByCode(serviceTypeStr.trim())
+                serviceTypeId = serviceTypeService.findEntityByCode(serviceTypeStr.trim())
                         .map(st -> st.getId())
                         .orElse(null);
             }
         }
 
         if (serviceTypeId == null) {
-            serviceTypeId = serviceTypeRepository.findByIsActiveTrue().stream()
+            serviceTypeId = serviceTypeService.findActiveEntities().stream()
                     .findFirst()
                     .map(st -> st.getId())
                     .orElse(null);
@@ -195,7 +191,7 @@ public class CustomerOrderCreateController {
                     .setName(senderName != null && !senderName.trim().isEmpty() ? senderName.trim() : sender.getName());
             senderLocation.setAddressText(senderAddress.trim());
             senderLocation.setIsActive(true);
-            senderLocation = locationRepository.save(senderLocation);
+            senderLocation = locationService.saveLocationEntity(senderLocation);
 
             // Tạo location cho receiver
             Location receiverLocation = new Location();
@@ -204,7 +200,7 @@ public class CustomerOrderCreateController {
                     receiverName != null && !receiverName.trim().isEmpty() ? receiverName.trim() : receiver.getName());
             receiverLocation.setAddressText(receiverAddress.trim());
             receiverLocation.setIsActive(true);
-            receiverLocation = locationRepository.save(receiverLocation);
+            receiverLocation = locationService.saveLocationEntity(receiverLocation);
 
             // Tạo request DTO
             CustomerRequestDTO requestDTO = new CustomerRequestDTO();
@@ -220,8 +216,9 @@ public class CustomerOrderCreateController {
 
             CustomerRequestDTO createdRequest = customerRequestService.createRequest(requestDTO);
 
-            // Ghi log tạo đơn thành công
-            loggingHelper.logOrderCreated(sender.getId(), createdRequest.getRequestCode(), request);
+            // Ghi log tạo đơn thành công - sử dụng User ID từ Customer
+            Long actorUserId = sender.getUser() != null ? sender.getUser().getId() : null;
+            loggingHelper.logOrderCreated(actorUserId, createdRequest.getRequestCode(), request);
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Tạo đơn hàng thành công! Mã vận đơn: " + createdRequest.getRequestCode());

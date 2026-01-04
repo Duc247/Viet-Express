@@ -84,4 +84,17 @@ public interface LocationService {
 
     /** Repository: routeRepository.findById(), routeRepository.save() */
     void toggleRouteStatus(Long id);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy Location entity theo ID */
+    vn.DucBackend.Entities.Location getLocationEntityById(Long id);
+
+    /** Lấy tất cả Location entities */
+    java.util.List<vn.DucBackend.Entities.Location> getAllLocationEntities();
+
+    /** Lưu Location entity */
+    vn.DucBackend.Entities.Location saveLocationEntity(vn.DucBackend.Entities.Location location);
 }

@@ -137,4 +137,13 @@ public class VehicleServiceImpl implements VehicleService {
         dto.setUpdatedAt(vehicle.getUpdatedAt());
         return dto;
     }
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<Vehicle> getAllVehicleEntities() {
+        return vehicleRepository.findAll();
+    }
 }

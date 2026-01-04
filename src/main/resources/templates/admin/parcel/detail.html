@@ -46,14 +46,16 @@
                             <tr>
                                 <th>Trạng thái:</th>
                                 <td>
-                                    <span class="badge bg-secondary" th:if="${parcel.status.name() == 'CREATED'}">Mới
+                                    <span class="badge bg-secondary" th:if="${parcel.status == 'CREATED'}">Mới
                                         tạo</span>
-                                    <span class="badge bg-info" th:if="${parcel.status.name() == 'IN_WAREHOUSE'}">Trong
+                                    <span class="badge bg-info" th:if="${parcel.status == 'IN_WAREHOUSE'}">Trong
                                         kho</span>
-                                    <span class="badge bg-primary" th:if="${parcel.status.name() == 'IN_TRANSIT'}">Đang
+                                    <span class="badge bg-primary" th:if="${parcel.status == 'IN_TRANSIT'}">Đang
                                         vận chuyển</span>
-                                    <span class="badge bg-success" th:if="${parcel.status.name() == 'DELIVERED'}">Đã
+                                    <span class="badge bg-success" th:if="${parcel.status == 'DELIVERED'}">Đã
                                         giao</span>
+                                    <span class="badge bg-warning" th:if="${parcel.status == 'PICKED_UP'}">Đã
+                                        lấy</span>
                                 </td>
                             </tr>
                         </table>
@@ -64,17 +66,17 @@
                 <div class="card mb-4">
                     <div class="card-header"><i class="fas fa-map-marker-alt me-2"></i>Vị trí hiện tại</div>
                     <div class="card-body">
-                        <p th:if="${parcel.currentLocation != null}">
-                            <strong th:text="${parcel.currentLocation.name}"></strong><br>
-                            <small class="text-muted" th:text="${parcel.currentLocation.addressText}"></small>
+                        <p th:if="${parcel.currentLocationName != null}">
+                            <strong th:text="${parcel.currentLocationName}"></strong>
                         </p>
-                        <p th:unless="${parcel.currentLocation != null}" class="text-muted">Chưa xác định</p>
+                        <p th:unless="${parcel.currentLocationName != null}" class="text-muted">Chưa xác định</p>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-header"><i class="fas fa-file-invoice me-2"></i>Đơn hàng</div>
                     <div class="card-body">
-                        <p><strong>Mã đơn:</strong> <code th:text="${parcel.request.requestCode}"></code></p>
+                        <p><strong>Mã đơn:</strong> <code th:text="${parcel.requestCode ?: '-'}"></code></p>
+                        <p th:if="${parcel.requestId != null}"><a th:href="@{/admin/request/{id}(id=${parcel.requestId})}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>Xem đơn hàng</a></p>
                     </div>
                 </div>
             </div>

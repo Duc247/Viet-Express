@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.DucBackend.Entities.TrackingCode;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,7 +14,10 @@ public interface TrackingCodeRepository extends JpaRepository<TrackingCode, Long
 
     Optional<TrackingCode> findByCode(String code);
 
-    Optional<TrackingCode> findByRequestId(Long requestId);
+    Optional<TrackingCode> findFirstByRequestId(Long requestId);
+
+    @Query("SELECT t FROM TrackingCode t WHERE t.request.id = :requestId")
+    List<TrackingCode> findAllByRequestId(@Param("requestId") Long requestId);
 
     @Query("SELECT t FROM TrackingCode t WHERE t.code LIKE %:keyword%")
     java.util.List<TrackingCode> searchByCode(@Param("keyword") String keyword);

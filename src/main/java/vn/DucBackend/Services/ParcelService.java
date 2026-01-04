@@ -76,4 +76,70 @@ public interface ParcelService {
 
     /** Tạo mã kiện hàng tự động */
     String generateParcelCode(Long requestId);
+
+    // ==========================================
+    // Methods cho Staff Controllers
+    // ==========================================
+
+    /** Đếm số parcels theo status */
+    Long countParcelsByStatus(String status);
+
+    /** Lấy parcels theo location và status */
+    List<ParcelDTO> findByLocationIdAndStatus(Long locationId, String status);
+
+    /** Lấy tất cả parcels ngoại trừ DELIVERED */
+    List<ParcelDTO> findAllExceptDelivered();
+
+    /** Nhập kho - Cập nhật status và location */
+    ParcelDTO checkinParcel(Long parcelId, Long staffId, String note);
+
+    /** Xuất kho - Cập nhật status */
+    ParcelDTO checkoutParcel(Long parcelId, Long staffId, String note);
+
+    /** Lấy Parcel entity theo ID */
+    vn.DucBackend.Entities.Parcel getParcelEntityById(Long id);
+
+    /** Tạo parcel với location của staff */
+    ParcelDTO createParcelWithLocation(ParcelDTO dto, Long locationId);
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    /** Lấy tất cả Parcel entities */
+    java.util.List<vn.DucBackend.Entities.Parcel> getAllParcelEntities();
+
+    /** Lưu Parcel entity */
+    vn.DucBackend.Entities.Parcel saveParcelEntity(vn.DucBackend.Entities.Parcel parcel);
+
+    /** Cập nhật location và status cho parcel */
+    ParcelDTO updateParcelLocation(Long parcelId, Long locationId, String newStatus);
+
+    /** Tìm parcels theo request ID - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Parcel> findByRequestIdEntities(Long requestId);
+
+    /** Tìm parcels theo trip ID - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Parcel> findByTripIdEntities(Long tripId);
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    /** Đếm parcels theo request ID */
+    Long countByRequestId(Long requestId);
+
+    /** Đếm parcels đã giao theo request ID */
+    Long countDeliveredByRequestId(Long requestId);
+
+    /** Đếm parcels đang giao theo request ID */
+    Long countInDeliveryByRequestId(Long requestId);
+
+    /** Đếm parcels chờ xử lý theo request ID */
+    Long countPendingByRequestId(Long requestId);
+
+    /** Tìm parcels theo request và keyword */
+    java.util.List<vn.DucBackend.Entities.Parcel> searchByRequestIdAndKeyword(Long requestId, String keyword);
+
+    /** Tìm parcels theo request và status - trả về entities */
+    java.util.List<vn.DucBackend.Entities.Parcel> findByRequestIdAndStatusEntities(Long requestId, String status);
 }

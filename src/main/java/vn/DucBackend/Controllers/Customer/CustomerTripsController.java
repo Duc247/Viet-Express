@@ -12,28 +12,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Entities.Trip;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.ParcelRepository;
-import vn.DucBackend.Repositories.TripRepository;
+import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Services.ParcelService;
+import vn.DucBackend.Services.TripService;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controller xử lý chi tiết chuyến vận chuyển cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerTripsController {
 
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private CustomerRequestService customerRequestService;
 
     @Autowired
-    private TripRepository tripRepository;
+    private TripService tripService;
 
     @Autowired
-    private ParcelRepository parcelRepository;
+    private ParcelService parcelService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -66,14 +66,12 @@ public class CustomerTripsController {
             return "redirect:/auth/login";
         }
 
-        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        CustomerRequest order = customerRequestService.getRequestEntityById(id);
 
-        if (orderOpt.isEmpty()) {
+        if (order == null) {
             model.addAttribute("errorMessage", "Không tìm thấy đơn hàng!");
             return "redirect:/customer/orders";
         }
-
-        CustomerRequest order = orderOpt.get();
 
         // Kiểm tra quyền xem - phải là sender hoặc receiver
         boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
@@ -91,38 +89,36 @@ public class CustomerTripsController {
 
         if (search != null && !search.trim().isEmpty()) {
             // Search by keyword (description, note, route)
-            trips = tripRepository.searchTripsByRequestIdAndKeyword(id, search.trim());
+            trips = tripService.searchTripsByRequestIdAndKeyword(id, search.trim());
             model.addAttribute("search", search);
         } else if (status != null && !status.isEmpty()) {
             // Filter by status
             try {
-                Trip.TripStatus tripStatus = Trip.TripStatus.valueOf(status);
-                trips = tripRepository.findTripsByRequestIdAndStatus(id, tripStatus);
+                trips = tripService.findTripsByRequestIdAndStatusEntities(id, status);
             } catch (IllegalArgumentException e) {
-                trips = tripRepository.findTripsByRequestId(id);
+                trips = tripService.findTripsByRequestIdEntities(id);
             }
             model.addAttribute("status", status);
         } else if (type != null && !type.isEmpty()) {
             // Filter by trip type
             try {
-                Trip.TripType tripType = Trip.TripType.valueOf(type);
-                trips = tripRepository.findTripsByRequestIdAndType(id, tripType);
+                trips = tripService.findTripsByRequestIdAndTypeEntities(id, type);
             } catch (IllegalArgumentException e) {
-                trips = tripRepository.findTripsByRequestId(id);
+                trips = tripService.findTripsByRequestIdEntities(id);
             }
             model.addAttribute("type", type);
         } else {
             // Get all trips
-            trips = tripRepository.findTripsByRequestId(id);
+            trips = tripService.findTripsByRequestIdEntities(id);
         }
 
         model.addAttribute("trips", trips);
 
         // Summary statistics
-        Long totalTrips = tripRepository.countTripsByRequestId(id);
-        Long completedTrips = tripRepository.countCompletedTripsByRequestId(id);
-        Long inProgressTrips = tripRepository.countInProgressTripsByRequestId(id);
-        Long pendingTrips = tripRepository.countCreatedTripsByRequestId(id);
+        Long totalTrips = tripService.countTripsByRequestId(id);
+        Long completedTrips = tripService.countCompletedTripsByRequestId(id);
+        Long inProgressTrips = tripService.countInProgressTripsByRequestId(id);
+        Long pendingTrips = tripService.countCreatedTripsByRequestId(id);
 
         model.addAttribute("totalTrips", totalTrips != null ? totalTrips : 0L);
         model.addAttribute("completedTrips", completedTrips != null ? completedTrips : 0L);
@@ -130,8 +126,8 @@ public class CustomerTripsController {
         model.addAttribute("pendingTrips", pendingTrips != null ? pendingTrips : 0L);
 
         // Calculate completion percentage based on delivered parcels
-        Long totalParcels = parcelRepository.countByRequestId(id);
-        Long deliveredParcels = parcelRepository.countDeliveredByRequestId(id);
+        Long totalParcels = parcelService.countByRequestId(id);
+        Long deliveredParcels = parcelService.countDeliveredByRequestId(id);
         int completionPercentage = 0;
         if (totalParcels != null && totalParcels > 0) {
             completionPercentage = (int) ((deliveredParcels * 100) / totalParcels);

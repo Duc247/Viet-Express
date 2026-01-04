@@ -135,16 +135,16 @@
                                 </td>
                                 <td th:text="${p.description ?: '-'}">Mô tả</td>
                                 <td>
-                                    <span th:text="${p.request?.sender?.name ?: '-'}">Người gửi</span>
+                                    <span th:text="${p.request?.sender?.fullName ?: p.request?.sender?.name ?: '-'}">Người gửi</span>
                                     <br>
                                     <small class="text-muted"
-                                        th:text="${p.request?.sender?.phone ?: '-'}">0901234567</small>
+                                        th:text="${p.request?.senderLocation?.addressText ?: '-'}">-</small>
                                 </td>
                                 <td>
-                                    <span th:text="${p.request?.receiver?.name ?: '-'}">Người nhận</span>
+                                    <span th:text="${p.request?.receiver?.fullName ?: p.request?.receiver?.name ?: '-'}">Người nhận</span>
                                     <br>
                                     <small class="text-muted"
-                                        th:text="${p.request?.receiver?.phone ?: '-'}">0901234567</small>
+                                        th:text="${p.request?.receiverLocation?.addressText ?: '-'}">-</small>
                                 </td>
                                 <td>
                                     <span th:if="${p.lengthCm != null || p.widthCm != null || p.heightCm != null}"

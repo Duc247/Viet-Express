@@ -109,10 +109,32 @@ public class TripServiceImpl implements TripService {
     @Override
     public TripDTO updateTrip(Long id, TripDTO dto) {
         Trip trip = tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
-        if (dto.getNote() != null)
-            trip.setNote(dto.getNote());
-        if (dto.getCodAmount() != null)
+
+        if (dto.getTripType() != null) {
+            trip.setTripType(Trip.TripType.valueOf(dto.getTripType()));
+        }
+        if (dto.getStartLocationId() != null) {
+            trip.setStartLocation(locationRepository.findById(dto.getStartLocationId())
+                    .orElseThrow(() -> new RuntimeException("Start location not found")));
+        }
+        if (dto.getEndLocationId() != null) {
+            trip.setEndLocation(locationRepository.findById(dto.getEndLocationId())
+                    .orElseThrow(() -> new RuntimeException("End location not found")));
+        }
+
+        // allow unassign
+        trip.setShipper(dto.getShipperId() != null ? shipperRepository.findById(dto.getShipperId()).orElse(null) : null);
+        trip.setVehicle(dto.getVehicleId() != null ? vehicleRepository.findById(dto.getVehicleId()).orElse(null) : null);
+
+        if (dto.getStatus() != null) {
+            trip.setStatus(Trip.TripStatus.valueOf(dto.getStatus()));
+        }
+        if (dto.getCodAmount() != null) {
             trip.setCodAmount(dto.getCodAmount());
+        }
+        if (dto.getNote() != null) {
+            trip.setNote(dto.getNote());
+        }
         return toDTO(tripRepository.save(trip));
     }
 
@@ -178,12 +200,20 @@ public class TripServiceImpl implements TripService {
             dto.setVehicleId(trip.getVehicle().getId());
             dto.setVehicleLicensePlate(trip.getVehicle().getLicensePlate());
         }
-        dto.setTripType(trip.getTripType().name());
-        dto.setStartLocationId(trip.getStartLocation().getId());
-        dto.setStartLocationName(trip.getStartLocation().getName());
-        dto.setEndLocationId(trip.getEndLocation().getId());
-        dto.setEndLocationName(trip.getEndLocation().getName());
-        dto.setStatus(trip.getStatus().name());
+        if (trip.getTripType() != null) {
+            dto.setTripType(trip.getTripType().name());
+        }
+        if (trip.getStartLocation() != null) {
+            dto.setStartLocationId(trip.getStartLocation().getId());
+            dto.setStartLocationName(trip.getStartLocation().getName());
+        }
+        if (trip.getEndLocation() != null) {
+            dto.setEndLocationId(trip.getEndLocation().getId());
+            dto.setEndLocationName(trip.getEndLocation().getName());
+        }
+        if (trip.getStatus() != null) {
+            dto.setStatus(trip.getStatus().name());
+        }
         dto.setStartedAt(trip.getStartedAt());
         dto.setEndedAt(trip.getEndedAt());
         dto.setCodAmount(trip.getCodAmount());
@@ -191,5 +221,70 @@ public class TripServiceImpl implements TripService {
         dto.setCreatedAt(trip.getCreatedAt());
         dto.setUpdatedAt(trip.getUpdatedAt());
         return dto;
+    }
+
+    // ==========================================
+    // Methods cho Manager Controllers
+    // ==========================================
+
+    @Override
+    public java.util.List<Trip> getAllTripEntities() {
+        return tripRepository.findAll();
+    }
+
+    @Override
+    public Trip getTripEntityById(Long id) {
+        return tripRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public java.util.List<Trip> findTripsByRequestIdEntities(Long requestId) {
+        return tripRepository.findTripsByRequestId(requestId);
+    }
+
+    @Override
+    public Trip saveTripEntity(Trip trip) {
+        return tripRepository.save(trip);
+    }
+
+    // ==========================================
+    // Methods cho Customer Controllers
+    // ==========================================
+
+    @Override
+    public Long countTripsByRequestId(Long requestId) {
+        return tripRepository.countTripsByRequestId(requestId);
+    }
+
+    @Override
+    public Long countCompletedTripsByRequestId(Long requestId) {
+        return tripRepository.countCompletedTripsByRequestId(requestId);
+    }
+
+    @Override
+    public Long countInProgressTripsByRequestId(Long requestId) {
+        return tripRepository.countInProgressTripsByRequestId(requestId);
+    }
+
+    @Override
+    public Long countCreatedTripsByRequestId(Long requestId) {
+        return tripRepository.countCreatedTripsByRequestId(requestId);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Trip> searchTripsByRequestIdAndKeyword(Long requestId, String keyword) {
+        return tripRepository.searchTripsByRequestIdAndKeyword(requestId, keyword);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Trip> findTripsByRequestIdAndStatusEntities(Long requestId, String status) {
+        vn.DucBackend.Entities.Trip.TripStatus tripStatus = vn.DucBackend.Entities.Trip.TripStatus.valueOf(status);
+        return tripRepository.findTripsByRequestIdAndStatus(requestId, tripStatus);
+    }
+
+    @Override
+    public java.util.List<vn.DucBackend.Entities.Trip> findTripsByRequestIdAndTypeEntities(Long requestId, String type) {
+        vn.DucBackend.Entities.Trip.TripType tripType = vn.DucBackend.Entities.Trip.TripType.valueOf(type);
+        return tripRepository.findTripsByRequestIdAndType(requestId, tripType);
     }
 }

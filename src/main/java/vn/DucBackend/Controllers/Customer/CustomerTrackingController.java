@@ -11,36 +11,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.CustomerRequest;
-import vn.DucBackend.Repositories.CustomerRequestRepository;
-import vn.DucBackend.Repositories.ParcelActionRepository;
-import vn.DucBackend.Repositories.ParcelRepository;
-import vn.DucBackend.Repositories.TripRepository;
-import vn.DucBackend.Repositories.TrackingCodeRepository;
-import vn.DucBackend.Entities.TrackingCode;
-
-import java.util.Optional;
+import vn.DucBackend.Services.*;
 
 /**
  * Controller xử lý tracking (theo dõi đơn hàng) cho Customer
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerTrackingController {
 
     @Autowired
-    private CustomerRequestRepository customerRequestRepository;
+    private CustomerRequestService customerRequestService;
 
     @Autowired
-    private TripRepository tripRepository;
+    private TripService tripService;
 
     @Autowired
-    private ParcelRepository parcelRepository;
-
-    @Autowired
-    private ParcelActionRepository parcelActionRepository;
-
-    @Autowired
-    private TrackingCodeRepository trackingCodeRepository;
+    private ParcelService parcelService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -75,26 +63,18 @@ public class CustomerTrackingController {
         // Nếu có code, tìm kiếm (có thể là tracking code TRK-xxx hoặc request code REQ-xxx)
         if (requestCode != null && !requestCode.trim().isEmpty()) {
             String code = requestCode.trim();
-            Optional<CustomerRequest> requestOpt = Optional.empty();
+            CustomerRequest order = null;
             
             // Kiểm tra xem là tracking code (TRK-xxx) hay request code (REQ-xxx)
             if (code.startsWith("TRK-")) {
                 // Tìm theo tracking code
-                Optional<TrackingCode> trackingCodeOpt = trackingCodeRepository.findByCode(code);
-                if (trackingCodeOpt.isPresent()) {
-                    TrackingCode trackingCode = trackingCodeOpt.get();
-                    // Pre-fetch request để tránh lazy loading
-                    trackingCode.getRequest().getId();
-                    requestOpt = Optional.of(trackingCode.getRequest());
-                }
+                order = customerRequestService.findByTrackingCodeEntity(code);
             } else {
                 // Tìm theo request code (REQ-xxx)
-                requestOpt = customerRequestRepository.findByRequestCode(code);
+                order = customerRequestService.findByRequestCodeEntity(code);
             }
             
-            if (requestOpt.isPresent()) {
-                CustomerRequest order = requestOpt.get();
-                
+            if (order != null) {
                 // Kiểm tra quyền xem - phải là sender hoặc receiver
                 boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
                 boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
@@ -125,13 +105,13 @@ public class CustomerTrackingController {
                     model.addAttribute("isReceiver", isReceiver);
                     
                     // Lấy các trips
-                    model.addAttribute("trips", tripRepository.findTripsByRequestId(order.getId()));
+                    model.addAttribute("trips", tripService.findTripsByRequestIdEntities(order.getId()));
                     
                     // Lấy các parcels
-                    model.addAttribute("parcels", parcelRepository.findByRequestId(order.getId()));
+                    model.addAttribute("parcels", parcelService.findByRequestIdEntities(order.getId()));
                     
                     // Lấy lịch sử hành động (parcel actions) - fetch relationships
-                    var actions = parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(order.getId());
+                    var actions = customerRequestService.findParcelActionsByRequestIdEntities(order.getId());
                     // Pre-fetch các relationships của parcel actions
                     actions.forEach(action -> {
                         if (action.getActionType() != null) action.getActionType().getName();
@@ -153,4 +133,3 @@ public class CustomerTrackingController {
         return "customer/tracking";
     }
 }
-

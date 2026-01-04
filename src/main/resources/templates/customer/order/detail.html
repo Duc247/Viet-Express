@@ -33,7 +33,7 @@
                 </h6>
             </div>
             <div class="card-body">
-                <p class="mb-3">Người gửi <strong th:text="${order.sender?.name ?: 'N/A'}"></strong> đã tạo đơn hàng này
+                <p class="mb-3">Người gửi <strong th:text="${order.sender?.fullName ?: order.sender?.name ?: 'N/A'}"></strong> đã tạo đơn hàng này
                     gửi đến bạn. Vui lòng xác nhận hoặc từ chối nhận hàng.</p>
                 <div class="d-flex gap-2">
                     <form th:action="@{/customer/orders/{id}/confirm(id=${order.id})}" method="post" class="d-inline">
@@ -145,16 +145,14 @@
                         <div class="row">
                             <div class="col-md-6 border-end">
                                 <h6 class="text-muted small text-uppercase mb-2">Người gửi</h6>
-                                <p class="mb-1"><strong th:text="${order.sender?.name ?: '-'}">Nguyễn Văn A</strong></p>
-                                <p class="mb-1 text-muted" th:text="${order.senderLocation?.addressText ?: '-'}">123
-                                    Đường ABC</p>
+                                <p class="mb-1"><strong th:text="${order.sender?.fullName ?: order.sender?.name ?: '-'}">Nguyễn Văn A</strong></p>
+                                <p class="mb-1 text-muted" th:text="${order.senderLocation?.addressText ?: '-'}">-</p>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="text-muted small text-uppercase mb-2">Người nhận</h6>
-                                <p class="mb-1"><strong th:text="${order.receiverLocation?.name ?: '-'}">Trần Văn
+                                <p class="mb-1"><strong th:text="${order.receiver?.fullName ?: order.receiver?.name ?: '-'}">Trần Văn
                                         B</strong></p>
-                                <p class="mb-1 text-muted" th:text="${order.receiverLocation?.addressText ?: '-'}">456
-                                    Đường XYZ</p>
+                                <p class="mb-1 text-muted" th:text="${order.receiverLocation?.addressText ?: '-'}">-</p>
                             </div>
                         </div>
                     </div>
