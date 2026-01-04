@@ -1,5 +1,7 @@
 package vn.DucBackend.Controllers.Admin;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +23,8 @@ import vn.DucBackend.Services.*;
 @Controller
 @RequestMapping("/admin")
 public class AdminMarketingController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminMarketingController.class);
 
     @Autowired
     private CaseStudyService caseStudyService;
@@ -88,17 +92,25 @@ public class AdminMarketingController {
     @PostMapping("/casestudy/save")
     public String saveCaseStudy(@ModelAttribute CaseStudyDTO caseStudy,
             RedirectAttributes redirectAttributes) {
+        logger.info("=== SAVE CASESTUDY REQUEST ===");
+        logger.info("ID: {}", caseStudy.getId());
+        logger.info("Title: {}", caseStudy.getTitle());
+        logger.info("Slug: {}", caseStudy.getSlug());
+        logger.info("RequestId: {}", caseStudy.getRequestId());
         try {
             if (caseStudy.getId() != null && caseStudy.getId() > 0) {
                 // Update
+                logger.info("Updating CaseStudy ID: {}", caseStudy.getId());
                 caseStudyService.updateCaseStudy(caseStudy.getId(), caseStudy);
                 redirectAttributes.addFlashAttribute("success", "Đã cập nhật Case Study thành công!");
             } else {
                 // Create
+                logger.info("Creating new CaseStudy");
                 caseStudyService.createCaseStudy(caseStudy);
                 redirectAttributes.addFlashAttribute("success", "Đã tạo Case Study mới thành công!");
             }
         } catch (Exception e) {
+            logger.error("Error saving CaseStudy: ", e);
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/casestudy";

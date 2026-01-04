@@ -4,9 +4,6 @@
 
 <head>
     <title>Đăng nhập - Logistics</title>
-<<<<<<< Updated upstream
-    <style>
-=======
     <script>
         // Scroll về đầu trang ngay khi script chạy (trước khi CSS load)
         if (typeof window !== 'undefined') {
@@ -20,7 +17,6 @@
         html, body {
             scroll-behavior: auto !important;
         }
->>>>>>> Stashed changes
         .auth-page {
             min-height: calc(100vh - 200px);
             display: flex;
@@ -75,12 +71,9 @@
         .input-group-password {
             position: relative;
         }
-<<<<<<< Updated upstream
-=======
         .input-group-password .form-floating {
             margin-bottom: 0;
         }
->>>>>>> Stashed changes
         .input-group-password .toggle-password {
             position: absolute;
             right: 15px;
@@ -91,13 +84,10 @@
             color: #64748b;
             cursor: pointer;
             z-index: 10;
-<<<<<<< Updated upstream
-=======
             padding: 0.5rem;
         }
         .input-group-password .toggle-password:hover {
             color: #667eea;
->>>>>>> Stashed changes
         }
         .auth-footer {
             background: #f8fafc;
@@ -138,11 +128,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
 
-<<<<<<< Updated upstream
-                                <form th:action="@{/auth/login}" method="post">
-=======
                                 <form th:action="@{/auth/login}" method="post" id="loginForm">
->>>>>>> Stashed changes
                                     <div class="form-floating mb-3">
                                         <input type="text" name="username" id="username" class="form-control" 
                                                placeholder="Email hoặc tên đăng nhập" required autofocus>
@@ -155,11 +141,7 @@
                                                    placeholder="Mật khẩu" required>
                                             <label for="passwordInput"><i class="fas fa-lock me-2"></i>Mật khẩu</label>
                                         </div>
-<<<<<<< Updated upstream
-                                        <button type="button" class="toggle-password" id="togglePassword">
-=======
                                         <button type="button" class="toggle-password" id="togglePassword" aria-label="Hiện/ẩn mật khẩu">
->>>>>>> Stashed changes
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -193,20 +175,6 @@
     
     <th:block layout:fragment="scripts">
     <script>
-<<<<<<< Updated upstream
-    document.addEventListener('DOMContentLoaded', function() {
-        const passwordInput = document.getElementById('passwordInput');
-        const toggleBtn = document.getElementById('togglePassword');
-        
-        if (toggleBtn && passwordInput) {
-            toggleBtn.addEventListener('click', function() {
-                const type = passwordInput.type === 'password' ? 'text' : 'password';
-                passwordInput.type = type;
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-        }
-=======
     // Scroll về đầu trang ngay lập tức khi trang load (trước khi DOM ready)
     window.scrollTo(0, 0);
     if (window.history && window.history.scrollRestoration) {
@@ -254,7 +222,6 @@
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
->>>>>>> Stashed changes
     });
     </script>
     </th:block>

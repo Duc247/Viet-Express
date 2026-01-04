@@ -56,19 +56,12 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Chi nhánh làm
                                 việc</label>
-<<<<<<< Updated upstream
-                            <select name="locationId" class="form-select">
-                                <option value="">-- Chọn chi nhánh --</option>
-                                <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"
-                                    th:selected="${staff?.locationId == loc.id}"></option>
-=======
                             <select name="locationId" class="form-select" required>
                                 <option value="">-- Chọn chi nhánh --</option>
                                 <option th:each="loc : ${locations}" 
                                         th:value="${loc.id}" 
                                         th:text="${loc.name}"
                                         th:selected="${staff?.locationId != null && staff.locationId.equals(loc.id)}"></option>
->>>>>>> Stashed changes
                             </select>
                             <!-- Debug: Show locations count -->
                             <small class="text-muted" th:if="${locations != null}">

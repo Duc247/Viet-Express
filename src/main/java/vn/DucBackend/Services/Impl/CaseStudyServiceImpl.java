@@ -73,7 +73,12 @@ public class CaseStudyServiceImpl implements CaseStudyService {
             }
         }
         cs.setTitle(dto.getTitle());
-        cs.setSlug(dto.getSlug() != null ? dto.getSlug() : generateSlug(dto.getTitle()));
+        // Generate slug if empty or null
+        String slug = dto.getSlug();
+        if (slug == null || slug.trim().isEmpty()) {
+            slug = generateSlug(dto.getTitle());
+        }
+        cs.setSlug(slug);
         cs.setClientNameDisplay(dto.getClientNameDisplay());
         cs.setChallenge(dto.getChallenge());
         cs.setSolution(dto.getSolution());
@@ -90,8 +95,12 @@ public class CaseStudyServiceImpl implements CaseStudyService {
         CaseStudy cs = caseStudyRepository.findById(id).orElseThrow(() -> new RuntimeException("CaseStudy not found"));
         if (dto.getTitle() != null)
             cs.setTitle(dto.getTitle());
-        if (dto.getSlug() != null)
+        // Update slug only if provided and not empty
+        if (dto.getSlug() != null && !dto.getSlug().trim().isEmpty()) {
             cs.setSlug(dto.getSlug());
+        } else if (dto.getTitle() != null && (cs.getSlug() == null || cs.getSlug().isEmpty())) {
+            cs.setSlug(generateSlug(dto.getTitle()));
+        }
         if (dto.getClientNameDisplay() != null)
             cs.setClientNameDisplay(dto.getClientNameDisplay());
         if (dto.getChallenge() != null)
@@ -104,6 +113,17 @@ public class CaseStudyServiceImpl implements CaseStudyService {
             cs.setThumbnailUrl(dto.getThumbnailUrl());
         if (dto.getImageGallery() != null)
             cs.setImageGallery(dto.getImageGallery());
+        // Update featured and published flags
+        cs.setIsFeatured(dto.getIsFeatured() != null ? dto.getIsFeatured() : false);
+        cs.setIsPublished(dto.getIsPublished() != null ? dto.getIsPublished() : false);
+        // Update request if changed
+        if (dto.getRequestId() != null) {
+            var request = requestRepository.findById(dto.getRequestId()).orElse(null);
+            cs.setRequest(request);
+            if (request != null && request.getServiceType() != null) {
+                cs.setServiceType(request.getServiceType());
+            }
+        }
         return toDTO(caseStudyRepository.save(cs));
     }
 

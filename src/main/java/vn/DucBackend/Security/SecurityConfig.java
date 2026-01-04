@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -128,8 +127,8 @@ public class SecurityConfig {
         public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
                 http
                                 // CSRF protection - enabled cho forms
+                                // Sử dụng default session-based CSRF để Thymeleaf tự động thêm token
                                 .csrf(csrf -> csrf
-                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                                 // Disable CSRF cho H2 console (dev only)
                                                 .ignoringRequestMatchers("/h2-console/**"))
 

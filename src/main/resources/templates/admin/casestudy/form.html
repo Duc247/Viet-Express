@@ -19,7 +19,7 @@
         <div class="card">
             <div class="card-body">
                 <form th:action="@{/admin/casestudy/save}" method="post" th:object="${caseStudy}">
-                    <input type="hidden" th:field="*{id}" th:if="${caseStudy != null && caseStudy.id != null}">
+                    <input type="hidden" th:field="*{id}">
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -28,8 +28,8 @@
                                 placeholder="Dự án vận chuyển thành công...">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Slug (URL) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" th:field="*{slug}" required
+                            <label class="form-label">Slug (URL) <span class="text-muted">(tự tạo nếu để trống)</span></label>
+                            <input type="text" class="form-control" th:field="*{slug}"
                                 placeholder="du-an-van-chuyen">
                         </div>
                     </div>
