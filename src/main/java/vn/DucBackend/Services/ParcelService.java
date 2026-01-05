@@ -142,4 +142,17 @@ public interface ParcelService {
 
     /** Tìm parcels theo request và status - trả về entities */
     java.util.List<vn.DucBackend.Entities.Parcel> findByRequestIdAndStatusEntities(Long requestId, String status);
+
+    // ==========================================
+    // Bulk Parcel Creation
+    // ==========================================
+
+    /**
+     * Tạo nhiều kiện hàng giống nhau
+     * Description sẽ được thêm số thứ tự: "#1 - Mô tả", "#2 - Mô tả"...
+     */
+    java.util.List<ParcelDTO> createBulkParcels(Long requestId, String description,
+            java.math.BigDecimal codAmount, java.math.BigDecimal weightKg,
+            java.math.BigDecimal lengthCm, java.math.BigDecimal widthCm, java.math.BigDecimal heightCm,
+            Integer quantity, Long locationId);
 }

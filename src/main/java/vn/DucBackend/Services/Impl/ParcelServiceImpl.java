@@ -9,6 +9,7 @@ import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Entities.Location;
 import vn.DucBackend.Entities.ActionType;
 import vn.DucBackend.Entities.ParcelAction;
+import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Repositories.CustomerRequestRepository;
 import vn.DucBackend.Repositories.LocationRepository;
 import vn.DucBackend.Repositories.ParcelRepository;
@@ -197,6 +198,30 @@ public class ParcelServiceImpl implements ParcelService {
         dto.setStatus(parcel.getStatus().name());
         dto.setCreatedAt(parcel.getCreatedAt());
         dto.setUpdatedAt(parcel.getUpdatedAt());
+
+        // Sender/Receiver info from CustomerRequest
+        CustomerRequest request = parcel.getRequest();
+        if (request != null) {
+            if (request.getSender() != null) {
+                dto.setSenderName(request.getSender().getFullName() != null
+                        ? request.getSender().getFullName()
+                        : request.getSender().getName());
+                dto.setSenderPhone(request.getSender().getPhone());
+            }
+            if (request.getSenderLocation() != null) {
+                dto.setSenderAddress(request.getSenderLocation().getAddressText());
+            }
+            if (request.getReceiver() != null) {
+                dto.setReceiverName(request.getReceiver().getFullName() != null
+                        ? request.getReceiver().getFullName()
+                        : request.getReceiver().getName());
+                dto.setReceiverPhone(request.getReceiver().getPhone());
+            }
+            if (request.getReceiverLocation() != null) {
+                dto.setReceiverAddress(request.getReceiverLocation().getAddressText());
+            }
+        }
+
         return dto;
     }
 
@@ -275,7 +300,8 @@ public class ParcelServiceImpl implements ParcelService {
         Parcel parcel = new Parcel();
         parcel.setRequest(requestRepository.findById(dto.getRequestId())
                 .orElseThrow(() -> new RuntimeException("Request not found")));
-        parcel.setParcelCode(dto.getParcelCode() != null ? dto.getParcelCode() : generateParcelCode(dto.getRequestId()));
+        parcel.setParcelCode(
+                dto.getParcelCode() != null ? dto.getParcelCode() : generateParcelCode(dto.getRequestId()));
         parcel.setDescription(dto.getDescription());
         parcel.setCodAmount(dto.getCodAmount());
         parcel.setWeightKg(dto.getWeightKg());
@@ -404,5 +430,63 @@ public class ParcelServiceImpl implements ParcelService {
     public java.util.List<Parcel> findByRequestIdAndStatusEntities(Long requestId, String status) {
         Parcel.ParcelStatus parcelStatus = Parcel.ParcelStatus.valueOf(status);
         return parcelRepository.findByRequestIdAndStatus(requestId, parcelStatus);
+    }
+
+    // ==========================================
+    // Bulk Parcel Creation
+    // ==========================================
+
+    @Override
+    public java.util.List<ParcelDTO> createBulkParcels(Long requestId, String description,
+            java.math.BigDecimal codAmount, java.math.BigDecimal weightKg,
+            java.math.BigDecimal lengthCm, java.math.BigDecimal widthCm, java.math.BigDecimal heightCm,
+            Integer quantity, Long locationId) {
+
+        java.util.List<ParcelDTO> createdParcels = new java.util.ArrayList<>();
+
+        // Lấy request entity
+        var request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        // Lấy location nếu có
+        Location location = null;
+        if (locationId != null) {
+            location = locationRepository.findById(locationId).orElse(null);
+        }
+
+        // Tạo N parcels
+        String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        long currentCount = parcelRepository.countByRequestId(requestId);
+
+        for (int i = 1; i <= quantity; i++) {
+            Parcel parcel = new Parcel();
+            parcel.setRequest(request);
+
+            // Tạo parcel code unique
+            String parcelCode = String.format("PCL-%s-%d-%02d", dateStr, requestId, currentCount + i);
+            parcel.setParcelCode(parcelCode);
+
+            // Description với số thứ tự
+            String numberedDescription = "#" + i + " - " + description;
+            parcel.setDescription(numberedDescription);
+
+            parcel.setCodAmount(codAmount);
+            parcel.setWeightKg(weightKg);
+            parcel.setLengthCm(lengthCm);
+            parcel.setWidthCm(widthCm);
+            parcel.setHeightCm(heightCm);
+            parcel.setStatus(Parcel.ParcelStatus.CREATED);
+            parcel.setCurrentLocation(location);
+
+            Parcel saved = parcelRepository.save(parcel);
+
+            // Tạo parcel action
+            createParcelAction(saved, "CREATED", null, location, null,
+                    "Staff tạo kiện hàng (bulk): " + numberedDescription);
+
+            createdParcels.add(toDTO(saved));
+        }
+
+        return createdParcels;
     }
 }

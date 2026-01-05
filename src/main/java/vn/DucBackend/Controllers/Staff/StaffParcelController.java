@@ -150,6 +150,10 @@ public class StaffParcelController {
     @PostMapping("/parcels/{id}/checkin")
     public String checkinParcel(@PathVariable("id") Long parcelId,
             @RequestParam(value = "note", required = false) String note,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "requestId", required = false) Long requestId,
             HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
 
         Long staffId = getStaffIdFromSession(session);
@@ -160,7 +164,7 @@ public class StaffParcelController {
         Optional<Parcel> parcelOpt = parcelRepository.findById(parcelId);
         if (parcelOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy kiện hàng!");
-            return "redirect:/staff/parcels";
+            return buildRedirectUrl(search, status, page, requestId);
         }
 
         Parcel parcel = parcelOpt.get();
@@ -168,7 +172,7 @@ public class StaffParcelController {
 
         if (staff == null || staff.getLocation() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn chưa được gán kho làm việc!");
-            return "redirect:/staff/parcels";
+            return buildRedirectUrl(search, status, page, requestId);
         }
 
         Location fromLocation = parcel.getCurrentLocation();
@@ -176,9 +180,10 @@ public class StaffParcelController {
         // Sử dụng Service để update status
         parcelService.updateParcelStatus(parcelId, "IN_WAREHOUSE");
 
-        // Cập nhật location
+        // Cập nhật location và reset trip/shipper
         parcel.setCurrentLocation(staff.getLocation());
         parcel.setCurrentShipper(null); // Hàng đã về kho, không còn với shipper
+        parcel.setCurrentTrip(null); // Reset trip để có thể xếp vào chuyến mới
         parcelRepository.save(parcel);
 
         // Tạo parcel action - IN_WAREHOUSE
@@ -192,7 +197,7 @@ public class StaffParcelController {
 
         redirectAttributes.addFlashAttribute("successMessage",
                 "Đã nhập kho kiện " + parcel.getParcelCode() + " thành công!");
-        return "redirect:/staff/parcels";
+        return buildRedirectUrl(search, status, page, requestId);
     }
 
     // ==========================================
@@ -201,6 +206,10 @@ public class StaffParcelController {
     @PostMapping("/parcels/{id}/checkout")
     public String checkoutParcel(@PathVariable("id") Long parcelId,
             @RequestParam(value = "note", required = false) String note,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "requestId", required = false) Long requestId,
             HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
 
         Long staffId = getStaffIdFromSession(session);
@@ -211,7 +220,7 @@ public class StaffParcelController {
         Optional<Parcel> parcelOpt = parcelRepository.findById(parcelId);
         if (parcelOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy kiện hàng!");
-            return "redirect:/staff/parcels";
+            return buildRedirectUrl(search, status, page, requestId);
         }
 
         Parcel parcel = parcelOpt.get();
@@ -231,7 +240,30 @@ public class StaffParcelController {
 
         redirectAttributes.addFlashAttribute("successMessage",
                 "Đã xuất kho kiện " + parcel.getParcelCode() + " thành công!");
-        return "redirect:/staff/parcels";
+        return buildRedirectUrl(search, status, page, requestId);
+    }
+
+    // Helper: Build redirect URL với các search params
+    private String buildRedirectUrl(String search, String status, int page, Long requestId) {
+        StringBuilder url = new StringBuilder("redirect:/staff/parcels?");
+        if (search != null && !search.isEmpty()) {
+            url.append("search=").append(search).append("&");
+        }
+        if (status != null && !status.isEmpty()) {
+            url.append("status=").append(status).append("&");
+        }
+        if (page > 0) {
+            url.append("page=").append(page).append("&");
+        }
+        if (requestId != null) {
+            url.append("requestId=").append(requestId).append("&");
+        }
+        // Remove trailing & or ?
+        String result = url.toString();
+        if (result.endsWith("&") || result.endsWith("?")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 
     // ==========================================

@@ -167,6 +167,9 @@ public class CustomerPaymentsController {
 
         model.addAttribute("order", order);
 
+        // Xác định payerType dựa trên role của customer
+        Payment.PayerType customerPayerType = isSender ? Payment.PayerType.SENDER : Payment.PayerType.RECEIVER;
+
         // Get payments based on filters
         List<Payment> payments;
 
@@ -202,6 +205,11 @@ public class CustomerPaymentsController {
             // Get all payments
             payments = paymentService.findPaymentsByRequestIdEntities(id);
         }
+
+        // Filter theo payerType - customer chỉ thấy payments mà họ phải trả
+        payments = payments.stream()
+                .filter(p -> p.getPayerType() == customerPayerType)
+                .collect(java.util.stream.Collectors.toList());
 
         model.addAttribute("payments", payments);
 

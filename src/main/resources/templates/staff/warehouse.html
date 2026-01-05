@@ -129,22 +129,20 @@
                                     <code class="text-primary" th:text="${p.parcelCode}">PCL-XXX</code>
                                 </td>
                                 <td>
-                                    <code th:text="${p.request?.requestCode ?: '-'}">REQ-XXX</code>
+                                    <code th:text="${p.requestCode ?: '-'}">REQ-XXX</code>
                                     <br>
-                                    <small class="text-muted" th:text="'ID: ' + ${p.request?.id ?: '-'}">ID: 1</small>
+                                    <small class="text-muted" th:text="'ID: ' + ${p.requestId ?: '-'}">ID: 1</small>
                                 </td>
                                 <td th:text="${p.description ?: '-'}">Mô tả</td>
                                 <td>
-                                    <span th:text="${p.request?.sender?.fullName ?: p.request?.sender?.name ?: '-'}">Người gửi</span>
+                                    <span th:text="${p.senderName ?: '-'}">Người gửi</span>
                                     <br>
-                                    <small class="text-muted"
-                                        th:text="${p.request?.senderLocation?.addressText ?: '-'}">-</small>
+                                    <small class="text-muted" th:text="${p.senderAddress ?: '-'}">-</small>
                                 </td>
                                 <td>
-                                    <span th:text="${p.request?.receiver?.fullName ?: p.request?.receiver?.name ?: '-'}">Người nhận</span>
+                                    <span th:text="${p.receiverName ?: '-'}">Người nhận</span>
                                     <br>
-                                    <small class="text-muted"
-                                        th:text="${p.request?.receiverLocation?.addressText ?: '-'}">-</small>
+                                    <small class="text-muted" th:text="${p.receiverAddress ?: '-'}">-</small>
                                 </td>
                                 <td>
                                     <span th:if="${p.lengthCm != null || p.widthCm != null || p.heightCm != null}"

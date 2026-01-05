@@ -115,9 +115,12 @@
                                 </td>
                                 <td th:text="${p.description ?: '-'}">Mô tả</td>
                                 <td>
-                                    <span th:text="${p.request?.sender?.fullName ?: p.request?.sender?.name ?: '-'}">Người gửi</span>
+                                    <span
+                                        th:text="${p.request?.sender?.fullName ?: p.request?.sender?.name ?: '-'}">Người
+                                        gửi</span>
                                     <br>
-                                    <small class="text-muted" th:text="${p.request?.senderLocation?.addressText ?: '-'}">-</small>
+                                    <small class="text-muted"
+                                        th:text="${p.request?.senderLocation?.addressText ?: '-'}">-</small>
                                 </td>
                                 <td>
                                     <span th:if="${p.currentLocation != null}" th:text="${p.currentLocation.name}">Kho
@@ -150,6 +153,10 @@
                                         th:if="${p.status.name() != 'IN_WAREHOUSE' || (p.currentLocation != null && staffWarehouse != null && p.currentLocation.name != staffWarehouse)}"
                                         th:action="@{/staff/parcels/{id}/checkin(id=${p.id})}" method="post"
                                         class="d-inline">
+                                        <input type="hidden" name="search" th:value="${search}">
+                                        <input type="hidden" name="status" th:value="${selectedStatus}">
+                                        <input type="hidden" name="page" th:value="${currentPage}">
+                                        <input type="hidden" name="requestId" th:value="${requestId}">
                                         <button type="submit" class="btn btn-sm btn-success" title="Nhập kho">
                                             <i class="fas fa-arrow-down me-1"></i>Nhập kho
                                         </button>
@@ -158,6 +165,10 @@
                                     <form th:if="${p.status.name() == 'IN_WAREHOUSE'}"
                                         th:action="@{/staff/parcels/{id}/checkout(id=${p.id})}" method="post"
                                         class="d-inline">
+                                        <input type="hidden" name="search" th:value="${search}">
+                                        <input type="hidden" name="status" th:value="${selectedStatus}">
+                                        <input type="hidden" name="page" th:value="${currentPage}">
+                                        <input type="hidden" name="requestId" th:value="${requestId}">
                                         <button type="submit" class="btn btn-sm btn-warning" title="Xuất kho">
                                             <i class="fas fa-arrow-up me-1"></i>Xuất kho
                                         </button>

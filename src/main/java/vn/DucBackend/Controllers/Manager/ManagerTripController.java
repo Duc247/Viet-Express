@@ -74,12 +74,34 @@ public class ManagerTripController {
             });
         }
 
-        // Danh sách kiện chưa được gán chuyến (currentTrip = null) và chưa giao
-        java.util.List<Parcel> unassignedParcels = parcelRepository.findAll().stream()
-                .filter(p -> p.getCurrentTrip() == null &&
-                        p.getStatus() != Parcel.ParcelStatus.DELIVERED &&
-                        p.getStatus() != Parcel.ParcelStatus.RETURNED)
-                .toList();
+        // Danh sách kiện chưa được gán chuyến và phù hợp với điểm đi của chuyến
+        java.util.List<Parcel> unassignedParcels;
+
+        if (tripId != null) {
+            // Nếu đã chọn chuyến, chỉ hiển thị kiện:
+            // - Đang ở kho xuất phát (startLocation)
+            // - Trạng thái IN_WAREHOUSE (đang trong kho, sẵn sàng xếp)
+            // - Chưa được gán vào chuyến nào (currentTrip == null)
+            Trip selectedTrip = (Trip) model.getAttribute("selectedTrip");
+            if (selectedTrip != null && selectedTrip.getStartLocation() != null) {
+                Long startLocationId = selectedTrip.getStartLocation().getId();
+                unassignedParcels = parcelRepository.findAll().stream()
+                        .filter(p -> p.getCurrentTrip() == null &&
+                                p.getStatus() == Parcel.ParcelStatus.IN_WAREHOUSE &&
+                                p.getCurrentLocation() != null &&
+                                p.getCurrentLocation().getId().equals(startLocationId))
+                        .toList();
+            } else {
+                unassignedParcels = java.util.List.of();
+            }
+        } else {
+            // Chưa chọn chuyến - hiển thị tất cả kiện chưa gán
+            unassignedParcels = parcelRepository.findAll().stream()
+                    .filter(p -> p.getCurrentTrip() == null &&
+                            p.getStatus() != Parcel.ParcelStatus.DELIVERED &&
+                            p.getStatus() != Parcel.ParcelStatus.RETURNED)
+                    .toList();
+        }
         model.addAttribute("unassignedParcels", unassignedParcels);
 
         model.addAttribute("locations", locationRepository.findAll());

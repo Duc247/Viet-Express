@@ -70,10 +70,27 @@
                                 </span>
                                 <span class="badge bg-success ms-2" th:if="${order.status.name() == 'CONFIRMED'}">Đã
                                     chốt đơn</span>
+                                <span class="badge bg-warning ms-2"
+                                    th:if="${order.status.name() == 'PICKUP_ASSIGNED'}">Đã gán shipper lấy hàng</span>
+                                <span class="badge bg-info ms-2" th:if="${order.status.name() == 'PICKED_UP'}">Đã lấy
+                                    hàng</span>
+                                <span class="badge bg-secondary ms-2"
+                                    th:if="${order.status.name() == 'IN_WAREHOUSE'}">Trong kho</span>
                                 <span class="badge bg-primary ms-2" th:if="${order.status.name() == 'IN_TRANSIT'}">Đang
                                     vận chuyển</span>
+                                <span class="badge bg-info ms-2"
+                                    th:if="${order.status.name() == 'OUT_FOR_DELIVERY'}">Đang giao</span>
                                 <span class="badge bg-success ms-2" th:if="${order.status.name() == 'DELIVERED'}">Đã
                                     giao</span>
+                                <span class="badge bg-dark ms-2" th:if="${order.status.name() == 'COMPLETED'}">
+                                    <i class="fas fa-check-double me-1"></i>Hoàn thành
+                                </span>
+                                <span class="badge bg-danger ms-2" th:if="${order.status.name() == 'FAILED'}">Thất
+                                    bại</span>
+                                <span class="badge bg-warning ms-2" th:if="${order.status.name() == 'RETURNED'}">Đã
+                                    hoàn</span>
+                                <span class="badge bg-dark ms-2" th:if="${order.status.name() == 'CANCELLED'}">Đã
+                                    hủy</span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Ngày tạo:</strong>
@@ -85,13 +102,19 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-user me-1 text-success"></i>Người gửi:</strong>
-                                <p class="mb-0 ms-3">Họ tên: <span th:text="${order.sender?.fullName ?: order.sender?.name ?: 'N/A'}">Tên</span></p>
-                                <p class="mb-0 ms-3 text-muted">Địa chỉ: <span th:text="${order.senderLocation?.addressText ?: '-'}">-</span></p>
+                                <p class="mb-0 ms-3">Họ tên: <span
+                                        th:text="${order.sender?.fullName ?: order.sender?.name ?: 'N/A'}">Tên</span>
+                                </p>
+                                <p class="mb-0 ms-3 text-muted">Địa chỉ: <span
+                                        th:text="${order.senderLocation?.addressText ?: '-'}">-</span></p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong><i class="fas fa-user me-1 text-primary"></i>Người nhận:</strong>
-                                <p class="mb-0 ms-3">Họ tên: <span th:text="${order.receiver?.fullName ?: order.receiver?.name ?: 'Chưa có'}">Tên</span></p>
-                                <p class="mb-0 ms-3 text-muted">Địa chỉ: <span th:text="${order.receiverLocation?.addressText ?: '-'}">-</span></p>
+                                <p class="mb-0 ms-3">Họ tên: <span
+                                        th:text="${order.receiver?.fullName ?: order.receiver?.name ?: 'Chưa có'}">Tên</span>
+                                </p>
+                                <p class="mb-0 ms-3 text-muted">Địa chỉ: <span
+                                        th:text="${order.receiverLocation?.addressText ?: '-'}">-</span></p>
                             </div>
                         </div>
                         <div class="row">
@@ -146,6 +169,66 @@
                         <small class="text-muted d-block mt-2">
                             <i class="fas fa-info-circle me-1"></i>Người nhận chưa xác nhận. Dùng "Force Chốt" để
                             bypass.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Card: Cập nhật trạng thái thủ công -->
+                <div class="card shadow-sm mb-4 border-info">
+                    <div class="card-header bg-info bg-opacity-25 py-3">
+                        <h6 class="mb-0 fw-bold text-info">
+                            <i class="fas fa-exchange-alt me-2"></i>Cập nhật trạng thái
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/manager/requests/{id}/update-status(id=${order.id})}" method="post">
+                            <div class="row align-items-end">
+                                <div class="col-md-8 mb-2">
+                                    <label class="form-label fw-bold">Chọn trạng thái mới:</label>
+                                    <select name="status" class="form-select" required>
+                                        <option value="">-- Chọn trạng thái --</option>
+                                        <option value="PENDING" th:selected="${order.status.name() == 'PENDING'}">⏳ Chờ
+                                            người nhận XN</option>
+                                        <option value="RECEIVER_CONFIRMED"
+                                            th:selected="${order.status.name() == 'RECEIVER_CONFIRMED'}">✅ Người nhận đã
+                                            XN</option>
+                                        <option value="CONFIRMED" th:selected="${order.status.name() == 'CONFIRMED'}">📋
+                                            Đã chốt đơn</option>
+                                        <option value="PICKUP_ASSIGNED"
+                                            th:selected="${order.status.name() == 'PICKUP_ASSIGNED'}">🚚 Đã gán shipper
+                                            lấy hàng</option>
+                                        <option value="PICKED_UP" th:selected="${order.status.name() == 'PICKED_UP'}">📦
+                                            Đã lấy hàng</option>
+                                        <option value="IN_WAREHOUSE"
+                                            th:selected="${order.status.name() == 'IN_WAREHOUSE'}">🏢 Trong kho</option>
+                                        <option value="IN_TRANSIT" th:selected="${order.status.name() == 'IN_TRANSIT'}">
+                                            🚛 Đang vận chuyển</option>
+                                        <option value="OUT_FOR_DELIVERY"
+                                            th:selected="${order.status.name() == 'OUT_FOR_DELIVERY'}">🛵 Đang giao hàng
+                                        </option>
+                                        <option value="DELIVERED" th:selected="${order.status.name() == 'DELIVERED'}">✔️
+                                            Đã giao hàng</option>
+                                        <option value="COMPLETED" th:selected="${order.status.name() == 'COMPLETED'}">🎉
+                                            Hoàn thành</option>
+                                        <option value="FAILED" th:selected="${order.status.name() == 'FAILED'}">❌ Thất
+                                            bại</option>
+                                        <option value="RETURNED" th:selected="${order.status.name() == 'RETURNED'}">↩️
+                                            Đã hoàn hàng</option>
+                                        <option value="CANCELLED" th:selected="${order.status.name() == 'CANCELLED'}">🚫
+                                            Đã hủy</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <button type="submit" class="btn btn-info w-100"
+                                        onclick="return confirm('Xác nhận cập nhật trạng thái?');">
+                                        <i class="fas fa-save me-1"></i>Cập nhật
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle me-1"></i>Sử dụng tính năng này để cập nhật thủ công trạng thái
+                            đơn hàng.
                         </small>
                     </div>
                 </div>

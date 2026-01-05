@@ -362,4 +362,31 @@ public class ManagerRequestController {
                 "Đã giao việc cho " + staffOpt.get().getFullName() + " thành công!");
         return "redirect:/manager/requests/" + id;
     }
+
+    // ==========================================
+    // CẬP NHẬT TRẠNG THÁI THỦ CÔNG
+    // ==========================================
+    @PostMapping("/requests/{id}/update-status")
+    public String updateRequestStatus(
+            @PathVariable("id") Long id,
+            @RequestParam("status") String status,
+            RedirectAttributes redirectAttributes) {
+
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
+            return "redirect:/manager/requests";
+        }
+
+        try {
+            customerRequestService.updateRequestStatus(id, status);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đã cập nhật trạng thái thành " + status + " thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        }
+
+        return "redirect:/manager/requests/" + id;
+    }
 }

@@ -58,15 +58,15 @@ public class ShipperTripController extends ShipperBaseController {
             }
             model.addAttribute("trips", trips);
             model.addAttribute("filter", filter);
-            
+
             // Thống kê nhanh
             model.addAttribute("totalTrips", trips.size());
             model.addAttribute("activeCount", trips.stream()
-                .filter(t -> "IN_PROGRESS".equals(t.getStatus()) || "CREATED".equals(t.getStatus()))
-                .count());
+                    .filter(t -> "IN_PROGRESS".equals(t.getStatus()) || "CREATED".equals(t.getStatus()))
+                    .count());
             model.addAttribute("completedCount", trips.stream()
-                .filter(t -> "COMPLETED".equals(t.getStatus()))
-                .count());
+                    .filter(t -> "COMPLETED".equals(t.getStatus()))
+                    .count());
         }
 
         return "shipper/trip/list";
@@ -80,7 +80,7 @@ public class ShipperTripController extends ShipperBaseController {
             Principal principal) {
         addCommonAttributes(model, request, principal);
         ShipperDTO shipper = getCurrentShipper(principal);
-        
+
         Optional<TripDTO> tripOpt = tripService.findTripById(id);
         if (tripOpt.isPresent()) {
             TripDTO trip = tripOpt.get();
@@ -95,15 +95,15 @@ public class ShipperTripController extends ShipperBaseController {
             if (trip.getId() != null) {
                 List<ParcelDTO> parcels = parcelService.findParcelsByTripId(trip.getId());
                 model.addAttribute("parcels", parcels);
-                
+
                 // Thống kê kiện hàng
                 model.addAttribute("totalParcels", parcels.size());
                 model.addAttribute("deliveredCount", parcels.stream()
-                    .filter(p -> "DELIVERED".equals(p.getStatus()))
-                    .count());
+                        .filter(p -> "DELIVERED".equals(p.getStatus()))
+                        .count());
                 model.addAttribute("pendingCount", parcels.stream()
-                    .filter(p -> !"DELIVERED".equals(p.getStatus()) && !"FAILED".equals(p.getStatus()))
-                    .count());
+                        .filter(p -> !"DELIVERED".equals(p.getStatus()) && !"FAILED".equals(p.getStatus()))
+                        .count());
             }
 
             return "shipper/trip/detail";
@@ -116,7 +116,7 @@ public class ShipperTripController extends ShipperBaseController {
      * Bắt đầu chuyến xe
      */
     @PostMapping("/trip/{id}/start")
-    public String startTrip(@PathVariable("id") Long id, HttpServletRequest request, 
+    public String startTrip(@PathVariable("id") Long id, HttpServletRequest request,
             Principal principal, RedirectAttributes redirectAttributes) {
         ShipperDTO shipper = getCurrentShipper(principal);
 
@@ -129,23 +129,23 @@ public class ShipperTripController extends ShipperBaseController {
             Trip trip = tripService.getTripEntityById(id);
             if (trip != null) {
                 // Kiểm tra quyền
-                if (shipper != null && trip.getShipper() != null 
-                    && !shipper.getId().equals(trip.getShipper().getId())) {
+                if (shipper != null && trip.getShipper() != null
+                        && !shipper.getId().equals(trip.getShipper().getId())) {
                     redirectAttributes.addFlashAttribute("error", "Bạn không có quyền với chuyến này!");
                     return "redirect:/shipper/trips";
                 }
-                
+
                 // Cập nhật trạng thái
                 trip.setStatus(Trip.TripStatus.IN_PROGRESS);
                 trip.setStartedAt(LocalDateTime.now());
                 tripService.saveTripEntity(trip);
-                
+
                 // Cập nhật trạng thái các kiện hàng thành IN_TRANSIT
                 updateParcelsStatus(id, "IN_TRANSIT");
-                
+
                 // Ghi log
                 loggingHelper.logTripStarted(shipper.getId(), id, request);
-                
+
                 redirectAttributes.addFlashAttribute("success", "Đã bắt đầu chuyến xe!");
             }
         } catch (Exception e) {
@@ -159,7 +159,7 @@ public class ShipperTripController extends ShipperBaseController {
      * Hoàn thành chuyến xe
      */
     @PostMapping("/trip/{id}/complete")
-    public String completeTrip(@PathVariable("id") Long id, 
+    public String completeTrip(@PathVariable("id") Long id,
             @RequestParam(value = "note", required = false) String note,
             HttpServletRequest request, Principal principal, RedirectAttributes redirectAttributes) {
         ShipperDTO shipper = getCurrentShipper(principal);
@@ -173,12 +173,12 @@ public class ShipperTripController extends ShipperBaseController {
             Trip trip = tripService.getTripEntityById(id);
             if (trip != null) {
                 // Kiểm tra quyền
-                if (shipper != null && trip.getShipper() != null 
-                    && !shipper.getId().equals(trip.getShipper().getId())) {
+                if (shipper != null && trip.getShipper() != null
+                        && !shipper.getId().equals(trip.getShipper().getId())) {
                     redirectAttributes.addFlashAttribute("error", "Bạn không có quyền với chuyến này!");
                     return "redirect:/shipper/trips";
                 }
-                
+
                 // Cập nhật trạng thái
                 trip.setStatus(Trip.TripStatus.COMPLETED);
                 trip.setEndedAt(LocalDateTime.now());
@@ -186,7 +186,7 @@ public class ShipperTripController extends ShipperBaseController {
                     trip.setNote(note);
                 }
                 tripService.saveTripEntity(trip);
-                
+
                 // Cập nhật trạng thái các kiện hàng (theo loại chuyến)
                 if (trip.getTripType() == Trip.TripType.DELIVERY) {
                     updateParcelsStatus(id, "DELIVERED");
@@ -195,10 +195,10 @@ public class ShipperTripController extends ShipperBaseController {
                 } else {
                     updateParcelsStatus(id, "IN_WAREHOUSE");
                 }
-                
+
                 // Ghi log
                 loggingHelper.logTripEnded(shipper.getId(), id, request);
-                
+
                 redirectAttributes.addFlashAttribute("success", "Đã hoàn thành chuyến xe!");
             }
         } catch (Exception e) {
@@ -227,7 +227,7 @@ public class ShipperTripController extends ShipperBaseController {
                     loggingHelper.logTripEnded(shipper.getId(), id, request);
                 }
             }
-            
+
             redirectAttributes.addFlashAttribute("success", "Đã cập nhật trạng thái chuyến xe!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -240,7 +240,7 @@ public class ShipperTripController extends ShipperBaseController {
      * Cập nhật ghi chú chuyến xe
      */
     @PostMapping("/trip/{id}/update-note")
-    public String updateTripNote(@PathVariable("id") Long id, 
+    public String updateTripNote(@PathVariable("id") Long id,
             @RequestParam("note") String note,
             Principal principal, RedirectAttributes redirectAttributes) {
         ShipperDTO shipper = getCurrentShipper(principal);
@@ -283,8 +283,8 @@ public class ShipperTripController extends ShipperBaseController {
             if (parcel != null) {
                 parcel.setStatus(Parcel.ParcelStatus.valueOf(status));
                 parcelService.saveParcelEntity(parcel);
-                redirectAttributes.addFlashAttribute("success", 
-                    "Đã cập nhật trạng thái kiện " + parcel.getParcelCode() + "!");
+                redirectAttributes.addFlashAttribute("success",
+                        "Đã cập nhật trạng thái kiện " + parcel.getParcelCode() + "!");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());

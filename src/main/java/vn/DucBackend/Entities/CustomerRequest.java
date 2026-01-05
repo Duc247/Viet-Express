@@ -23,6 +23,7 @@ public class CustomerRequest {
         IN_TRANSIT,
         OUT_FOR_DELIVERY,
         DELIVERED,
+        COMPLETED, // Đơn hàng đã hoàn thành toàn bộ quy trình (giao hàng + thanh toán)
         FAILED,
         RETURNED,
         CANCELLED

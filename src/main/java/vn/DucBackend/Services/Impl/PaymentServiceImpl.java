@@ -395,33 +395,40 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public java.util.List<vn.DucBackend.Entities.Payment> findPaymentsByCustomerIdEntities(Long customerId) {
-        // Lấy payments từ tất cả requests mà customer là sender hoặc receiver
-        java.util.List<vn.DucBackend.Entities.Payment> allPayments = new java.util.ArrayList<>();
+        // Lấy payments mà customer phải trả (dựa trên payerType)
+        java.util.List<vn.DucBackend.Entities.Payment> relevantPayments = new java.util.ArrayList<>();
 
-        // Lấy requests theo sender
+        // Lấy requests mà customer là SENDER -> chỉ lấy payments có payerType = SENDER
         java.util.List<vn.DucBackend.Entities.CustomerRequest> senderRequests = requestRepository
                 .findBySenderId(customerId);
         for (vn.DucBackend.Entities.CustomerRequest req : senderRequests) {
-            allPayments.addAll(paymentRepository.findByRequestId(req.getId()));
+            java.util.List<vn.DucBackend.Entities.Payment> payments = paymentRepository.findByRequestId(req.getId());
+            for (vn.DucBackend.Entities.Payment p : payments) {
+                if (p.getPayerType() == vn.DucBackend.Entities.Payment.PayerType.SENDER) {
+                    relevantPayments.add(p);
+                }
+            }
         }
 
-        // Lấy requests theo receiver (chỉ thêm nếu chưa có)
+        // Lấy requests mà customer là RECEIVER -> chỉ lấy payments có payerType =
+        // RECEIVER
         java.util.List<vn.DucBackend.Entities.CustomerRequest> receiverRequests = requestRepository
                 .findByReceiverId(customerId);
-        java.util.Set<Long> existingPaymentIds = allPayments.stream()
+        java.util.Set<Long> existingPaymentIds = relevantPayments.stream()
                 .map(vn.DucBackend.Entities.Payment::getId)
                 .collect(java.util.stream.Collectors.toSet());
 
         for (vn.DucBackend.Entities.CustomerRequest req : receiverRequests) {
             java.util.List<vn.DucBackend.Entities.Payment> payments = paymentRepository.findByRequestId(req.getId());
             for (vn.DucBackend.Entities.Payment p : payments) {
-                if (!existingPaymentIds.contains(p.getId())) {
-                    allPayments.add(p);
+                if (p.getPayerType() == vn.DucBackend.Entities.Payment.PayerType.RECEIVER
+                        && !existingPaymentIds.contains(p.getId())) {
+                    relevantPayments.add(p);
                 }
             }
         }
 
-        return allPayments;
+        return relevantPayments;
     }
 
     @Override

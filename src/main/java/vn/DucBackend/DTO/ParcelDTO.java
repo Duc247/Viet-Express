@@ -24,4 +24,12 @@ public class ParcelDTO {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Sender/Receiver info for warehouse display
+    private String senderName;
+    private String senderPhone;
+    private String senderAddress;
+    private String receiverName;
+    private String receiverPhone;
+    private String receiverAddress;
 }

@@ -113,7 +113,7 @@ public class StaffRequestController {
         // Tạo nhiều parcels
         int createdCount = 0;
         StringBuilder parcelCodes = new StringBuilder();
-        
+
         for (int i = 0; i < descriptions.size(); i++) {
             String description = descriptions.get(i);
             if (description == null || description.trim().isEmpty()) {
@@ -143,7 +143,7 @@ public class StaffRequestController {
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Không có kiện hàng nào được tạo!");
         }
-        
+
         return "redirect:/staff/requests/" + requestId;
     }
 
@@ -204,6 +204,59 @@ public class StaffRequestController {
 
         redirectAttributes.addFlashAttribute("successMessage",
                 "Đã tạo kiện hàng " + created.getParcelCode() + " thành công!");
+        return "redirect:/staff/requests/" + requestId;
+    }
+
+    // ==========================================
+    // TẠO NHIỀU KIỆN HÀNG GIỐNG NHAU (BULK)
+    // ==========================================
+    @PostMapping("/requests/{id}/create-bulk-parcels")
+    public String createBulkParcels(@PathVariable("id") Long requestId,
+            @RequestParam("description") String description,
+            @RequestParam(value = "codAmount", defaultValue = "0") BigDecimal codAmount,
+            @RequestParam(value = "weightKg", required = false) BigDecimal weightKg,
+            @RequestParam(value = "lengthCm", required = false) BigDecimal lengthCm,
+            @RequestParam(value = "widthCm", required = false) BigDecimal widthCm,
+            @RequestParam(value = "heightCm", required = false) BigDecimal heightCm,
+            @RequestParam("quantity") Integer quantity,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+
+        Long staffId = getStaffIdFromSession(session);
+        if (staffId == null) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<CustomerRequestDTO> reqOpt = customerRequestService.findRequestById(requestId);
+        if (reqOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
+            return "redirect:/staff/requests";
+        }
+
+        // Validate quantity
+        if (quantity == null || quantity < 2) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Số lượng phải từ 2 trở lên!");
+            return "redirect:/staff/requests/" + requestId;
+        }
+
+        // Lấy location của staff
+        vn.DucBackend.Entities.Staff staff = staffService.getStaffEntityById(staffId);
+        Long locationId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+
+        // Gọi service để tạo bulk parcels
+        List<vn.DucBackend.DTO.ParcelDTO> createdParcels = parcelService.createBulkParcels(
+                requestId, description, codAmount, weightKg, lengthCm, widthCm, heightCm, quantity, locationId);
+
+        // Lấy danh sách mã parcel đã tạo
+        StringBuilder parcelCodes = new StringBuilder();
+        for (vn.DucBackend.DTO.ParcelDTO p : createdParcels) {
+            if (parcelCodes.length() > 0) {
+                parcelCodes.append(", ");
+            }
+            parcelCodes.append(p.getParcelCode());
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đã tạo " + quantity + " kiện hàng thành công: " + parcelCodes);
         return "redirect:/staff/requests/" + requestId;
     }
 }
