@@ -8,6 +8,7 @@ import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Entities.ParcelAction;
 import vn.DucBackend.Entities.Route;
 import vn.DucBackend.Entities.ServiceType;
+import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Entities.User;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.CustomerRequestService;
@@ -30,6 +31,7 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
     private final LocationRepository locationRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final UserRepository userRepository;
+    private final StaffRepository staffRepository;
     private final ParcelActionRepository parcelActionRepository;
     private final RouteRepository routeRepository;
 
@@ -226,6 +228,70 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         return requestRepository.countNewAssignmentsForManager(managerId, since);
     }
 
+    // ==========================================
+    // STAFF ASSIGNMENT IMPLEMENTATION
+    // ==========================================
+
+    @Override
+    public List<CustomerRequestDTO> findByAssignedStaff(Long staffId) {
+        return requestRepository.findByAssignedStaffId(staffId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CustomerRequestDTO assignStaff(Long requestId, Long staffId) {
+        CustomerRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found: " + requestId));
+
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
+
+        request.setAssignedStaff(staff);
+        request.setAssignedAt(LocalDateTime.now());
+        return toDTO(requestRepository.save(request));
+    }
+
+    // ==========================================
+    // ENTITY METHODS (for controllers)
+    // ==========================================
+
+    @Override
+    public CustomerRequest getRequestEntityById(Long id) {
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found: " + id));
+    }
+
+    @Override
+    public CustomerRequest saveRequestEntity(CustomerRequest request) {
+        return requestRepository.save(request);
+    }
+
+    @Override
+    public java.util.List<CustomerRequest> getAllRequestEntities() {
+        return requestRepository.findAll();
+    }
+
+    @Override
+    public java.util.List<CustomerRequest> findByAssignedManagerEntities(Long managerId) {
+        return requestRepository.findByAssignedManagerId(managerId);
+    }
+
+    @Override
+    public java.util.List<CustomerRequest> findByCustomerIdEntities(Long customerId) {
+        return requestRepository.findByCustomerId(customerId);
+    }
+
+    @Override
+    public CustomerRequest findByRequestCodeEntity(String requestCode) {
+        return requestRepository.findByRequestCode(requestCode).orElse(null);
+    }
+
+    @Override
+    public java.util.List<ParcelAction> findParcelActionsByRequestIdEntities(Long requestId) {
+        return parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(requestId);
+    }
+
     private CustomerRequestDTO toDTO(CustomerRequest request) {
         CustomerRequestDTO dto = new CustomerRequestDTO();
         dto.setId(request.getId());
@@ -285,44 +351,6 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         }
 
         return dto;
-    }
-
-    // ==========================================
-    // Methods cho Manager Controllers
-    // ==========================================
-
-    @Override
-    public java.util.List<CustomerRequest> getAllRequestEntities() {
-        return requestRepository.findAll();
-    }
-
-    @Override
-    public java.util.List<CustomerRequest> findByAssignedManagerEntities(Long managerId) {
-        return requestRepository.findByAssignedManagerId(managerId);
-    }
-
-    @Override
-    public CustomerRequest saveRequestEntity(CustomerRequest request) {
-        return requestRepository.save(request);
-    }
-
-    // ==========================================
-    // Methods cho Customer Controllers
-    // ==========================================
-
-    @Override
-    public java.util.List<CustomerRequest> findByCustomerIdEntities(Long customerId) {
-        return requestRepository.findByCustomerId(customerId);
-    }
-
-    @Override
-    public CustomerRequest findByRequestCodeEntity(String requestCode) {
-        return requestRepository.findByRequestCode(requestCode).orElse(null);
-    }
-
-    @Override
-    public java.util.List<ParcelAction> findParcelActionsByRequestIdEntities(Long requestId) {
-        return parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(requestId);
     }
 
     // ==========================================

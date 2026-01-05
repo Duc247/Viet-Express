@@ -106,8 +106,18 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             SystemConfig config = optional.get();
             config.setConfigValue(value);
             return systemConfigRepository.save(config);
+        } else {
+            // Tự tạo config mới nếu chưa tồn tại
+            SystemConfig config = new SystemConfig();
+            config.setConfigKey(key);
+            config.setConfigValue(value);
+            config.setConfigType("STRING");
+            config.setConfigGroup("THEME");
+            config.setDescription("Auto-created config");
+            config.setIsActive(true);
+            config.setIsPublic(false);
+            return systemConfigRepository.save(config);
         }
-        return null;
     }
 
     @Override
@@ -196,7 +206,21 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                         "Gửi email thông báo"),
                 new DefaultConfig("SMS_NOTIFICATION_ENABLED", "false", "BOOLEAN", "NOTIFICATION", "Gửi SMS thông báo"),
                 new DefaultConfig("PUSH_NOTIFICATION_ENABLED", "true", "BOOLEAN", "NOTIFICATION",
-                        "Gửi push notification"));
+                        "Gửi push notification"),
+                
+                // Theme Settings
+                new DefaultConfig("SEASONAL_THEME", "none", "STRING", "THEME", 
+                        "Theme mặc định theo mùa: none, spring, summer, autumn, winter"),
+                new DefaultConfig("SEASONAL_THEME_ADMIN", "none", "STRING", "THEME", 
+                        "Theme cho Admin: none, spring, summer, autumn, winter"),
+                new DefaultConfig("SEASONAL_THEME_MANAGER", "none", "STRING", "THEME", 
+                        "Theme cho Manager: none, spring, summer, autumn, winter"),
+                new DefaultConfig("SEASONAL_THEME_STAFF", "none", "STRING", "THEME", 
+                        "Theme cho Staff: none, spring, summer, autumn, winter"),
+                new DefaultConfig("SEASONAL_THEME_SHIPPER", "none", "STRING", "THEME", 
+                        "Theme cho Shipper: none, spring, summer, autumn, winter"),
+                new DefaultConfig("SEASONAL_THEME_CUSTOMER", "none", "STRING", "THEME", 
+                        "Theme cho Customer: none, spring, summer, autumn, winter"));
 
         for (DefaultConfig def : defaults) {
             if (!systemConfigRepository.existsByConfigKey(def.key)) {

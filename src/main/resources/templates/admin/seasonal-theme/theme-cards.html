@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Theme Cards Fragment -->
+    <th:block th:fragment="themeCards(role, current)">
+        <div class="row g-4">
+            <!-- Không có theme -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="theme-card card h-100" th:classappend="${current == 'none' or current == null ? 'selected' : ''}" 
+                     onclick="selectThemeCard(this, 'none')">
+                    <div class="theme-preview theme-none-preview">
+                        <span>🚫</span>
+                    </div>
+                    <div class="theme-info text-center">
+                        <div class="theme-title">Tắt</div>
+                        <div class="theme-description small">Dùng mặc định</div>
+                    </div>
+                    <input type="radio" name="theme" value="none" class="d-none" 
+                           th:checked="${current == 'none' or current == null}">
+                </div>
+            </div>
+
+            <!-- Mùa Xuân -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="theme-card card h-100" th:classappend="${current == 'spring' ? 'selected' : ''}"
+                     onclick="selectThemeCard(this, 'spring')">
+                    <div class="theme-preview theme-spring-preview">
+                        <div class="animation-demo">
+                            <span class="floating-icon" style="left: 20%;">🌸</span>
+                            <span class="floating-icon" style="left: 50%; animation-delay: 0.5s;">🧧</span>
+                            <span class="floating-icon" style="left: 80%; animation-delay: 1s;">🏮</span>
+                        </div>
+                    </div>
+                    <div class="theme-info text-center">
+                        <div class="theme-title">Xuân</div>
+                        <div class="theme-icons">🌸🧧🏮</div>
+                    </div>
+                    <input type="radio" name="theme" value="spring" class="d-none"
+                           th:checked="${current == 'spring'}">
+                </div>
+            </div>
+
+            <!-- Mùa Hạ -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="theme-card card h-100" th:classappend="${current == 'summer' ? 'selected' : ''}"
+                     onclick="selectThemeCard(this, 'summer')">
+                    <div class="theme-preview theme-summer-preview">
+                        <div class="animation-demo">
+                            <span class="floating-icon" style="left: 20%;">☀️</span>
+                            <span class="floating-icon" style="left: 50%; animation-delay: 0.5s;">🍉</span>
+                            <span class="floating-icon" style="left: 80%; animation-delay: 1s;">🌊</span>
+                        </div>
+                    </div>
+                    <div class="theme-info text-center">
+                        <div class="theme-title">Hạ</div>
+                        <div class="theme-icons">☀️🍉🌊</div>
+                    </div>
+                    <input type="radio" name="theme" value="summer" class="d-none"
+                           th:checked="${current == 'summer'}">
+                </div>
+            </div>
+
+            <!-- Mùa Thu -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="theme-card card h-100" th:classappend="${current == 'autumn' ? 'selected' : ''}"
+                     onclick="selectThemeCard(this, 'autumn')">
+                    <div class="theme-preview theme-autumn-preview">
+                        <div class="animation-demo">
+                            <span class="floating-icon" style="left: 20%;">🍂</span>
+                            <span class="floating-icon" style="left: 50%; animation-delay: 0.5s;">🏮</span>
+                            <span class="floating-icon" style="left: 80%; animation-delay: 1s;">🥮</span>
+                        </div>
+                    </div>
+                    <div class="theme-info text-center">
+                        <div class="theme-title">Thu</div>
+                        <div class="theme-icons">🍂🏮🥮</div>
+                    </div>
+                    <input type="radio" name="theme" value="autumn" class="d-none"
+                           th:checked="${current == 'autumn'}">
+                </div>
+            </div>
+
+            <!-- Mùa Đông -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="theme-card card h-100" th:classappend="${current == 'winter' ? 'selected' : ''}"
+                     onclick="selectThemeCard(this, 'winter')">
+                    <div class="theme-preview theme-winter-preview">
+                        <div class="animation-demo">
+                            <span class="floating-icon" style="left: 20%;">❄️</span>
+                            <span class="floating-icon" style="left: 50%; animation-delay: 0.5s;">🎄</span>
+                            <span class="floating-icon" style="left: 80%; animation-delay: 1s;">🎅</span>
+                        </div>
+                    </div>
+                    <div class="theme-info text-center">
+                        <div class="theme-title">Đông</div>
+                        <div class="theme-icons">❄️🎄🎅</div>
+                    </div>
+                    <input type="radio" name="theme" value="winter" class="d-none"
+                           th:checked="${current == 'winter'}">
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

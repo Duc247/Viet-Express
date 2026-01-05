@@ -1,0 +1,583 @@
+/**
+ * Seasonal Theme CSS
+ * Các hiệu ứng theo mùa cho tất cả các role
+ * Author: Viet Express Team
+ * 
+ * LƯU Ý: 
+ * - Icon nằm PHÍA SAU nội dung (z-index thấp)
+ * - Có 2 loại icon: Rơi xuống (falling) và Động tại chỗ (floating)
+ * - Không che chữ và nội dung chính
+ */
+
+/* ==========================================
+   SEASONAL CONTAINER - Container chứa các hiệu ứng
+   ========================================== */
+.seasonal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1; /* PHÍA SAU nội dung */
+    overflow: hidden;
+}
+
+/* Không che các phần quan trọng */
+.seasonal-container * {
+    pointer-events: none;
+}
+
+/* ==========================================
+   FLOATING DECORATIONS - Icon động tại chỗ (góc màn hình)
+   ========================================== */
+.floating-decoration {
+    position: fixed;
+    font-size: 2rem;
+    opacity: 0.4;
+    z-index: -1;
+    animation: floatInPlace 4s ease-in-out infinite;
+}
+
+.floating-decoration.top-left { top: 100px; left: 30px; }
+.floating-decoration.top-right { top: 100px; right: 30px; animation-delay: 0.5s; }
+.floating-decoration.bottom-left { bottom: 100px; left: 30px; animation-delay: 1s; }
+.floating-decoration.bottom-right { bottom: 100px; right: 30px; animation-delay: 1.5s; }
+.floating-decoration.mid-left { top: 50%; left: 20px; animation-delay: 0.7s; }
+.floating-decoration.mid-right { top: 50%; right: 20px; animation-delay: 1.2s; }
+
+@keyframes floatInPlace {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-10px) rotate(5deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    75% { transform: translateY(10px) rotate(-5deg); }
+}
+
+/* ==========================================
+   MÙA XUÂN - Tết - Hoa đào, Lì xì, Cây mai
+   ========================================== */
+.theme-spring .seasonal-item {
+    position: absolute;
+    font-size: 1.2rem;
+    opacity: 0.3; /* Mờ hơn để không che chữ */
+    animation: springFloat 20s linear infinite;
+}
+
+.theme-spring .seasonal-item.falling {
+    animation: springFloat 20s linear infinite;
+}
+
+@keyframes springFloat {
+    0% {
+        transform: translateY(-50px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Hoa đào rơi */
+.spring-flower {
+    color: #FF69B4;
+    text-shadow: 0 0 5px rgba(255, 105, 180, 0.5);
+}
+
+/* Lì xì bay */
+.spring-envelope {
+    color: #FF0000;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+
+/* Pháo hoa */
+.spring-firework {
+    animation: springFirework 2s ease-out infinite;
+}
+
+@keyframes springFirework {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.5); opacity: 0; }
+}
+
+/* ==========================================
+   MÙA HẠ - Mặt trời, Dưa hấu, Biển
+   ========================================== */
+.theme-summer .seasonal-item {
+    position: absolute;
+    font-size: 1.2rem;
+    opacity: 0.25;
+    animation: summerFloat 18s linear infinite;
+}
+
+@keyframes summerFloat {
+    0% {
+        transform: translateX(-50px) translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.25;
+    }
+    90% {
+        opacity: 0.25;
+    }
+    100% {
+        transform: translateX(100vw) translateY(20px);
+        opacity: 0;
+    }
+}
+
+/* Mặt trời */
+.summer-sun {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    animation: summerSunGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes summerSunGlow {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.3); }
+}
+
+/* Dưa hấu */
+.summer-watermelon {
+    color: #FF4500;
+}
+
+/* Sóng biển */
+.summer-wave {
+    color: #00CED1;
+}
+
+/* ==========================================
+   MÙA THU - Lá vàng, Trung thu, Lồng đèn
+   ========================================== */
+.theme-autumn .seasonal-item {
+    position: absolute;
+    font-size: 1.2rem;
+    opacity: 0.3;
+    animation: autumnFall 22s linear infinite;
+}
+
+@keyframes autumnFall {
+    0% {
+        transform: translateY(-50px) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(50vh) translateX(100px) rotate(180deg);
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(100vh) translateX(-50px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Lá vàng */
+.autumn-leaf {
+    color: #DAA520;
+    text-shadow: 0 0 5px rgba(218, 165, 32, 0.5);
+}
+
+/* Lồng đèn */
+.autumn-lantern {
+    color: #FF6347;
+    animation: autumnLanternGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes autumnLanternGlow {
+    0% { filter: brightness(0.8); }
+    100% { filter: brightness(1.2); }
+}
+
+/* Bánh trung thu */
+.autumn-mooncake {
+    color: #CD853F;
+}
+
+/* Mặt trăng */
+.autumn-moon {
+    position: fixed !important;
+    top: 80px;
+    right: 50px;
+    font-size: 3rem !important;
+    color: #FFFACD;
+    text-shadow: 0 0 20px rgba(255, 250, 205, 0.8);
+    animation: autumnMoonGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes autumnMoonGlow {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* ==========================================
+   MÙA ĐÔNG - Tuyết, Cây thông, Ông già Noel
+   ========================================== */
+.theme-winter .seasonal-item {
+    position: absolute;
+    font-size: 0.9rem;
+    opacity: 0.35;
+    animation: winterSnowfall 14s linear infinite;
+}
+
+@keyframes winterSnowfall {
+    0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.35;
+    }
+    90% {
+        opacity: 0.35;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Tuyết rơi */
+.winter-snow {
+    color: #FFFFFF;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+/* Cây thông - ở góc cố định */
+.winter-tree {
+    position: fixed !important;
+    font-size: 4rem !important;
+    color: #228B22;
+    text-shadow: 0 0 10px rgba(34, 139, 34, 0.5);
+    animation: winterTreeGlow 3s ease-in-out infinite alternate;
+}
+
+.winter-tree.left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.winter-tree.right {
+    bottom: 20px;
+    right: 20px;
+}
+
+@keyframes winterTreeGlow {
+    0% { filter: brightness(0.9); }
+    100% { filter: brightness(1.1); }
+}
+
+/* Ông già Noel - bay qua */
+.winter-santa {
+    font-size: 2rem !important;
+    animation: winterSantaFly 30s linear infinite;
+}
+
+@keyframes winterSantaFly {
+    0% {
+        transform: translateX(-100px) translateY(0);
+        opacity: 0;
+    }
+    5% {
+        opacity: 0.9;
+    }
+    95% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateX(100vw) translateY(-50px);
+        opacity: 0;
+    }
+}
+
+/* Quà Noel */
+.winter-gift {
+    color: #FF0000;
+}
+
+/* Chuông Noel */
+.winter-bell {
+    color: #FFD700;
+    animation: winterBellRing 1s ease-in-out infinite;
+}
+
+@keyframes winterBellRing {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+}
+
+/* ==========================================
+   HEADER DECORATIONS
+   ========================================== */
+.header-seasonal {
+    position: relative;
+}
+
+.header-seasonal::before,
+.header-seasonal::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+}
+
+/* Mùa xuân - viền hoa */
+.theme-spring .header-seasonal {
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #FF69B4, #FFB6C1, #FF69B4) 1;
+}
+
+/* Mùa hạ - viền nắng */
+.theme-summer .header-seasonal {
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #FFD700, #FFA500, #FFD700) 1;
+}
+
+/* Mùa thu - viền lá */
+.theme-autumn .header-seasonal {
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #DAA520, #CD853F, #DAA520) 1;
+}
+
+/* Mùa đông - viền tuyết */
+.theme-winter .header-seasonal {
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #87CEEB, #FFFFFF, #87CEEB) 1;
+}
+
+/* ==========================================
+   FOOTER DECORATIONS
+   ========================================== */
+.footer-seasonal {
+    position: relative;
+}
+
+/* Mùa xuân */
+.theme-spring .footer-seasonal::before {
+    content: '🌸 🧧 🏮';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    opacity: 0.6;
+}
+
+/* Mùa hạ */
+.theme-summer .footer-seasonal::before {
+    content: '☀️ 🍉 🌊';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    opacity: 0.6;
+}
+
+/* Mùa thu */
+.theme-autumn .footer-seasonal::before {
+    content: '🍂 🏮 🥮';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    opacity: 0.6;
+}
+
+/* Mùa đông */
+.theme-winter .footer-seasonal::before {
+    content: '❄️ 🎄 🎅';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    opacity: 0.6;
+}
+
+/* ==========================================
+   SIDEBAR DECORATIONS
+   ========================================== */
+.sidebar-seasonal {
+    position: relative;
+}
+
+/* Mùa xuân - Mai vàng góc trên */
+.theme-spring .sidebar-seasonal::after {
+    content: '🌼';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    opacity: 0.5;
+    animation: sidebarDecoPulse 3s ease-in-out infinite;
+}
+
+/* Mùa hạ */
+.theme-summer .sidebar-seasonal::after {
+    content: '🌴';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    opacity: 0.5;
+    animation: sidebarDecoPulse 3s ease-in-out infinite;
+}
+
+/* Mùa thu */
+.theme-autumn .sidebar-seasonal::after {
+    content: '🍁';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    opacity: 0.5;
+    animation: sidebarDecoPulse 3s ease-in-out infinite;
+}
+
+/* Mùa đông */
+.theme-winter .sidebar-seasonal::after {
+    content: '⛄';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    opacity: 0.5;
+    animation: sidebarDecoPulse 3s ease-in-out infinite;
+}
+
+@keyframes sidebarDecoPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+}
+
+/* ==========================================
+   DASHBOARD SIDEBAR DECORATIONS - Xịn hơn!
+   ========================================== */
+/* Gradient background cho sidebar theo mùa */
+.theme-spring .sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #4a1942 50%, #1e293b 100%) !important;
+}
+.theme-spring .sidebar::before {
+    content: '🌸';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+    animation: floatInPlace 3s ease-in-out infinite;
+}
+
+.theme-summer .sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #0f4c3a 50%, #1e293b 100%) !important;
+}
+.theme-summer .sidebar::before {
+    content: '☀️';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+    animation: floatInPlace 3s ease-in-out infinite;
+}
+
+.theme-autumn .sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #5c3d1e 50%, #1e293b 100%) !important;
+}
+.theme-autumn .sidebar::before {
+    content: '🍂';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+    animation: floatInPlace 3s ease-in-out infinite;
+}
+
+.theme-winter .sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #1e3a5f 50%, #1e293b 100%) !important;
+}
+.theme-winter .sidebar::before {
+    content: '❄️';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+    animation: floatInPlace 3s ease-in-out infinite;
+}
+
+/* ==========================================
+   TOPBAR/HEADER DECORATIONS - Thanh header xịn
+   ========================================== */
+.theme-spring .topbar,
+.theme-spring .navbar-admin {
+    background: linear-gradient(135deg, #667eea 0%, #f59e9e 100%) !important;
+}
+
+.theme-summer .topbar,
+.theme-summer .navbar-admin {
+    background: linear-gradient(135deg, #f59e0b 0%, #10b981 100%) !important;
+}
+
+.theme-autumn .topbar,
+.theme-autumn .navbar-admin {
+    background: linear-gradient(135deg, #d97706 0%, #dc2626 100%) !important;
+}
+
+.theme-winter .topbar,
+.theme-winter .navbar-admin {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
+}
+
+/* ==========================================
+   STAT CARDS DECORATIONS - Cards thống kê theo mùa
+   ========================================== */
+.theme-spring .stat-card,
+.theme-spring .dashboard-card {
+    border-top: 3px solid #ff69b4;
+}
+
+.theme-summer .stat-card,
+.theme-summer .dashboard-card {
+    border-top: 3px solid #f59e0b;
+}
+
+.theme-autumn .stat-card,
+.theme-autumn .dashboard-card {
+    border-top: 3px solid #d97706;
+}
+
+.theme-winter .stat-card,
+.theme-winter .dashboard-card {
+    border-top: 3px solid #3b82f6;
+}
+
+/* ==========================================
+   DISABLED STATE
+   ========================================== */
+.theme-none .seasonal-container,
+.theme-none .header-seasonal::before,
+.theme-none .header-seasonal::after,
+.theme-none .footer-seasonal::before,
+.theme-none .sidebar-seasonal::after {
+    display: none !important;
+}

@@ -115,25 +115,21 @@ public interface CustomerRequestService {
     /** Gán staff cho đơn hàng */
     CustomerRequestDTO assignStaff(Long requestId, Long staffId);
 
+    // ==========================================
+    // ENTITY METHODS (for controllers)
+    // ==========================================
+
     /** Lấy CustomerRequest entity theo ID */
     vn.DucBackend.Entities.CustomerRequest getRequestEntityById(Long id);
 
-    // ==========================================
-    // Methods cho Manager Controllers
-    // ==========================================
+    /** Lưu CustomerRequest entity */
+    vn.DucBackend.Entities.CustomerRequest saveRequestEntity(vn.DucBackend.Entities.CustomerRequest request);
 
     /** Lấy tất cả CustomerRequest entities */
     java.util.List<vn.DucBackend.Entities.CustomerRequest> getAllRequestEntities();
 
     /** Tìm requests được gán cho manager - trả về entities */
     java.util.List<vn.DucBackend.Entities.CustomerRequest> findByAssignedManagerEntities(Long managerId);
-
-    /** Lưu CustomerRequest entity */
-    vn.DucBackend.Entities.CustomerRequest saveRequestEntity(vn.DucBackend.Entities.CustomerRequest request);
-
-    // ==========================================
-    // Methods cho Customer Controllers
-    // ==========================================
 
     /** Tìm requests của customer - trả về entities */
     java.util.List<vn.DucBackend.Entities.CustomerRequest> findByCustomerIdEntities(Long customerId);
@@ -148,8 +144,6 @@ public interface CustomerRequestService {
     // Route-Based Shipping Fee
     // ==========================================
 
-    /**
-     * Cập nhật phí vận chuyển cho tất cả đơn hàng có cùng route khi tạo Route mới
-     */
+    /** Cập nhật phí vận chuyển cho tất cả đơn hàng có cùng route khi tạo Route mới */
     int updateShippingFeeForRoute(Long fromLocationId, Long toLocationId, java.math.BigDecimal distanceKm);
 }

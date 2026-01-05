@@ -28,14 +28,6 @@ public class ManagerRequestController {
     // Services cho business logic
     @Autowired
     private CustomerRequestService customerRequestService;
-    @Autowired
-    private ParcelService parcelService;
-    @Autowired
-    private TripService tripService;
-    @Autowired
-    private PaymentService paymentService;
-    @Autowired
-    private LocationService locationService;
 
     // Repositories cho template data (Thymeleaf cần Entity)
     @Autowired

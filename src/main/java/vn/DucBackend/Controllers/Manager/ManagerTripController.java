@@ -25,10 +25,6 @@ public class ManagerTripController {
     // Services cho business logic
     @Autowired
     private TripService tripService;
-    @Autowired
-    private ParcelService parcelService;
-    @Autowired
-    private ShipperService shipperService;
 
     // Repositories cho template data
     @Autowired

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title>Quản lý Theme theo Mùa</title>
+    <style>
+        .theme-card {
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-card.selected {
+            border: 3px solid #28a745;
+        }
+
+        .theme-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .theme-preview {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Spring */
+        .theme-spring-preview {
+            background: linear-gradient(135deg, #FFE4E1, #FFC0CB);
+        }
+
+        /* Summer */
+        .theme-summer-preview {
+            background: linear-gradient(135deg, #87CEEB, #FFD700);
+        }
+
+        /* Autumn */
+        .theme-autumn-preview {
+            background: linear-gradient(135deg, #DEB887, #CD853F);
+        }
+
+        /* Winter */
+        .theme-winter-preview {
+            background: linear-gradient(135deg, #B0E0E6, #FFFFFF);
+        }
+
+        /* None */
+        .theme-none-preview {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .theme-info {
+            padding: 1.5rem;
+        }
+
+        .theme-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .theme-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .theme-icons {
+            font-size: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .preview-header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .preview-sidebar {
+            background: #34495e;
+            color: white;
+            padding: 1rem;
+            min-height: 200px;
+            border-radius: 0 0 0 10px;
+        }
+
+        .preview-content {
+            background: white;
+            padding: 1rem;
+            min-height: 200px;
+            border-radius: 0 0 10px 0;
+        }
+
+        .preview-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0 0 10px 10px;
+            text-align: center;
+        }
+
+        .animation-demo {
+            position: relative;
+            height: 100px;
+            overflow: hidden;
+        }
+
+        .floating-icon {
+            position: absolute;
+            animation: floatDemo 3s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatDemo {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-palette me-2"></i>Quản lý Theme theo Mùa
+            </h1>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Info Card -->
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Hướng dẫn:</strong> Cấu hình theme theo mùa cho từng vai trò. Icon nằm phía sau nội dung, không che chữ.
+            Bao gồm icon động tại chỗ (góc màn hình) và icon rơi nhẹ nhàng.
+        </div>
+
+        <!-- Role Tabs -->
+        <ul class="nav nav-tabs mb-4" id="roleThemeTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-default" type="button">
+                    <i class="fas fa-globe me-1"></i> Mặc định
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-admin" type="button">
+                    <i class="fas fa-user-shield me-1"></i> Admin
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-manager" type="button">
+                    <i class="fas fa-user-tie me-1"></i> Manager
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-staff" type="button">
+                    <i class="fas fa-user-cog me-1"></i> Staff
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shipper" type="button">
+                    <i class="fas fa-truck me-1"></i> Shipper
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-customer" type="button">
+                    <i class="fas fa-user me-1"></i> Customer
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Default Theme -->
+            <div class="tab-pane fade show active" id="tab-default">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-globe me-2"></i>Theme Mặc Định (áp dụng khi role không có cấu hình riêng)
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/seasonal-theme/update}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="role" value="DEFAULT">
+                            <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='DEFAULT', current=${themeDefault})}"></div>
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-secondary btn-lg px-5">
+                                    <i class="fas fa-save me-2"></i>Lưu Theme Mặc Định
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Theme -->
+            <div class="tab-pane fade" id="tab-admin">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <i class="fas fa-user-shield me-2"></i>Theme cho Admin
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/seasonal-theme/update}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="role" value="ADMIN">
+                            <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='ADMIN', current=${themeAdmin})}"></div>
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-danger btn-lg px-5">
+                                    <i class="fas fa-save me-2"></i>Lưu Theme Admin
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manager Theme -->
+            <div class="tab-pane fade" id="tab-manager">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-user-tie me-2"></i>Theme cho Manager
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/seasonal-theme/update}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="role" value="MANAGER">
+                            <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='MANAGER', current=${themeManager})}"></div>
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fas fa-save me-2"></i>Lưu Theme Manager
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Staff Theme -->
+            <div class="tab-pane fade" id="tab-staff">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <i class="fas fa-user-cog me-2"></i>Theme cho Staff
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/seasonal-theme/update}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="role" value="STAFF">
+                            <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='STAFF', current=${themeStaff})}"></div>
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-info btn-lg px-5">
+                                    <i class="fas fa-save me-2"></i>Lưu Theme Staff
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipper Theme -->
+            <div class="tab-pane fade" id="tab-shipper">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="fas fa-truck me-2"></i>Theme cho Shipper
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/seasonal-theme/update}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="role" value="SHIPPER">
+                            <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='SHIPPER', current=${themeShipper})}"></div>
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-warning btn-lg px-5">
+                                    <i class="fas fa-save me-2"></i>Lưu Theme Shipper
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Theme -->
+            <div class="tab-pane fade" id="tab-customer">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-user me-2"></i>Theme cho Customer
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/seasonal-theme/update}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="role" value="CUSTOMER">
+                            <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='CUSTOMER', current=${themeCustomer})}"></div>
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-success btn-lg px-5">
+                                    <i class="fas fa-save me-2"></i>Lưu Theme Customer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section mt-5">
+            <h4 class="mb-4"><i class="fas fa-eye me-2"></i>Xem trước hiệu ứng</h4>
+            <p class="text-muted mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                Icon nằm <strong>phía sau</strong> nội dung (z-index thấp). Có 2 loại: 
+                <span class="badge bg-primary">Động tại chỗ</span> ở góc màn hình và 
+                <span class="badge bg-secondary">Rơi nhẹ</span> từ trên xuống.
+            </p>
+            <div class="row">
+                <div class="col-12">
+                    <div class="preview-header d-flex justify-content-between align-items-center header-seasonal">
+                        <span><i class="fas fa-truck me-2"></i>Viet Express</span>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="preview-sidebar sidebar-seasonal">
+                        <p><i class="fas fa-home me-2"></i>Dashboard</p>
+                        <p><i class="fas fa-box me-2"></i>Đơn hàng</p>
+                        <p><i class="fas fa-users me-2"></i>Khách hàng</p>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="preview-content">
+                        <p><strong>Nội dung chính của trang</strong></p>
+                        <p class="text-muted">Các icon sẽ xuất hiện phía sau, không che text này.</p>
+                        <p class="text-muted">Dashboard sẽ có gradient màu theo mùa.</p>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="preview-footer footer-seasonal">
+                        <small>© 2026 Viet Express</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-2"></i>Mô tả các theme
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <h6>🌸 Mùa Xuân (Tết)</h6>
+                        <ul class="small text-muted">
+                            <li>Hoa đào rơi</li>
+                            <li>Lì xì bay</li>
+                            <li>Lồng đèn lấp lánh</li>
+                            <li>Cây mai vàng</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <h6>☀️ Mùa Hạ</h6>
+                        <ul class="small text-muted">
+                            <li>Mặt trời chói sáng</li>
+                            <li>Dưa hấu mát lạnh</li>
+                            <li>Sóng biển</li>
+                            <li>Cây dừa</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <h6>🍂 Mùa Thu (Trung Thu)</h6>
+                        <ul class="small text-muted">
+                            <li>Lá vàng rơi</li>
+                            <li>Lồng đèn trung thu</li>
+                            <li>Bánh trung thu</li>
+                            <li>Mặt trăng sáng</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <h6>❄️ Mùa Đông (Giáng Sinh)</h6>
+                        <ul class="small text-muted">
+                            <li>Tuyết rơi</li>
+                            <li>Cây thông Noel</li>
+                            <li>Ông già Noel bay</li>
+                            <li>Quà Giáng sinh</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="scripts">
+        function selectThemeCard(card, theme) {
+            // Tìm form chứa card này
+            const form = card.closest('form');
+            if (!form) return;
+            
+            // Bỏ selected tất cả trong form này
+            form.querySelectorAll('.theme-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // Chọn card được click
+            card.classList.add('selected');
+            
+            // Check radio trong form này
+            const radio = form.querySelector(`input[value="${theme}"]`);
+            if (radio) radio.checked = true;
+            
+            // Preview ngay lập tức
+            const previewSection = document.querySelector('.preview-section');
+            if (previewSection) {
+                previewSection.className = 'preview-section mt-5 theme-' + theme;
+            }
+        }
+    </script>
+</body>
+
+</html>

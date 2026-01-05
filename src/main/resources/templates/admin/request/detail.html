@@ -121,8 +121,12 @@
                                 <td th:text="${customerRequest.senderName ?: '-'}"></td>
                             </tr>
                             <tr>
+                                <th>Số điện thoại:</th>
+                                <td th:text="${customerRequest.senderPhone ?: '-'}"></td>
+                            </tr>
+                            <tr>
                                 <th>Địa chỉ:</th>
-                                <td th:text="${customerRequest.senderLocationName ?: '-'}"></td>
+                                <td th:text="${customerRequest.senderAddress ?: (customerRequest.senderLocationName ?: '-')}"></td>
                             </tr>
                         </table>
                     </div>
@@ -138,8 +142,12 @@
                                 <td th:text="${customerRequest.receiverName ?: '-'}"></td>
                             </tr>
                             <tr>
+                                <th>Số điện thoại:</th>
+                                <td th:text="${customerRequest.receiverPhone ?: '-'}"></td>
+                            </tr>
+                            <tr>
                                 <th>Địa chỉ:</th>
-                                <td th:text="${customerRequest.receiverLocationName ?: '-'}"></td>
+                                <td th:text="${customerRequest.receiverAddress ?: (customerRequest.receiverLocationName ?: '-')}"></td>
                             </tr>
                         </table>
                     </div>

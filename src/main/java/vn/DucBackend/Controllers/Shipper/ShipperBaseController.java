@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.DTO.ShipperDTO;
 import vn.DucBackend.DTO.UserDTO;
 import vn.DucBackend.Services.LocationService;
+import vn.DucBackend.Services.ParcelService;
 import vn.DucBackend.Services.ShipperService;
 import vn.DucBackend.Services.TripService;
 import vn.DucBackend.Services.UserService;
@@ -23,6 +24,9 @@ public abstract class ShipperBaseController {
 
     @Autowired
     protected TripService tripService;
+
+    @Autowired
+    protected ParcelService parcelService;
 
     @Autowired
     protected ShipperService shipperService;

@@ -109,7 +109,7 @@ public class CustomerOrderDetailController {
 
         // Calculate completion percentage based on delivered parcels
         int completionPercentage = 0;
-        if (totalParcels != null && totalParcels > 0) {
+        if (totalParcels != null && totalParcels > 0 && deliveredParcels != null) {
             completionPercentage = (int) ((deliveredParcels * 100) / totalParcels);
         }
         model.addAttribute("completionPercentage", completionPercentage);

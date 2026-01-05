@@ -455,4 +455,92 @@ public class AdminSystemController {
         }
         return "redirect:/admin/systemlog";
     }
+
+    // ==========================================
+    // SEASONAL THEME - Quản lý theme theo mùa
+    // ==========================================
+
+    /**
+     * Trang quản lý seasonal theme - hỗ trợ cấu hình cho từng role
+     */
+    @GetMapping("/seasonal-theme")
+    public String seasonalTheme(Model model, HttpServletRequest request) {
+        addCommonAttributes(model, request);
+        
+        // Lấy theme cho từng role
+        model.addAttribute("themeDefault", systemConfigService.getValue("SEASONAL_THEME", "none"));
+        model.addAttribute("themeAdmin", systemConfigService.getValue("SEASONAL_THEME_ADMIN", "none"));
+        model.addAttribute("themeManager", systemConfigService.getValue("SEASONAL_THEME_MANAGER", "none"));
+        model.addAttribute("themeStaff", systemConfigService.getValue("SEASONAL_THEME_STAFF", "none"));
+        model.addAttribute("themeShipper", systemConfigService.getValue("SEASONAL_THEME_SHIPPER", "none"));
+        model.addAttribute("themeCustomer", systemConfigService.getValue("SEASONAL_THEME_CUSTOMER", "none"));
+        
+        return "admin/seasonal-theme/index";
+    }
+
+    /**
+     * Cập nhật seasonal theme cho role cụ thể
+     */
+    @PostMapping("/seasonal-theme/update")
+    public String updateSeasonalTheme(@RequestParam("theme") String theme,
+            @RequestParam(value = "role", defaultValue = "DEFAULT") String role,
+            RedirectAttributes redirectAttributes) {
+        try {
+            // Validate theme
+            List<String> validThemes = Arrays.asList("none", "spring", "summer", "autumn", "winter");
+            if (!validThemes.contains(theme)) {
+                redirectAttributes.addFlashAttribute("error", "Theme không hợp lệ!");
+                return "redirect:/admin/seasonal-theme";
+            }
+
+            // Xác định config key theo role
+            String configKey;
+            String roleName;
+            switch (role) {
+                case "ADMIN":
+                    configKey = "SEASONAL_THEME_ADMIN";
+                    roleName = "Admin";
+                    break;
+                case "MANAGER":
+                    configKey = "SEASONAL_THEME_MANAGER";
+                    roleName = "Manager";
+                    break;
+                case "STAFF":
+                    configKey = "SEASONAL_THEME_STAFF";
+                    roleName = "Staff";
+                    break;
+                case "SHIPPER":
+                    configKey = "SEASONAL_THEME_SHIPPER";
+                    roleName = "Shipper";
+                    break;
+                case "CUSTOMER":
+                    configKey = "SEASONAL_THEME_CUSTOMER";
+                    roleName = "Customer";
+                    break;
+                default:
+                    configKey = "SEASONAL_THEME";
+                    roleName = "Mặc định";
+            }
+
+            // Lưu vào system config
+            systemConfigService.updateValue(configKey, theme);
+            
+            String themeName = getThemeName(theme);
+            redirectAttributes.addFlashAttribute("success", 
+                "Đã cập nhật theme cho " + roleName + " thành: " + themeName);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/seasonal-theme";
+    }
+
+    private String getThemeName(String theme) {
+        switch (theme) {
+            case "spring": return "Mùa Xuân (Tết)";
+            case "summer": return "Mùa Hạ";
+            case "autumn": return "Mùa Thu (Trung Thu)";
+            case "winter": return "Mùa Đông (Giáng Sinh)";
+            default: return "Không có theme";
+        }
+    }
 }

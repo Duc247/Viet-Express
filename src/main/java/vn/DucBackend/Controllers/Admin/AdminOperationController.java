@@ -118,6 +118,22 @@ public class AdminOperationController {
         return "admin/request/form";
     }
 
+    /**
+     * Cập nhật yêu cầu khách hàng
+     * Service: customerRequestService.updateRequest()
+     */
+    @PostMapping("/request/{id}/update")
+    public String updateRequest(@PathVariable Long id, CustomerRequestDTO requestDTO, 
+            RedirectAttributes redirectAttributes) {
+        try {
+            customerRequestService.updateRequest(id, requestDTO);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật đơn hàng thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/request/" + id;
+    }
+
     // ==========================================
     // PARCEL
     // ==========================================
@@ -207,6 +223,26 @@ public class AdminOperationController {
         model.addAttribute("shippers", shipperService.findAllShippers());
         model.addAttribute("vehicles", vehicleService.findAll());
         return "admin/trip/form";
+    }
+
+    /**
+     * Lưu chuyến xe (tạo mới hoặc cập nhật)
+     * Service: tripService.createTrip() / tripService.updateTrip()
+     */
+    @PostMapping("/trip/save")
+    public String saveTrip(TripDTO tripDTO, RedirectAttributes redirectAttributes) {
+        try {
+            if (tripDTO.getId() != null) {
+                tripService.updateTrip(tripDTO.getId(), tripDTO);
+                redirectAttributes.addFlashAttribute("success", "Cập nhật chuyến xe thành công!");
+            } else {
+                tripService.createTrip(tripDTO);
+                redirectAttributes.addFlashAttribute("success", "Tạo chuyến xe mới thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/trip";
     }
 
     // ==========================================
