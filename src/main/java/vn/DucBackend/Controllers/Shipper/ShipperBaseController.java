@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.DTO.ShipperDTO;
 import vn.DucBackend.DTO.UserDTO;
 import vn.DucBackend.Services.LocationService;
-import vn.DucBackend.Services.ParcelService;
 import vn.DucBackend.Services.ShipperService;
 import vn.DucBackend.Services.TripService;
 import vn.DucBackend.Services.UserService;
@@ -37,8 +36,6 @@ public abstract class ShipperBaseController {
     @Autowired
     protected LoggingHelper loggingHelper;
 
-    @Autowired
-    protected ParcelService parcelService;
     /**
      * Thêm các attributes chung vào Model
      */

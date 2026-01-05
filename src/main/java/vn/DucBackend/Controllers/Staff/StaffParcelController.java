@@ -7,26 +7,37 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import vn.DucBackend.DTO.ParcelDTO;
-import vn.DucBackend.Entities.Staff;
+import vn.DucBackend.Entities.*;
+import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Staff Parcel Controller - Quản lý kiện hàng, nhập kho, xuất kho
- * Chỉ sử dụng Service layer - không gọi Repository trực tiếp
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/staff")
 public class StaffParcelController {
 
+    // Services cho business logic
     @Autowired
     private ParcelService parcelService;
+
+    // Repositories cho template data
     @Autowired
-    private StaffService staffService;
+    private ParcelRepository parcelRepository;
+    @Autowired
+    private StaffRepository staffRepository;
+    @Autowired
+    private ActionTypeRepository actionTypeRepository;
+    @Autowired
+    private ParcelActionRepository parcelActionRepository;
+
     @Autowired
     private LoggingHelper loggingHelper;
 
@@ -37,6 +48,11 @@ public class StaffParcelController {
     private Long getStaffIdFromSession(HttpSession session) {
         Object staffId = session.getAttribute("staffId");
         return staffId != null ? (Long) staffId : null;
+    }
+
+    private Long getUserIdFromSession(HttpSession session) {
+        Object userId = session.getAttribute("userId");
+        return userId != null ? (Long) userId : null;
     }
 
     // ==========================================
@@ -54,14 +70,19 @@ public class StaffParcelController {
         addCommonAttributes(model, request);
 
         Long staffId = getStaffIdFromSession(session);
-        Staff staff = staffId != null ? staffService.getStaffEntityById(staffId) : null;
+        Staff staff = staffId != null ? staffRepository.findById(staffId).orElse(null) : null;
 
         if (staff != null && staff.getLocation() != null) {
             model.addAttribute("staffWarehouse", staff.getLocation().getName());
         }
 
-        // Lấy TẤT CẢ kiện hàng ngoại trừ DELIVERED - Sử dụng Service
-        List<ParcelDTO> parcels = parcelService.findAllExceptDelivered();
+        // Lấy TẤT CẢ kiện hàng từ tất cả dự án
+        List<Parcel> parcels = parcelRepository.findAll();
+
+        // Ẩn kiện hàng đã giao (DELIVERED)
+        parcels = parcels.stream()
+                .filter(p -> p.getStatus() != Parcel.ParcelStatus.DELIVERED)
+                .toList();
 
         // Áp dụng filter theo mô tả/mã kiện
         if (search != null && !search.trim().isEmpty()) {
@@ -75,14 +96,32 @@ public class StaffParcelController {
         // Filter theo request ID
         if (requestId != null) {
             parcels = parcels.stream()
-                    .filter(p -> requestId.equals(p.getRequestId()))
+                    .filter(p -> p.getRequest() != null && requestId.equals(p.getRequest().getId()))
+                    .toList();
+        }
+
+        // Filter theo SĐT người gửi
+        if (senderPhone != null && !senderPhone.trim().isEmpty()) {
+            parcels = parcels.stream()
+                    .filter(p -> p.getRequest() != null && p.getRequest().getSender() != null
+                            && p.getRequest().getSender().getPhone() != null
+                            && p.getRequest().getSender().getPhone().contains(senderPhone))
+                    .toList();
+        }
+
+        // Filter theo SĐT người nhận
+        if (receiverPhone != null && !receiverPhone.trim().isEmpty()) {
+            parcels = parcels.stream()
+                    .filter(p -> p.getRequest() != null && p.getRequest().getReceiver() != null
+                            && p.getRequest().getReceiver().getPhone() != null
+                            && p.getRequest().getReceiver().getPhone().contains(receiverPhone))
                     .toList();
         }
 
         // Filter theo status
         if (status != null && !status.trim().isEmpty()) {
             parcels = parcels.stream()
-                    .filter(p -> p.getStatus() != null && p.getStatus().equals(status))
+                    .filter(p -> p.getStatus() != null && p.getStatus().name().equals(status))
                     .toList();
         }
 
@@ -118,25 +157,41 @@ public class StaffParcelController {
             return "redirect:/auth/login";
         }
 
-        Staff staff = staffService.getStaffEntityById(staffId);
+        Optional<Parcel> parcelOpt = parcelRepository.findById(parcelId);
+        if (parcelOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy kiện hàng!");
+            return "redirect:/staff/parcels";
+        }
+
+        Parcel parcel = parcelOpt.get();
+        Staff staff = staffRepository.findById(staffId).orElse(null);
+
         if (staff == null || staff.getLocation() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn chưa được gán kho làm việc!");
             return "redirect:/staff/parcels";
         }
 
-        try {
-            // Sử dụng Service để xử lý checkin
-            ParcelDTO parcel = parcelService.checkinParcel(parcelId, staffId, note);
+        Location fromLocation = parcel.getCurrentLocation();
 
-            // Ghi log nhập kho
-            loggingHelper.logWarehouseReceive(staffId, parcel.getParcelCode(), staff.getLocation().getName(), request);
+        // Sử dụng Service để update status
+        parcelService.updateParcelStatus(parcelId, "IN_WAREHOUSE");
 
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Đã nhập kho kiện " + parcel.getParcelCode() + " thành công!");
-        } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
+        // Cập nhật location
+        parcel.setCurrentLocation(staff.getLocation());
+        parcel.setCurrentShipper(null); // Hàng đã về kho, không còn với shipper
+        parcelRepository.save(parcel);
 
+        // Tạo parcel action - IN_WAREHOUSE
+        createParcelAction(parcel, parcel.getRequest(), "IN_WAREHOUSE",
+                fromLocation, staff.getLocation(),
+                getUserIdFromSession(session),
+                note != null ? note : "Nhập kho " + staff.getLocation().getName());
+
+        // Ghi log nhập kho
+        loggingHelper.logWarehouseReceive(staffId, parcel.getParcelCode(), staff.getLocation().getName(), request);
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đã nhập kho kiện " + parcel.getParcelCode() + " thành công!");
         return "redirect:/staff/parcels";
     }
 
@@ -153,19 +208,54 @@ public class StaffParcelController {
             return "redirect:/auth/login";
         }
 
-        try {
-            // Sử dụng Service để xử lý checkout
-            ParcelDTO parcel = parcelService.checkoutParcel(parcelId, staffId, note);
-
-            // Ghi log xuất kho
-            loggingHelper.logWarehouseDispatch(staffId, parcel.getParcelCode(), request);
-
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Đã xuất kho kiện " + parcel.getParcelCode() + " thành công!");
-        } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        Optional<Parcel> parcelOpt = parcelRepository.findById(parcelId);
+        if (parcelOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy kiện hàng!");
+            return "redirect:/staff/parcels";
         }
 
+        Parcel parcel = parcelOpt.get();
+        Location fromLocation = parcel.getCurrentLocation();
+
+        // Sử dụng Service để update status
+        parcelService.updateParcelStatus(parcelId, "IN_TRANSIT");
+
+        // Tạo parcel action - IN_TRANSIT
+        createParcelAction(parcel, parcel.getRequest(), "IN_TRANSIT",
+                fromLocation, null,
+                getUserIdFromSession(session),
+                note != null ? note : "Xuất kho để vận chuyển");
+
+        // Ghi log xuất kho
+        loggingHelper.logWarehouseDispatch(staffId, parcel.getParcelCode(), request);
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đã xuất kho kiện " + parcel.getParcelCode() + " thành công!");
         return "redirect:/staff/parcels";
+    }
+
+    // ==========================================
+    // HELPER METHODS
+    // ==========================================
+    private void createParcelAction(Parcel parcel, CustomerRequest request, String actionCode,
+            Location fromLocation, Location toLocation, Long userId, String note) {
+        Optional<ActionType> actionTypeOpt = actionTypeRepository.findByActionCode(actionCode);
+        if (actionTypeOpt.isPresent()) {
+            ParcelAction action = new ParcelAction();
+            action.setParcel(parcel);
+            action.setRequest(request);
+            action.setActionType(actionTypeOpt.get());
+            action.setFromLocation(fromLocation);
+            action.setToLocation(toLocation);
+            action.setNote(note);
+
+            if (userId != null) {
+                User user = new User();
+                user.setId(userId);
+                action.setActorUser(user);
+            }
+
+            parcelActionRepository.save(action);
+        }
     }
 }

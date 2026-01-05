@@ -104,49 +104,4 @@ public interface CustomerRequestService {
 
     /** Đếm số đơn mới được giao cho manager (trong 24h) */
     Long countNewAssignmentsForManager(Long managerId);
-
-    // ==========================================
-    // STAFF ASSIGNMENT
-    // ==========================================
-
-    /** Tìm đơn hàng được giao cho staff */
-    List<CustomerRequestDTO> findByAssignedStaff(Long staffId);
-
-    /** Gán staff cho đơn hàng */
-    CustomerRequestDTO assignStaff(Long requestId, Long staffId);
-
-    /** Lấy CustomerRequest entity theo ID */
-    vn.DucBackend.Entities.CustomerRequest getRequestEntityById(Long id);
-
-    // ==========================================
-    // Methods cho Manager Controllers
-    // ==========================================
-
-    /** Lấy tất cả CustomerRequest entities */
-    java.util.List<vn.DucBackend.Entities.CustomerRequest> getAllRequestEntities();
-
-    /** Tìm requests được gán cho manager - trả về entities */
-    java.util.List<vn.DucBackend.Entities.CustomerRequest> findByAssignedManagerEntities(Long managerId);
-
-    /** Lưu CustomerRequest entity */
-    vn.DucBackend.Entities.CustomerRequest saveRequestEntity(vn.DucBackend.Entities.CustomerRequest request);
-
-    // ==========================================
-    // Methods cho Customer Controllers
-    // ==========================================
-
-    /** Tìm requests của customer - trả về entities */
-    java.util.List<vn.DucBackend.Entities.CustomerRequest> findByCustomerIdEntities(Long customerId);
-
-    /** Tìm request theo code - trả về entity */
-    vn.DucBackend.Entities.CustomerRequest findByRequestCodeEntity(String requestCode);
-
-    /** Tìm request theo tracking code - trả về entity */
-    vn.DucBackend.Entities.CustomerRequest findByTrackingCodeEntity(String trackingCode);
-
-    /** Lấy parcel actions theo request id - trả về entities */
-    java.util.List<vn.DucBackend.Entities.ParcelAction> findParcelActionsByRequestIdEntities(Long requestId);
-
-    /** Lấy tracking codes theo request id - trả về entities */
-    java.util.List<vn.DucBackend.Entities.TrackingCode> findTrackingCodesByRequestIdEntities(Long requestId);
 }

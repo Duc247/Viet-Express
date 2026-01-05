@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,6 +84,7 @@ public class AdminOperationController {
         model.addAttribute("managers", userRepository.findActiveUsersByRole("MANAGER"));
         return "admin/request/detail";
     }
+
     /**
      * Gán Manager cho đơn hàng
      */
@@ -116,52 +116,6 @@ public class AdminOperationController {
         model.addAttribute("customerRequest", requestDTO);
         model.addAttribute("locations", locationService.findAllLocations());
         return "admin/request/form";
-    }
-
-    /**
-     * Tạo mới đơn hàng (Admin)
-     * Template: admin/request/form
-     */
-    @PostMapping("/request/create")
-    public String createRequest(@ModelAttribute CustomerRequestDTO dto, RedirectAttributes redirectAttributes) {
-        try {
-            CustomerRequestDTO created = customerRequestService.createRequest(dto);
-            redirectAttributes.addFlashAttribute("success", "Tạo đơn hàng thành công!");
-            return "redirect:/admin/request/" + created.getId();
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            return "redirect:/admin/request";
-        }
-    }
-
-    /**
-     * Cập nhật đơn hàng (Admin)
-     * Template action: /admin/request/{id}/update
-     */
-    @PostMapping("/request/{id}/update")
-    public String updateRequest(@PathVariable Long id, @ModelAttribute CustomerRequestDTO dto,
-            RedirectAttributes redirectAttributes) {
-        try {
-            customerRequestService.updateRequest(id, dto);
-            redirectAttributes.addFlashAttribute("success", "Cập nhật đơn hàng thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/admin/request/" + id;
-    }
-
-    /**
-     * Xoá đơn hàng (Admin)
-     */
-    @PostMapping("/request/{id}/delete")
-    public String deleteRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            customerRequestService.deleteRequest(id);
-            redirectAttributes.addFlashAttribute("success", "Đã xoá đơn hàng!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/admin/request";
     }
 
     // ==========================================
@@ -253,43 +207,6 @@ public class AdminOperationController {
         model.addAttribute("shippers", shipperService.findAllShippers());
         model.addAttribute("vehicles", vehicleService.findAll());
         return "admin/trip/form";
-    }
-
-    /**
-     * Lưu Trip (create/update) (Admin)
-     * Template action: /admin/trip/save
-     */
-    @PostMapping("/trip/save")
-    public String saveTrip(@ModelAttribute TripDTO dto, RedirectAttributes redirectAttributes) {
-        try {
-            TripDTO saved;
-            if (dto.getId() != null) {
-                saved = tripService.updateTrip(dto.getId(), dto);
-                redirectAttributes.addFlashAttribute("success", "Cập nhật chuyến xe thành công!");
-            } else {
-                saved = tripService.createTrip(dto);
-                redirectAttributes.addFlashAttribute("success", "Tạo chuyến xe thành công!");
-            }
-            return "redirect:/admin/trip/" + saved.getId();
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            return "redirect:/admin/trip";
-        }
-    }
-
-    /**
-     * Xoá Trip (Admin)
-     * Template action: /admin/trip/{id}/delete
-     */
-    @PostMapping("/trip/{id}/delete")
-    public String deleteTrip(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            tripService.deleteTrip(id);
-            redirectAttributes.addFlashAttribute("success", "Đã xoá chuyến xe!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/admin/trip";
     }
 
     // ==========================================

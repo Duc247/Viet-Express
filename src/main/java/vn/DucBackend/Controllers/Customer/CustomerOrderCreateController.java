@@ -14,14 +14,17 @@ import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.Entities.Customer;
 import vn.DucBackend.Entities.Location;
-import vn.DucBackend.Services.*;
+import vn.DucBackend.Repositories.CustomerRepository;
+import vn.DucBackend.Repositories.LocationRepository;
+import vn.DucBackend.Repositories.ServiceTypeRepository;
+import vn.DucBackend.Services.CustomerRequestService;
 import vn.DucBackend.Utils.LoggingHelper;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * Controller xử lý tạo đơn hàng mới cho Customer
- * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/customer")
@@ -31,13 +34,13 @@ public class CustomerOrderCreateController {
     private CustomerRequestService customerRequestService;
 
     @Autowired
-    private LocationService locationService;
+    private LocationRepository locationRepository;
 
     @Autowired
-    private ServiceTypeService serviceTypeService;
+    private ServiceTypeRepository serviceTypeRepository;
 
     @Autowired
-    private CustomerService customerService;
+    private CustomerRepository customerRepository;
 
     @Autowired
     private LoggingHelper loggingHelper;
@@ -63,14 +66,13 @@ public class CustomerOrderCreateController {
         }
 
         addCommonAttributes(model, request);
-        model.addAttribute("serviceTypes", serviceTypeService.findActiveEntities());
+        model.addAttribute("serviceTypes", serviceTypeRepository.findAll());
         model.addAttribute("customerId", customerId);
 
         // Lấy thông tin customer để pre-fill form
-        Customer customer = customerService.getCustomerEntityById(customerId);
-        if (customer != null) {
+        customerRepository.findById(customerId).ifPresent(customer -> {
             model.addAttribute("currentCustomer", customer);
-        }
+        });
 
         return "customer/order/create-order";
     }
@@ -89,10 +91,6 @@ public class CustomerOrderCreateController {
             @RequestParam(value = "distanceKm", required = false) BigDecimal distanceKm,
             @RequestParam(value = "note", required = false) String note,
             @RequestParam(value = "weight", required = false) BigDecimal weight,
-            @RequestParam(value = "parcelCount", defaultValue = "1") Integer parcelCount,
-            @RequestParam(value = "lengthCm", required = false) BigDecimal lengthCm,
-            @RequestParam(value = "widthCm", required = false) BigDecimal widthCm,
-            @RequestParam(value = "heightCm", required = false) BigDecimal heightCm,
             HttpServletRequest request,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
@@ -134,40 +132,31 @@ public class CustomerOrderCreateController {
         }
 
         // Tìm sender theo số điện thoại
-        Customer sender = customerService.getCustomerEntityByPhone(senderPhone.trim());
-        if (sender == null) {
+        Optional<Customer> senderOpt = customerRepository.findByPhone(senderPhone.trim());
+        if (senderOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Không tìm thấy khách hàng với số điện thoại người gửi: " + senderPhone);
             return "redirect:/customer/create-order";
         }
+        Customer sender = senderOpt.get();
 
         // Tìm receiver theo số điện thoại (hoặc dùng sender nếu cùng SĐT)
         Customer receiver;
         if (receiverPhone.trim().equals(senderPhone.trim())) {
             receiver = sender; // Người nhận = người gửi
         } else {
-            receiver = customerService.getCustomerEntityByPhone(receiverPhone.trim());
-            if (receiver == null) {
+            Optional<Customer> receiverOpt = customerRepository.findByPhone(receiverPhone.trim());
+            if (receiverOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "Không tìm thấy khách hàng với số điện thoại người nhận: " + receiverPhone);
                 return "redirect:/customer/create-order";
             }
+            receiver = receiverOpt.get();
         }
 
-        // Validate service type - get from request parameter
+        // Validate service type
         if (serviceTypeId == null) {
-            // Try to get from serviceType parameter (old format)
-            String serviceTypeStr = request.getParameter("serviceType");
-            if (serviceTypeStr != null && !serviceTypeStr.trim().isEmpty()) {
-                // Map old service type codes to IDs
-                serviceTypeId = serviceTypeService.findEntityByCode(serviceTypeStr.trim())
-                        .map(st -> st.getId())
-                        .orElse(null);
-            }
-        }
-
-        if (serviceTypeId == null) {
-            serviceTypeId = serviceTypeService.findActiveEntities().stream()
+            serviceTypeId = serviceTypeRepository.findAll().stream()
                     .findFirst()
                     .map(st -> st.getId())
                     .orElse(null);
@@ -191,7 +180,7 @@ public class CustomerOrderCreateController {
                     .setName(senderName != null && !senderName.trim().isEmpty() ? senderName.trim() : sender.getName());
             senderLocation.setAddressText(senderAddress.trim());
             senderLocation.setIsActive(true);
-            senderLocation = locationService.saveLocationEntity(senderLocation);
+            senderLocation = locationRepository.save(senderLocation);
 
             // Tạo location cho receiver
             Location receiverLocation = new Location();
@@ -200,7 +189,7 @@ public class CustomerOrderCreateController {
                     receiverName != null && !receiverName.trim().isEmpty() ? receiverName.trim() : receiver.getName());
             receiverLocation.setAddressText(receiverAddress.trim());
             receiverLocation.setIsActive(true);
-            receiverLocation = locationService.saveLocationEntity(receiverLocation);
+            receiverLocation = locationRepository.save(receiverLocation);
 
             // Tạo request DTO
             CustomerRequestDTO requestDTO = new CustomerRequestDTO();
@@ -216,9 +205,8 @@ public class CustomerOrderCreateController {
 
             CustomerRequestDTO createdRequest = customerRequestService.createRequest(requestDTO);
 
-            // Ghi log tạo đơn thành công - sử dụng User ID từ Customer
-            Long actorUserId = sender.getUser() != null ? sender.getUser().getId() : null;
-            loggingHelper.logOrderCreated(actorUserId, createdRequest.getRequestCode(), request);
+            // Ghi log tạo đơn thành công
+            loggingHelper.logOrderCreated(sender.getId(), createdRequest.getRequestCode(), request);
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Tạo đơn hàng thành công! Mã vận đơn: " + createdRequest.getRequestCode());

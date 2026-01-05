@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.*;
+import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.LoggingHelper;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Manager Request Controller - Quản lý yêu cầu/đơn hàng
@@ -34,14 +36,26 @@ public class ManagerRequestController {
     private PaymentService paymentService;
     @Autowired
     private LocationService locationService;
+
+    // Repositories cho template data (Thymeleaf cần Entity)
     @Autowired
-    private ShipperService shipperService;
+    private CustomerRequestRepository customerRequestRepository;
     @Autowired
-    private VehicleService vehicleService;
+    private ParcelRepository parcelRepository;
     @Autowired
-    private StaffService staffService;
+    private TripRepository tripRepository;
     @Autowired
-    private UserService userService;
+    private PaymentRepository paymentRepository;
+    @Autowired
+    private LocationRepository locationRepository;
+    @Autowired
+    private ShipperRepository shipperRepository;
+    @Autowired
+    private VehicleRepository vehicleRepository;
+    @Autowired
+    private StaffRepository staffRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private LoggingHelper loggingHelper;
@@ -59,12 +73,12 @@ public class ManagerRequestController {
         addCommonAttributes(model, request);
 
         // Lấy user hiện tại
-        User currentUser = userService.getUserEntityByUsername(userDetails.getUsername());
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
 
         if (currentUser != null) {
             // Chỉ lấy đơn hàng được gán cho manager này
-            List<CustomerRequest> assignedRequests = customerRequestService
-                    .findByAssignedManagerEntities(currentUser.getId());
+            List<CustomerRequest> assignedRequests = customerRequestRepository
+                    .findByAssignedManagerId(currentUser.getId());
             model.addAttribute("requests", assignedRequests);
             model.addAttribute("totalRequests", assignedRequests.size());
         } else {
@@ -79,19 +93,20 @@ public class ManagerRequestController {
     public String requestDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        CustomerRequest order = customerRequestService.getRequestEntityById(id);
-        if (order == null) {
+        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        if (orderOpt.isEmpty()) {
             return "redirect:/manager/requests";
         }
 
+        CustomerRequest order = orderOpt.get();
         model.addAttribute("order", order);
-        model.addAttribute("locations", locationService.getAllLocationEntities());
-        model.addAttribute("shippers", shipperService.getAllShipperEntities());
-        model.addAttribute("vehicles", vehicleService.getAllVehicleEntities());
-        model.addAttribute("staffs", staffService.getAllStaffEntities());
-        model.addAttribute("parcels", parcelService.findByRequestIdEntities(id));
-        model.addAttribute("trips", tripService.findTripsByRequestIdEntities(id));
-        model.addAttribute("payments", paymentService.findPaymentsByRequestIdEntities(id));
+        model.addAttribute("locations", locationRepository.findAll());
+        model.addAttribute("shippers", shipperRepository.findAll());
+        model.addAttribute("vehicles", vehicleRepository.findAll());
+        model.addAttribute("staffs", staffRepository.findAll());
+        model.addAttribute("parcels", parcelRepository.findByRequestId(id));
+        model.addAttribute("trips", tripRepository.findTripsByRequestId(id));
+        model.addAttribute("payments", paymentRepository.findByRequestId(id));
         return "manager/request/detail";
     }
 
@@ -103,26 +118,22 @@ public class ManagerRequestController {
             @RequestParam(value = "receiverLocationId", required = false) Long receiverLocationId,
             RedirectAttributes redirectAttributes) {
 
-        CustomerRequest customerRequest = customerRequestService.getRequestEntityById(id);
-        if (customerRequest == null) {
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
             return "redirect:/manager/requests";
         }
 
+        CustomerRequest customerRequest = requestOpt.get();
+
         if (senderLocationId != null) {
-            Location location = locationService.getLocationEntityById(senderLocationId);
-            if (location != null) {
-                customerRequest.setSenderLocation(location);
-            }
+            locationRepository.findById(senderLocationId).ifPresent(customerRequest::setSenderLocation);
         }
         if (receiverLocationId != null) {
-            Location location = locationService.getLocationEntityById(receiverLocationId);
-            if (location != null) {
-                customerRequest.setReceiverLocation(location);
-            }
+            locationRepository.findById(receiverLocationId).ifPresent(customerRequest::setReceiverLocation);
         }
 
-        customerRequestService.saveRequestEntity(customerRequest);
+        customerRequestRepository.save(customerRequest);
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật địa điểm thành công!");
         return "redirect:/manager/requests/" + id;
     }
@@ -131,11 +142,13 @@ public class ManagerRequestController {
     @PostMapping("/requests/{id}/confirm")
     public String confirmRequest(@PathVariable("id") Long id, HttpServletRequest httpRequest,
             RedirectAttributes redirectAttributes) {
-        CustomerRequest customerRequest = customerRequestService.getRequestEntityById(id);
-        if (customerRequest == null) {
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
             return "redirect:/manager/requests";
         }
+
+        CustomerRequest customerRequest = requestOpt.get();
 
         // Kiểm tra receiver đã xác nhận chưa
         if (customerRequest.getStatus() != CustomerRequest.RequestStatus.RECEIVER_CONFIRMED) {
@@ -165,11 +178,13 @@ public class ManagerRequestController {
     @PostMapping("/requests/{id}/force-confirm")
     public String forceConfirmRequest(@PathVariable("id") Long id, HttpServletRequest httpRequest,
             RedirectAttributes redirectAttributes) {
-        CustomerRequest customerRequest = customerRequestService.getRequestEntityById(id);
-        if (customerRequest == null) {
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
             return "redirect:/manager/requests";
         }
+
+        CustomerRequest customerRequest = requestOpt.get();
 
         // Kiểm tra có đủ location không
         if (customerRequest.getSenderLocation() == null || customerRequest.getReceiverLocation() == null) {
@@ -200,14 +215,15 @@ public class ManagerRequestController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        CustomerRequest order = customerRequestService.getRequestEntityById(id);
-        if (order == null) {
+        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        if (orderOpt.isEmpty()) {
             return "redirect:/manager/requests";
         }
 
+        CustomerRequest order = orderOpt.get();
         model.addAttribute("order", order);
 
-        java.util.List<Parcel> parcels = parcelService.findByRequestIdEntities(id);
+        java.util.List<Parcel> parcels = parcelRepository.findByRequestId(id);
 
         // Filter
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -242,15 +258,16 @@ public class ManagerRequestController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        CustomerRequest order = customerRequestService.getRequestEntityById(id);
-        if (order == null) {
+        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        if (orderOpt.isEmpty()) {
             return "redirect:/manager/requests";
         }
 
+        CustomerRequest order = orderOpt.get();
         model.addAttribute("order", order);
-        model.addAttribute("locations", locationService.getAllLocationEntities());
+        model.addAttribute("locations", locationRepository.findAll());
 
-        java.util.List<Trip> trips = tripService.findTripsByRequestIdEntities(id);
+        java.util.List<Trip> trips = tripRepository.findTripsByRequestId(id);
 
         // Filter
         if (status != null && !status.isEmpty()) {
@@ -280,15 +297,16 @@ public class ManagerRequestController {
             Model model, HttpServletRequest request) {
         addCommonAttributes(model, request);
 
-        CustomerRequest order = customerRequestService.getRequestEntityById(id);
-        if (order == null) {
+        Optional<CustomerRequest> orderOpt = customerRequestRepository.findById(id);
+        if (orderOpt.isEmpty()) {
             return "redirect:/manager/requests";
         }
 
+        CustomerRequest order = orderOpt.get();
         model.addAttribute("order", order);
-        model.addAttribute("trips", tripService.findTripsByRequestIdEntities(id));
+        model.addAttribute("trips", tripRepository.findTripsByRequestId(id));
 
-        java.util.List<Payment> payments = paymentService.findPaymentsByRequestIdEntities(id);
+        java.util.List<Payment> payments = paymentRepository.findByRequestId(id);
 
         // Filter
         if (status != null && !status.isEmpty()) {
@@ -314,24 +332,25 @@ public class ManagerRequestController {
             @RequestParam("staffId") Long staffId,
             RedirectAttributes redirectAttributes) {
 
-        CustomerRequest customerRequest = customerRequestService.getRequestEntityById(id);
-        if (customerRequest == null) {
+        Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy yêu cầu!");
             return "redirect:/manager/requests";
         }
 
-        Staff staff = staffService.getStaffEntityById(staffId);
-        if (staff == null) {
+        Optional<Staff> staffOpt = staffRepository.findById(staffId);
+        if (staffOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy nhân viên!");
             return "redirect:/manager/requests/" + id;
         }
 
-        customerRequest.setAssignedStaff(staff);
+        CustomerRequest customerRequest = requestOpt.get();
+        customerRequest.setAssignedStaff(staffOpt.get());
         customerRequest.setAssignedAt(java.time.LocalDateTime.now());
-        customerRequestService.saveRequestEntity(customerRequest);
+        customerRequestRepository.save(customerRequest);
 
         redirectAttributes.addFlashAttribute("successMessage",
-                "Đã giao việc cho " + staff.getFullName() + " thành công!");
+                "Đã giao việc cho " + staffOpt.get().getFullName() + " thành công!");
         return "redirect:/manager/requests/" + id;
     }
 }

@@ -1,5 +1,5 @@
 package vn.DucBackend.Config;
-import org.hibernate.LazyInitializationException;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,25 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
-    /**
-     * Xử lý LazyInitializationException - Lỗi lazy loading phổ biến
-     */
-    @ExceptionHandler(LazyInitializationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleLazyInitializationException(LazyInitializationException ex, Model model, HttpServletRequest request) {
-        // Log lỗi chi tiết cho developer
-        log.error("LazyInitializationException at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
-        log.error("Stack trace: ", ex);
-
-        // Hiển thị thông báo thân thiện cho user
-        model.addAttribute("errorCode", "500");
-        model.addAttribute("errorTitle", "Lỗi tải dữ liệu");
-        model.addAttribute("errorMessage", "Không thể tải dữ liệu liên quan. Vui lòng thử lại sau.");
-        model.addAttribute("errorDetail", "Lỗi này thường xảy ra lần đầu. Vui lòng refresh trang.");
-
-        return "error/error";
-    }
 
     /**
      * Xử lý lỗi Database/SQL - ẨN chi tiết khỏi user

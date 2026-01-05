@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.DucBackend.Entities.User;
 import vn.DucBackend.Services.*;
+import vn.DucBackend.Repositories.UserRepository;
 
 /**
  * Manager Dashboard Controller - Xử lý trang dashboard cho Manager
- * Chỉ sử dụng Service layer - không gọi Repository trực tiếp
+ * Sử dụng Service layer cho business logic
  */
 @Controller
 @RequestMapping("/manager")
@@ -28,8 +29,9 @@ public class ManagerDashboardController {
     private PaymentService paymentService;
     @Autowired
     private LocationService locationService;
+
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
@@ -43,8 +45,8 @@ public class ManagerDashboardController {
             @AuthenticationPrincipal UserDetails userDetails) {
         addCommonAttributes(model, request);
 
-        // Lấy user hiện tại - Sử dụng Service
-        User currentUser = userService.getUserEntityByUsername(userDetails.getUsername());
+        // Lấy user hiện tại
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
 
         if (currentUser != null) {
             Long managerId = currentUser.getId();
