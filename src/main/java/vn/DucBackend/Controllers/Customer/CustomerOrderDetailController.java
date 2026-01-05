@@ -33,6 +33,8 @@ public class CustomerOrderDetailController {
     private PaymentService paymentService;
     @Autowired
     private TripService tripService;
+    @Autowired
+    private TrackingService trackingService;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -78,7 +80,7 @@ public class CustomerOrderDetailController {
         model.addAttribute("isSender", isSender);
         model.addAttribute("isReceiver", isReceiver);
         model.addAttribute("parcels", parcelService.findByRequestIdEntities(id));
-        model.addAttribute("trackingCodes", customerRequestService.findTrackingCodesByRequestIdEntities(id));
+        // TrackingCode entity đã bị loại bỏ - sử dụng RequestCode trực tiếp
         model.addAttribute("parcelActions", customerRequestService.findParcelActionsByRequestIdEntities(id));
         model.addAttribute("payments", paymentService.findPaymentsByRequestIdEntities(id));
         model.addAttribute("trips", tripService.findTripsByRequestIdEntities(id));
@@ -173,6 +175,13 @@ public class CustomerOrderDetailController {
         // Receiver xác nhận → RECEIVER_CONFIRMED (chờ Manager chốt đơn)
         order.setStatus(CustomerRequest.RequestStatus.RECEIVER_CONFIRMED);
         customerRequestService.saveRequestEntity(order);
+
+        // Ghi action RECEIVER_CONFIRMED vào ParcelAction để tracking
+        try {
+            trackingService.logAction(null, id, "RECEIVER_CONFIRMED", null, null, null, "Người nhận đã xác nhận");
+        } catch (Exception e) {
+            System.err.println("Failed to log RECEIVER_CONFIRMED action: " + e.getMessage());
+        }
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã xác nhận nhận hàng! Chờ quản lý chốt đơn.");
         return "redirect:/customer/orders/" + id;

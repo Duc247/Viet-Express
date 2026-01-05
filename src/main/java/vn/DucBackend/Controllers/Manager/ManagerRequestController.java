@@ -60,6 +60,9 @@ public class ManagerRequestController {
     @Autowired
     private LoggingHelper loggingHelper;
 
+    @Autowired
+    private TrackingService trackingService;
+
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
     }
@@ -167,6 +170,13 @@ public class ManagerRequestController {
         // Cập nhật trạng thái qua Service → CONFIRMED (cả 2 đã xác nhận)
         customerRequestService.updateRequestStatus(id, "CONFIRMED");
 
+        // Ghi action CONFIRMED vào ParcelAction để tracking
+        try {
+            trackingService.logAction(null, id, "CONFIRMED", null, null, null, "Đơn hàng đã được chốt");
+        } catch (Exception e) {
+            System.err.println("Failed to log CONFIRMED action: " + e.getMessage());
+        }
+
         // Ghi log duyệt đơn
         loggingHelper.logOrderConfirmed(null, customerRequest.getRequestCode(), httpRequest);
 
@@ -195,6 +205,13 @@ public class ManagerRequestController {
 
         // Force update → CONFIRMED (bỏ qua kiểm tra receiver)
         customerRequestService.updateRequestStatus(id, "CONFIRMED");
+
+        // Ghi action CONFIRMED vào ParcelAction để tracking
+        try {
+            trackingService.logAction(null, id, "CONFIRMED", null, null, null, "Đơn hàng đã được chốt (force)");
+        } catch (Exception e) {
+            System.err.println("Failed to log CONFIRMED action: " + e.getMessage());
+        }
 
         // Ghi log duyệt đơn (force)
         loggingHelper.logOrderConfirmed(null, customerRequest.getRequestCode() + " (Force)", httpRequest);

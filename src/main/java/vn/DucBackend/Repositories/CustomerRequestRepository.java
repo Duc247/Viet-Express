@@ -54,4 +54,11 @@ public interface CustomerRequestRepository extends JpaRepository<CustomerRequest
     Long countNewAssignmentsForManager(@Param("managerId") Long managerId, @Param("since") LocalDateTime since);
 
     boolean existsByRequestCode(String requestCode);
+
+    // Tìm đơn hàng cần cập nhật phí khi tạo Route mới
+    @Query("SELECT r FROM CustomerRequest r WHERE r.senderLocation.id = :senderLocationId " +
+            "AND r.receiverLocation.id = :receiverLocationId AND r.shippingFee IS NULL")
+    List<CustomerRequest> findByLocationAndFeeIsNull(
+            @Param("senderLocationId") Long senderLocationId,
+            @Param("receiverLocationId") Long receiverLocationId);
 }

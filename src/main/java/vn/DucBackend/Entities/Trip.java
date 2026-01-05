@@ -18,7 +18,7 @@ public class Trip {
     }
 
     public enum TripStatus {
-        CREATED, IN_PROGRESS, COMPLETED, CANCELLED
+        CREATED, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED
     }
 
     public enum CapacityStatus {

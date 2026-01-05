@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 public class PaymentTransaction {
 
     public enum TransactionType {
-        IN, OUT
+        IN, // Nạp tiền vào payment
+        OUT, // Rút tiền từ payment
+        STATUS_CHANGE // Thay đổi trạng thái payment (không liên quan đến tiền)
     }
 
     public enum PaymentMethod {
@@ -24,6 +26,19 @@ public class PaymentTransaction {
     public enum TransactionStatus {
         PENDING, SUCCESS, FAILED
     }
+
+    // --- Fields cho Status Change History ---
+    @Enumerated(EnumType.STRING)
+    @Column(name = "old_payment_status", length = 30)
+    private Payment.PaymentStatus oldPaymentStatus; // Status trước khi thay đổi (null nếu tạo mới)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "new_payment_status", length = 30)
+    private Payment.PaymentStatus newPaymentStatus; // Status sau khi thay đổi
+
+    @Column(name = "actor_type", length = 20)
+    private String actorType; // MANAGER, SHIPPER, CUSTOMER, SYSTEM
+    // --- End Status Change History fields ---
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -217,6 +217,21 @@
                                 <i class="fas fa-info-circle me-2"></i>Tìm hiểu thêm
                             </a>
                         </div>
+
+                        <!-- Tracking Search Form -->
+                        <div class="mt-5 animate__animated animate__fadeInUp animate__delay-3s">
+                            <form th:action="@{/tracking}" method="get" class="d-flex justify-content-center">
+                                <div class="input-group" style="max-width: 500px;">
+                                    <input type="text" name="code" class="form-control form-control-lg"
+                                        placeholder="Nhập mã vận đơn REQ-xxx hoặc PCL-xxx..."
+                                        style="border-radius: 50px 0 0 50px;">
+                                    <button type="submit" class="btn btn-warning btn-lg px-4"
+                                        style="border-radius: 0 50px 50px 0;">
+                                        <i class="fas fa-search me-2"></i>Tra cứu
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

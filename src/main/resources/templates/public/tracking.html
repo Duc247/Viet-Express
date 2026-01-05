@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu vận đơn - Viet Express</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tracking-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+        }
+
+        .tracking-card {
+            margin-top: -40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 2px solid white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .hidden-info {
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Header -->
+    <div class="tracking-header text-center">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-search-location me-3"></i>Tra cứu vận đơn
+            </h1>
+            <p class="lead mb-0">Nhập mã đơn hàng (REQ-xxx) hoặc mã kiện (PCL-xxx) để theo dõi</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search Card -->
+        <div class="card tracking-card mb-4">
+            <div class="card-body p-4">
+                <form th:action="@{/tracking}" method="get">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white"><i class="fas fa-barcode text-primary"></i></span>
+                        <input type="text" name="code" class="form-control" placeholder="Nhập mã tra cứu..."
+                            th:value="${searchCode}" required autofocus>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-search me-2"></i>Tra cứu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${errorMessage}">Không tìm thấy</span>
+        </div>
+
+        <!-- Result Card -->
+        <div th:if="${found == true}" class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Thông tin vận đơn
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Order Info -->
+                    <div class="col-md-6 mb-4">
+                        <h6 class="text-muted mb-3"><i class="fas fa-info-circle me-2"></i>Thông tin đơn hàng</h6>
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th width="40%">Mã đơn hàng:</th>
+                                <td><code th:text="${order?.requestCode ?: '-'}">REQ-xxx</code></td>
+                            </tr>
+                            <tr th:if="${parcel}">
+                                <th>Mã kiện:</th>
+                                <td><code th:text="${parcel.parcelCode}">PCL-xxx</code></td>
+                            </tr>
+                            <tr>
+                                <th>Người gửi:</th>
+                                <td th:text="${order?.sender?.name ?: 'Ẩn thông tin'}">Tên người gửi</td>
+                            </tr>
+                            <tr>
+                                <th>Người nhận:</th>
+                                <td th:text="${order?.receiver?.name ?: 'Ẩn thông tin'}">Tên người nhận</td>
+                            </tr>
+                            <tr>
+                                <th>Điểm gửi:</th>
+                                <td class="hidden-info">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <span th:text="${order?.senderLocation?.addressText ?: 'Đang cập nhật'}">Địa
+                                        chỉ</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Điểm nhận:</th>
+                                <td class="hidden-info">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <span th:text="${order?.receiverLocation?.addressText ?: 'Đang cập nhật'}">Địa
+                                        chỉ</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>
+                                    <span class="badge bg-primary"
+                                        th:text="${order?.status?.name() ?: 'N/A'}">PENDING</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Parcels List -->
+                    <div class="col-md-6 mb-4" th:if="${parcels != null and !parcels.isEmpty()}">
+                        <h6 class="text-muted mb-3"><i class="fas fa-boxes me-2"></i>Danh sách kiện hàng</h6>
+                        <div class="list-group">
+                            <div th:each="p : ${parcels}" class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <code th:text="${p.parcelCode}">PCL-xxx</code>
+                                        <small class="text-muted ms-2" th:text="${p.description}">Mô tả</small>
+                                    </div>
+                                    <span class="badge bg-secondary" th:text="${p.status?.name()}">STATUS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Card -->
+        <div th:if="${found == true and actions != null and !actions.isEmpty()}" class="card mb-5">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Lịch sử vận chuyển
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div th:each="action : ${actions}" class="timeline-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong th:text="${action.actionType?.name ?: 'N/A'}">Hành động</strong>
+                                <p class="text-muted mb-0 small" th:text="${action.note ?: ''}">Ghi chú</p>
+                            </div>
+                            <small class="text-muted"
+                                th:text="${#temporals.format(action.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026
+                                10:00</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No History -->
+        <div th:if="${found == true and (actions == null or actions.isEmpty())}" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>Chưa có lịch sử vận chuyển.
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mb-5">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="fas fa-home me-2"></i>Về trang chủ
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

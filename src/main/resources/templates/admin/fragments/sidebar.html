@@ -50,6 +50,13 @@
                         <i class="fas fa-credit-card"></i> Thanh toán
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                        th:classappend="${requestURI != null and requestURI.startsWith('/tracking') ? 'active' : ''}"
+                        href="/tracking">
+                        <i class="fas fa-search-location"></i> Tra cứu vận đơn
+                    </a>
+                </li>
             </ul>
 
             <!-- Tài nguyên -->

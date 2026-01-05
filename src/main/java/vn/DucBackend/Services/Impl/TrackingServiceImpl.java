@@ -3,58 +3,29 @@ package vn.DucBackend.Services.Impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.DucBackend.DTO.TrackingCodeDTO;
 import vn.DucBackend.DTO.ParcelActionDTO;
 import vn.DucBackend.Entities.ParcelAction;
-import vn.DucBackend.Entities.TrackingCode;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.TrackingService;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service xử lý tracking log (ParcelAction)
+ * TrackingCode entity đã được loại bỏ, sử dụng RequestCode/ParcelCode trực tiếp
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TrackingServiceImpl implements TrackingService {
 
-    private final TrackingCodeRepository trackingCodeRepository;
     private final ParcelActionRepository parcelActionRepository;
     private final CustomerRequestRepository requestRepository;
     private final ParcelRepository parcelRepository;
     private final ActionTypeRepository actionTypeRepository;
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
-
-    @Override
-    public Optional<TrackingCodeDTO> findByCode(String code) {
-        return trackingCodeRepository.findByCode(code).map(this::toTrackingCodeDTO);
-    }
-
-    @Override
-    public Optional<TrackingCodeDTO> findByRequestId(Long requestId) {
-        return trackingCodeRepository.findFirstByRequestId(requestId).map(this::toTrackingCodeDTO);
-    }
-
-    @Override
-    public TrackingCodeDTO createTrackingCode(Long requestId) {
-        TrackingCode trackingCode = new TrackingCode();
-        trackingCode.setRequest(requestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found")));
-        trackingCode.setCode(generateTrackingCode());
-        return toTrackingCodeDTO(trackingCodeRepository.save(trackingCode));
-    }
-
-    @Override
-    public String generateTrackingCode() {
-        String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String uuid = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        return "TRK-" + dateStr + "-" + uuid;
-    }
 
     @Override
     public List<ParcelActionDTO> findActionsByParcelId(Long parcelId) {
@@ -66,15 +37,6 @@ public class TrackingServiceImpl implements TrackingService {
     public List<ParcelActionDTO> findActionsByRequestId(Long requestId) {
         return parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(requestId).stream()
                 .map(this::toParcelActionDTO).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ParcelActionDTO> getTrackingHistory(String trackingCode) {
-        Optional<TrackingCode> tc = trackingCodeRepository.findByCode(trackingCode);
-        if (tc.isPresent()) {
-            return findActionsByRequestId(tc.get().getRequest().getId());
-        }
-        return List.of();
     }
 
     @Override
@@ -136,16 +98,6 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public ParcelActionDTO logReturned(Long parcelId, Long locationId, Long staffId) {
         return logAction(parcelId, null, "RETURNED", null, locationId, staffId, "Đã hoàn hàng");
-    }
-
-    private TrackingCodeDTO toTrackingCodeDTO(TrackingCode tc) {
-        TrackingCodeDTO dto = new TrackingCodeDTO();
-        dto.setId(tc.getId());
-        dto.setRequestId(tc.getRequest().getId());
-        dto.setRequestCode(tc.getRequest().getRequestCode());
-        dto.setCode(tc.getCode());
-        dto.setCreatedAt(tc.getCreatedAt());
-        return dto;
     }
 
     private ParcelActionDTO toParcelActionDTO(ParcelAction action) {

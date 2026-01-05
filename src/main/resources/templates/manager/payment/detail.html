@@ -7,7 +7,6 @@
 </head>
 
 <body>
-
     <div layout:fragment="content">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -27,8 +26,9 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-6">
-                <div class="card shadow-sm mb-4">
+            <!-- Cột trái: Thông tin thanh toán -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm h-100">
                     <div class="card-header bg-white py-3">
                         <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Thông tin thanh
                             toán</h6>
@@ -53,6 +53,8 @@
                                         th:if="${payment.paymentType.name() == 'SHIPPING_FEE'}">💵 Phí vận chuyển</span>
                                     <span class="badge bg-warning text-dark"
                                         th:if="${payment.paymentType.name() == 'COD'}">📦 Thu hộ COD</span>
+                                    <span class="badge bg-info" th:if="${payment.paymentType.name() == 'DEPOSIT'}">💰
+                                        Phí cọc</span>
                                 </td>
                             </tr>
                             <tr>
@@ -100,7 +102,9 @@
                 </div>
             </div>
 
-            <div class="col-lg-6">
+            <!-- Cột phải: Form cập nhật + Nút lịch sử -->
+            <div class="col-lg-6 mb-4">
+                <!-- Form cập nhật -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-success bg-opacity-25 py-3">
                         <h6 class="mb-0 fw-bold"><i class="fas fa-edit me-2"></i>Cập nhật thanh toán</h6>
@@ -131,10 +135,121 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Nút xem lịch sử -->
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <button type="button" class="btn btn-outline-info btn-lg" id="btn-history"
+                            th:data-payment-id="${payment.id}" th:data-payment-code="${payment.paymentCode}">
+                            <i class="fas fa-history me-2"></i>Lịch sử thanh toán
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
+        <!-- History Modal -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-history me-2"></i>Lịch sử: <span id="modal-payment-code"
+                                class="fw-bold">...</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Thời gian</th>
+                                        <th>Loại</th>
+                                        <th>Chi tiết</th>
+                                        <th class="text-end">Số tiền</th>
+                                        <th>Người thực hiện</th>
+                                        <th>Ghi chú</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">Đang tải...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+
+                document.getElementById('btn-history').addEventListener('click', function () {
+                    var paymentId = this.getAttribute('data-payment-id');
+                    var paymentCode = this.getAttribute('data-payment-code');
+                    document.getElementById('modal-payment-code').textContent = paymentCode;
+                    loadHistory(paymentId);
+                    historyModal.show();
+                });
+
+                function loadHistory(paymentId) {
+                    var tbody = document.getElementById('history-body');
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-info"></div> Đang tải...</td></tr>';
+
+                    fetch('/manager/payments/' + paymentId + '/status-history')
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            if (data.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Chưa có lịch sử.</td></tr>';
+                                return;
+                            }
+
+                            var statusLabels = {
+                                'UNPAID': 'Chưa TT',
+                                'PARTIALLY_PAID': 'Một phần',
+                                'PAID': 'Đã TT',
+                                'COLLECTED_FROM_RECEIVER': 'Đã thu COD',
+                                'PAID_TO_SENDER': 'Đã trả COD',
+                                'REFUNDED': 'Hoàn tiền'
+                            };
+
+                            var html = '';
+                            for (var i = 0; i < data.length; i++) {
+                                var item = data[i];
+                                var timeStr = item.time ? item.time.replace('T', ' ').substring(0, 19) : '-';
+                                var oldLabel = item.oldStatus ? (statusLabels[item.oldStatus] || item.oldStatus) : '-';
+                                var newLabel = statusLabels[item.newStatus] || item.newStatus;
+                                var actorLabel = item.actorType === 'SYSTEM' ? 'Hệ thống' : (item.performedBy || item.actorType || 'N/A');
+
+                                html += '<tr class="table-warning">';
+                                html += '<td>' + (i + 1) + '</td>';
+                                html += '<td><small>' + timeStr + '</small></td>';
+                                html += '<td><span class="badge bg-warning text-dark">Đổi TT</span></td>';
+                                html += '<td><span class="badge bg-secondary">' + oldLabel + '</span> → <span class="badge bg-success">' + newLabel + '</span></td>';
+                                html += '<td class="text-end">-</td>';
+                                html += '<td><small>' + actorLabel + '</small></td>';
+                                html += '<td><small class="text-muted">' + (item.note || '-') + '</small></td>';
+                                html += '</tr>';
+                            }
+                            tbody.innerHTML = html;
+                        })
+                        .catch(function (err) {
+                            console.error(err);
+                            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Lỗi khi tải dữ liệu!</td></tr>';
+                        });
+                }
+            });
+        </script>
+
+    </div>
 </body>
 
 </html>

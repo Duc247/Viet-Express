@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{manager/layout-manager}">
+
+<head>
+    <title>Quản Lý Tuyến Đường - Manager</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="fas fa-route me-2"></i>Quản lý tuyến đường</h1>
+            <a th:href="@{/manager/routes/create}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Thêm tuyến đường
+            </a>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Results -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary">Danh sách tuyến đường</h6>
+                <span class="badge bg-info" th:text="${totalRoutes} + ' tuyến'">0 tuyến</span>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Điểm đi</th>
+                                <th></th>
+                                <th>Điểm đến</th>
+                                <th>Khoảng cách</th>
+                                <th>Thời gian dự kiến</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end pe-4">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(routes)}" class="text-center text-muted">
+                                <td colspan="8" class="py-5">
+                                    <i class="fas fa-route fa-3x mb-3 d-block opacity-50"></i>
+                                    Chưa có tuyến đường nào. Thêm tuyến đường để tính phí tự động!
+                                </td>
+                            </tr>
+                            <tr th:each="route : ${routes}" th:classappend="${route.isActive ? '' : 'table-secondary'}">
+                                <td class="ps-4" th:text="${route.id}">1</td>
+                                <td>
+                                    <strong th:text="${route.fromLocation?.name ?: '-'}">Kho A</strong>
+                                    <br>
+                                    <small class="text-muted"
+                                        th:text="${#strings.abbreviate(route.fromLocation?.addressText ?: '', 30)}">Địa
+                                        chỉ</small>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-arrow-right text-primary"></i>
+                                </td>
+                                <td>
+                                    <strong th:text="${route.toLocation?.name ?: '-'}">Kho B</strong>
+                                    <br>
+                                    <small class="text-muted"
+                                        th:text="${#strings.abbreviate(route.toLocation?.addressText ?: '', 30)}">Địa
+                                        chỉ</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary fs-6" th:text="${route.distanceKm} + ' km'">0
+                                        km</span>
+                                </td>
+                                <td>
+                                    <span th:if="${route.estimatedTimeHours}"
+                                        th:text="${route.estimatedTimeHours} + ' giờ'">0 giờ</span>
+                                    <span th:unless="${route.estimatedTimeHours}" class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${route.isActive}">
+                                        <i class="fas fa-check-circle me-1"></i>Hoạt động
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${route.isActive}">
+                                        <i class="fas fa-times-circle me-1"></i>Ngừng
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/manager/routes/{id}/edit(id=${route.id})}"
+                                            class="btn btn-outline-primary" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form th:action="@{/manager/routes/{id}/delete(id=${route.id})}" method="post"
+                                            class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa"
+                                                onclick="return confirm('Bạn có chắc muốn xóa tuyến đường này?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Lưu ý:</strong> Khi tạo tuyến đường mới, hệ thống sẽ tự động cập nhật phí vận chuyển cho tất cả
+            đơn hàng có cùng điểm gửi và điểm nhận mà chưa có phí (hiển thị "Cần cập nhật tuyến đường").
+        </div>
+    </div>
+
+</body>
+
+</html>

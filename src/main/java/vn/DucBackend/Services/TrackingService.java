@@ -1,28 +1,19 @@
 package vn.DucBackend.Services;
 
-import vn.DucBackend.DTO.TrackingCodeDTO;
 import vn.DucBackend.DTO.ParcelActionDTO;
 
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Service xử lý tracking log (ParcelAction)
+ * TrackingCode đã được loại bỏ, sử dụng RequestCode/ParcelCode trực tiếp
+ */
 public interface TrackingService {
-
-    // TrackingCode operations
-    Optional<TrackingCodeDTO> findByCode(String code);
-
-    Optional<TrackingCodeDTO> findByRequestId(Long requestId);
-
-    TrackingCodeDTO createTrackingCode(Long requestId);
-
-    String generateTrackingCode();
 
     // ParcelAction (Tracking Log) operations
     List<ParcelActionDTO> findActionsByParcelId(Long parcelId);
 
     List<ParcelActionDTO> findActionsByRequestId(Long requestId);
-
-    List<ParcelActionDTO> getTrackingHistory(String trackingCode);
 
     ParcelActionDTO logAction(Long parcelId, Long requestId, String actionCode,
             Long fromLocationId, Long toLocationId,

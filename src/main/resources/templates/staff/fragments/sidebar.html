@@ -6,7 +6,8 @@
         <div class="py-3">
             <!-- User Info -->
             <div class="text-center px-3 mb-4 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 1.5rem; color: white;">
+                <div
+                    style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 1.5rem; color: white;">
                     <i class="fas fa-user-tie"></i>
                 </div>
                 <h6 class="text-white mb-1">
@@ -19,23 +20,37 @@
             <div class="sidebar-heading">CÔNG VIỆC</div>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/staff/dashboard') ? 'active' : ''}" th:href="@{/staff/dashboard}">
+                    <a class="nav-link"
+                        th:classappend="${#strings.contains(requestURI, '/staff/dashboard') ? 'active' : ''}"
+                        th:href="@{/staff/dashboard}">
                         <i class="fas fa-chart-line"></i> Tổng quan
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/staff/requests') ? 'active' : ''}" th:href="@{/staff/requests}">
+                    <a class="nav-link"
+                        th:classappend="${#strings.contains(requestURI, '/staff/requests') ? 'active' : ''}"
+                        th:href="@{/staff/requests}">
                         <i class="fas fa-clipboard-list"></i> Tiếp nhận yêu cầu
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/staff/parcels') ? 'active' : ''}" th:href="@{/staff/parcels}">
+                    <a class="nav-link"
+                        th:classappend="${#strings.contains(requestURI, '/staff/parcels') ? 'active' : ''}"
+                        th:href="@{/staff/parcels}">
                         <i class="fas fa-box"></i> Quản lý kiện hàng
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${#strings.startsWith(requestURI, '/staff/warehouse') ? 'active' : ''}" th:href="@{/staff/warehouse}">
+                    <a class="nav-link"
+                        th:classappend="${#strings.startsWith(requestURI, '/staff/warehouse') ? 'active' : ''}"
+                        th:href="@{/staff/warehouse}">
                         <i class="fas fa-warehouse"></i> Kho
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${#strings.contains(requestURI, '/tracking') ? 'active' : ''}"
+                        th:href="@{/tracking}">
+                        <i class="fas fa-search-location"></i> Tra cứu vận đơn
                     </a>
                 </li>
             </ul>
@@ -44,7 +59,8 @@
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <form th:action="@{/auth/logout}" method="post" class="m-0">
-                        <button type="submit" class="nav-link text-start w-100" style="border: none; background: none; cursor: pointer;">
+                        <button type="submit" class="nav-link text-start w-100"
+                            style="border: none; background: none; cursor: pointer;">
                             <i class="fas fa-sign-out-alt"></i> Đăng xuất
                         </button>
                     </form>

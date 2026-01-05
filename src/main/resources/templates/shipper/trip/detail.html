@@ -28,7 +28,8 @@
                 </a>
                 <div>
                     <h5 class="mb-0 fw-bold">Chi tiết chuyến xe #<span th:text="${trip.id}">123</span></h5>
-                    <small class="text-muted" th:text="${trip.createdAt != null ? 'Tạo lúc: ' + #temporals.format(trip.createdAt, 'HH:mm dd/MM/yyyy') : ''}"></small>
+                    <small class="text-muted"
+                        th:text="${trip.createdAt != null ? 'Tạo lúc: ' + #temporals.format(trip.createdAt, 'HH:mm dd/MM/yyyy') : ''}"></small>
                 </div>
                 <span class="badge ms-auto fs-6" th:text="${trip.status}"
                     th:classappend="${trip.status == 'IN_PROGRESS' ? 'bg-primary' : (trip.status == 'ASSIGNED' ? 'bg-warning text-dark' : (trip.status == 'COMPLETED' ? 'bg-success' : (trip.status == 'CANCELLED' ? 'bg-danger' : 'bg-secondary')))}">STATUS</span>
@@ -36,28 +37,35 @@
 
             <!-- Thông tin chuyến xe -->
             <div class="card shadow-sm mb-4 border-0">
-                <div class="card-header bg-gradient py-3" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <div class="card-header bg-gradient py-3"
+                    style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
                     <h6 class="mb-0 fw-bold text-white"><i class="fas fa-route me-2"></i>Thông tin chuyến xe</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <!-- Loại chuyến -->
                         <div class="col-12 mb-3">
-                            <div class="d-flex align-items-center justify-content-center p-3 rounded" style="background: #fffbeb;">
-                                <span th:if="${trip.tripType == 'PICKUP'}" class="badge bg-success fs-6 px-4 py-2">🚚 CHUYẾN LẤY HÀNG</span>
-                                <span th:if="${trip.tripType == 'TRANSFER'}" class="badge bg-info fs-6 px-4 py-2">🔄 CHUYẾN TRUNG CHUYỂN</span>
-                                <span th:if="${trip.tripType == 'DELIVERY'}" class="badge bg-warning text-dark fs-6 px-4 py-2">📦 CHUYẾN GIAO HÀNG</span>
-                                <span th:if="${trip.tripType == null}" class="badge bg-secondary fs-6 px-4 py-2">❓ Chưa xác định</span>
+                            <div class="d-flex align-items-center justify-content-center p-3 rounded"
+                                style="background: #fffbeb;">
+                                <span th:if="${trip.tripType == 'PICKUP'}" class="badge bg-success fs-6 px-4 py-2">🚚
+                                    CHUYẾN LẤY HÀNG</span>
+                                <span th:if="${trip.tripType == 'TRANSFER'}" class="badge bg-info fs-6 px-4 py-2">🔄
+                                    CHUYẾN TRUNG CHUYỂN</span>
+                                <span th:if="${trip.tripType == 'DELIVERY'}"
+                                    class="badge bg-warning text-dark fs-6 px-4 py-2">📦 CHUYẾN GIAO HÀNG</span>
+                                <span th:if="${trip.tripType == null}" class="badge bg-secondary fs-6 px-4 py-2">❓ Chưa
+                                    xác định</span>
                             </div>
                         </div>
-                        
+
                         <!-- Điểm đi - Điểm đến -->
                         <div class="col-12 mb-3">
                             <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
                                 <div class="text-center flex-fill">
                                     <i class="fas fa-map-marker-alt text-success fs-4 mb-1"></i>
                                     <label class="d-block small text-muted text-uppercase">Điểm đi</label>
-                                    <h6 class="fw-bold mb-0" th:text="${trip.startLocationName} ?: 'Chưa xác định'">Hà Nội</h6>
+                                    <h6 class="fw-bold mb-0" th:text="${trip.startLocationName} ?: 'Chưa xác định'">Hà
+                                        Nội</h6>
                                 </div>
                                 <div class="px-3">
                                     <i class="fas fa-long-arrow-alt-right text-muted fs-3"></i>
@@ -65,7 +73,8 @@
                                 <div class="text-center flex-fill">
                                     <i class="fas fa-flag-checkered text-danger fs-4 mb-1"></i>
                                     <label class="d-block small text-muted text-uppercase">Điểm đến</label>
-                                    <h6 class="fw-bold mb-0" th:text="${trip.endLocationName} ?: 'Chưa xác định'">Hải Phòng</h6>
+                                    <h6 class="fw-bold mb-0" th:text="${trip.endLocationName} ?: 'Chưa xác định'">Hải
+                                        Phòng</h6>
                                 </div>
                             </div>
                         </div>
@@ -75,14 +84,18 @@
                             <div class="p-3 bg-light rounded h-100">
                                 <i class="fas fa-clock text-primary me-2"></i>
                                 <label class="small text-muted text-uppercase">Bắt đầu lúc</label>
-                                <p class="mb-0 fw-bold mt-1" th:text="${trip.startedAt != null ? #temporals.format(trip.startedAt, 'HH:mm dd/MM/yyyy') : 'Chưa bắt đầu'}">--</p>
+                                <p class="mb-0 fw-bold mt-1"
+                                    th:text="${trip.startedAt != null ? #temporals.format(trip.startedAt, 'HH:mm dd/MM/yyyy') : 'Chưa bắt đầu'}">
+                                    --</p>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="p-3 bg-light rounded h-100">
                                 <i class="fas fa-flag text-success me-2"></i>
                                 <label class="small text-muted text-uppercase">Hoàn thành lúc</label>
-                                <p class="mb-0 fw-bold mt-1" th:text="${trip.endedAt != null ? #temporals.format(trip.endedAt, 'HH:mm dd/MM/yyyy') : 'Chưa hoàn thành'}">--</p>
+                                <p class="mb-0 fw-bold mt-1"
+                                    th:text="${trip.endedAt != null ? #temporals.format(trip.endedAt, 'HH:mm dd/MM/yyyy') : 'Chưa hoàn thành'}">
+                                    --</p>
                             </div>
                         </div>
 
@@ -100,7 +113,9 @@
                             <div class="p-3 bg-light rounded h-100">
                                 <i class="fas fa-money-bill-wave text-success me-2"></i>
                                 <label class="small text-muted text-uppercase">Tiền COD cần thu</label>
-                                <p class="mb-0 fw-bold mt-1 text-success fs-5" th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">0 VNĐ</p>
+                                <p class="mb-0 fw-bold mt-1 text-success fs-5"
+                                    th:text="${trip.codAmount != null ? #numbers.formatDecimal(trip.codAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">
+                                    0 VNĐ</p>
                             </div>
                         </div>
 
@@ -118,10 +133,12 @@
 
             <!-- Danh sách kiện hàng trong chuyến -->
             <div class="card shadow-sm mb-4 border-0">
-                <div class="card-header bg-gradient py-3" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                <div class="card-header bg-gradient py-3"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
                     <div class="d-flex align-items-center justify-content-between">
                         <h6 class="mb-0 fw-bold text-white"><i class="fas fa-boxes me-2"></i>Danh sách kiện hàng</h6>
-                        <span class="badge bg-light text-primary" th:text="${parcels != null ? parcels.size() + ' kiện' : '0 kiện'}">0 kiện</span>
+                        <span class="badge bg-light text-primary"
+                            th:text="${parcels != null ? parcels.size() + ' kiện' : '0 kiện'}">0 kiện</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -141,24 +158,31 @@
                                 <tbody>
                                     <tr th:each="parcel : ${parcels}">
                                         <td>
-                                            <code class="text-primary fw-bold" th:text="${parcel.parcelCode}">PKG001</code>
+                                            <code class="text-primary fw-bold"
+                                                th:text="${parcel.parcelCode}">PKG001</code>
                                         </td>
                                         <td th:text="${parcel.description} ?: 'Không có mô tả'">Hàng hóa</td>
                                         <td>
-                                            <span th:if="${parcel.weightKg != null}" th:text="${parcel.weightKg + ' kg'}">-- kg</span>
+                                            <span th:if="${parcel.weightKg != null}"
+                                                th:text="${parcel.weightKg + ' kg'}">-- kg</span>
                                             <span th:if="${parcel.weightKg == null}" class="text-muted">--</span>
                                         </td>
                                         <td>
-                                            <span class="fw-bold text-success" th:if="${parcel.codAmount != null}" 
+                                            <span class="fw-bold text-success" th:if="${parcel.codAmount != null}"
                                                 th:text="${#numbers.formatDecimal(parcel.codAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">0đ</span>
                                             <span th:if="${parcel.codAmount == null}" class="text-muted">0đ</span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-secondary" th:if="${parcel.status == 'CREATED'}">Mới tạo</span>
-                                            <span class="badge bg-info" th:if="${parcel.status == 'IN_WAREHOUSE'}">Trong kho</span>
-                                            <span class="badge bg-primary" th:if="${parcel.status == 'IN_TRANSIT'}">Đang vận chuyển</span>
-                                            <span class="badge bg-warning text-dark" th:if="${parcel.status == 'PICKED_UP'}">Đã lấy</span>
-                                            <span class="badge bg-success" th:if="${parcel.status == 'DELIVERED'}">Đã giao</span>
+                                            <span class="badge bg-secondary" th:if="${parcel.status == 'CREATED'}">Mới
+                                                tạo</span>
+                                            <span class="badge bg-info" th:if="${parcel.status == 'IN_WAREHOUSE'}">Trong
+                                                kho</span>
+                                            <span class="badge bg-primary" th:if="${parcel.status == 'IN_TRANSIT'}">Đang
+                                                vận chuyển</span>
+                                            <span class="badge bg-warning text-dark"
+                                                th:if="${parcel.status == 'PICKED_UP'}">Đã lấy</span>
+                                            <span class="badge bg-success" th:if="${parcel.status == 'DELIVERED'}">Đã
+                                                giao</span>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -173,11 +197,15 @@
                                 </div>
                                 <div class="col-4">
                                     <small class="text-muted d-block">Tổng COD</small>
-                                    <strong class="text-success" th:text="${#numbers.formatDecimal(parcels.?[codAmount != null].![codAmount].stream().reduce(0, (a, b) -> a.add(b)), 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</strong>
+                                    <strong class="text-success"
+                                        th:text="${#numbers.formatDecimal(parcels.?[codAmount != null].![codAmount].stream().reduce(0, (a, b) -> a.add(b)), 0, 'COMMA', 0, 'POINT') + ' đ'}">0
+                                        đ</strong>
                                 </div>
                                 <div class="col-4">
                                     <small class="text-muted d-block">Tổng KG</small>
-                                    <strong th:text="${parcels.?[weightKg != null].![weightKg].stream().reduce(0, (a, b) -> a.add(b)) + ' kg'}">0 kg</strong>
+                                    <strong
+                                        th:text="${parcels.?[weightKg != null].![weightKg].stream().reduce(0, (a, b) -> a.add(b)) + ' kg'}">0
+                                        kg</strong>
                                 </div>
                             </div>
                         </div>
@@ -203,18 +231,19 @@
                 </form>
 
                 <!-- Cập nhật/Hoàn thành chuyến -->
-                <button class="btn btn-success btn-lg w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#updateStatusModal"
-                    th:if="${trip.status == 'IN_PROGRESS'}">
+                <button class="btn btn-success btn-lg w-100 fw-bold" data-bs-toggle="modal"
+                    data-bs-target="#updateStatusModal" th:if="${trip.status == 'IN_PROGRESS'}">
                     <i class="fas fa-check-circle me-2"></i>Cập nhật / Hoàn thành chuyến
                 </button>
-                
+
                 <!-- Chuyến đã hoàn thành -->
                 <div th:if="${trip.status == 'COMPLETED'}" class="alert alert-success text-center mb-0">
                     <i class="fas fa-check-circle me-2"></i>
                     <strong>Chuyến xe đã hoàn thành</strong>
-                    <span th:if="${trip.endedAt != null}" th:text="' lúc ' + #temporals.format(trip.endedAt, 'HH:mm dd/MM/yyyy')"></span>
+                    <span th:if="${trip.endedAt != null}"
+                        th:text="' lúc ' + #temporals.format(trip.endedAt, 'HH:mm dd/MM/yyyy')"></span>
                 </div>
-                
+
                 <!-- Chuyến đã hủy -->
                 <div th:if="${trip.status == 'CANCELLED'}" class="alert alert-danger text-center mb-0">
                     <i class="fas fa-times-circle me-2"></i>
@@ -242,7 +271,7 @@
                                     </select>
                                 </div>
                                 <div class="alert alert-info py-2 small mb-0">
-                                    <i class="fas fa-info-circle me-1"></i> 
+                                    <i class="fas fa-info-circle me-1"></i>
                                     Khi hoàn thành chuyến, hệ thống sẽ tự động cập nhật vị trí và trạng thái kiện hàng.
                                 </div>
                             </div>
