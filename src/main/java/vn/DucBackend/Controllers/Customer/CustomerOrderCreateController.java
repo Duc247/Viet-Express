@@ -42,6 +42,9 @@ public class CustomerOrderCreateController {
     @Autowired
     private LoggingHelper loggingHelper;
 
+    @Autowired
+    private TrackingService trackingService;
+
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
     }
@@ -216,8 +219,16 @@ public class CustomerOrderCreateController {
 
             CustomerRequestDTO createdRequest = customerRequestService.createRequest(requestDTO);
 
-            // Ghi log tạo đơn thành công - sử dụng User ID từ Customer
+            // Ghi action CREATED vào ParcelAction để tracking
             Long actorUserId = sender.getUser() != null ? sender.getUser().getId() : null;
+            try {
+                trackingService.logCreated(createdRequest.getId(), actorUserId);
+            } catch (Exception e) {
+                // Không fail request nếu ghi log thất bại
+                System.err.println("Failed to log CREATED action: " + e.getMessage());
+            }
+
+            // Ghi log tạo đơn thành công - sử dụng User ID từ Customer
             loggingHelper.logOrderCreated(actorUserId, createdRequest.getRequestCode(), request);
 
             redirectAttributes.addFlashAttribute("successMessage",

@@ -61,6 +61,7 @@ public class WebController {
 
     @Autowired
     private EmailService emailService;
+
     // ==========================================
     // TRANG CHỦ & GIỚI THIỆU
     // ==========================================
@@ -114,12 +115,12 @@ public class WebController {
     // ==========================================
     // GỬI YÊU CẦU VẬN CHUYỂN (KHÁCH VÃNG LAI)
     // ==========================================
-    @GetMapping({"/request", "/public/request"})
+    @GetMapping({ "/request", "/public/request" })
     public String showRequestPage() {
         return "public/request";
     }
 
-    @PostMapping({"/request", "/public/request"})
+    @PostMapping({ "/request", "/public/request" })
     public String handleRequestSubmit(
             @RequestParam("customerName") String customerName,
             @RequestParam("phoneNumber") String phoneNumber,
@@ -131,12 +132,12 @@ public class WebController {
             @RequestParam("deliveryAddress") String deliveryAddress,
             @RequestParam(value = "note", required = false) String note,
             RedirectAttributes redirectAttributes) {
-        
+
         try {
             // Tìm hoặc tạo customer
             Customer customer;
             Optional<Customer> existingCustomerOpt = customerRepository.findByPhone(phoneNumber.trim());
-            
+
             if (existingCustomerOpt.isPresent()) {
                 customer = existingCustomerOpt.get();
             } else {
@@ -147,18 +148,18 @@ public class WebController {
                 customerDTO.setPhone(phoneNumber.trim());
                 customerDTO.setEmail(email != null && !email.trim().isEmpty() ? email.trim() : null);
                 customerDTO.setAddress(pickupAddress.trim()); // Dùng pickup address làm địa chỉ mặc định
-                
+
                 CustomerDTO createdCustomer = customerService.createCustomer(customerDTO);
                 customer = customerRepository.findById(createdCustomer.getId())
                         .orElseThrow(() -> new RuntimeException("Failed to create customer"));
             }
-            
+
             // Lấy service type mặc định (STANDARD hoặc service đầu tiên)
             Long serviceTypeId = serviceTypeRepository.findByIsActiveTrue().stream()
                     .findFirst()
                     .map(st -> st.getId())
                     .orElseThrow(() -> new RuntimeException("No active service type found"));
-            
+
             // Tạo location cho sender (pickup)
             Location senderLocation = new Location();
             senderLocation.setLocationType(Location.LocationType.SENDER);
@@ -166,7 +167,7 @@ public class WebController {
             senderLocation.setAddressText(pickupAddress.trim());
             senderLocation.setIsActive(true);
             senderLocation = locationRepository.save(senderLocation);
-            
+
             // Tạo location cho receiver (delivery)
             Location receiverLocation = new Location();
             receiverLocation.setLocationType(Location.LocationType.RECEIVER);
@@ -174,7 +175,7 @@ public class WebController {
             receiverLocation.setAddressText(deliveryAddress.trim());
             receiverLocation.setIsActive(true);
             receiverLocation = locationRepository.save(receiverLocation);
-            
+
             // Tạo request DTO
             CustomerRequestDTO requestDTO = new CustomerRequestDTO();
             requestDTO.setSenderId(customer.getId());
@@ -182,69 +183,74 @@ public class WebController {
             requestDTO.setSenderLocationId(senderLocation.getId());
             requestDTO.setReceiverLocationId(receiverLocation.getId());
             requestDTO.setServiceTypeId(serviceTypeId);
-            
+
             // Mô tả hàng hóa
             StringBuilder description = new StringBuilder();
             if (productName != null && !productName.trim().isEmpty()) {
                 description.append(productName.trim());
             }
             if (weightStr != null && !weightStr.trim().isEmpty()) {
-                if (description.length() > 0) description.append(" - ");
+                if (description.length() > 0)
+                    description.append(" - ");
                 description.append("Trọng lượng: ").append(weightStr.trim()).append(" kg");
             }
             if (vehicleType != null && !vehicleType.trim().isEmpty()) {
-                if (description.length() > 0) description.append(" - ");
+                if (description.length() > 0)
+                    description.append(" - ");
                 description.append("Loại xe: ").append(vehicleType.trim());
             }
             requestDTO.setParcelDescription(description.length() > 0 ? description.toString() : "Hàng hóa");
-            
+
             // Ghi chú
             if (note != null && !note.trim().isEmpty()) {
                 requestDTO.setNote(note.trim());
             }
-            
+
             // Distance mặc định 10km (có thể tính toán sau)
             requestDTO.setDistanceKm(new BigDecimal("10.0"));
             requestDTO.setCodAmount(BigDecimal.ZERO);
-            
+
             // Tạo request
             CustomerRequestDTO createdRequest = customerRequestService.createRequest(requestDTO);
-            
+
             // Gửi email thông báo (nếu có email)
             if (email != null && !email.trim().isEmpty()) {
                 try {
-                    String emailContent = String.format("""
-                        <h2>Yêu cầu vận chuyển của bạn đã được tiếp nhận!</h2>
-                        <p>Xin chào %s,</p>
-                        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Yêu cầu vận chuyển của bạn đã được ghi nhận với mã đơn: <strong>%s</strong></p>
-                        <p>Chúng tôi sẽ liên hệ với bạn trong vòng 30 phút để xác nhận thông tin và báo giá chi tiết.</p>
-                        <hr>
-                        <p><strong>Thông tin yêu cầu:</strong></p>
-                        <ul>
-                            <li>Điểm lấy hàng: %s</li>
-                            <li>Điểm giao hàng: %s</li>
-                            <li>Mô tả: %s</li>
-                        </ul>
-                        <p>Trân trọng,<br>Đội ngũ Logistics</p>
-                        """, customerName, createdRequest.getRequestCode(), pickupAddress, deliveryAddress, requestDTO.getParcelDescription());
-                    
-                    emailService.sendHtmlEmail(email.trim(), 
-                        "Yêu cầu vận chuyển đã được tiếp nhận - " + createdRequest.getRequestCode(), 
-                        emailContent);
+                    String emailContent = String.format(
+                            """
+                                    <h2>Yêu cầu vận chuyển của bạn đã được tiếp nhận!</h2>
+                                    <p>Xin chào %s,</p>
+                                    <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Yêu cầu vận chuyển của bạn đã được ghi nhận với mã đơn: <strong>%s</strong></p>
+                                    <p>Chúng tôi sẽ liên hệ với bạn trong vòng 30 phút để xác nhận thông tin và báo giá chi tiết.</p>
+                                    <hr>
+                                    <p><strong>Thông tin yêu cầu:</strong></p>
+                                    <ul>
+                                        <li>Điểm lấy hàng: %s</li>
+                                        <li>Điểm giao hàng: %s</li>
+                                        <li>Mô tả: %s</li>
+                                    </ul>
+                                    <p>Trân trọng,<br>Đội ngũ Logistics</p>
+                                    """,
+                            customerName, createdRequest.getRequestCode(), pickupAddress, deliveryAddress,
+                            requestDTO.getParcelDescription());
+
+                    emailService.sendHtmlEmail(email.trim(),
+                            "Yêu cầu vận chuyển đã được tiếp nhận - " + createdRequest.getRequestCode(),
+                            emailContent);
                 } catch (Exception e) {
                     // Log lỗi nhưng không fail request
                     System.err.println("Failed to send email: " + e.getMessage());
                 }
             }
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Yêu cầu vận chuyển của bạn đã được tiếp nhận! Mã đơn: " + createdRequest.getRequestCode() + 
-                ". Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.");
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Yêu cầu vận chuyển của bạn đã được tiếp nhận! Mã đơn: " + createdRequest.getRequestCode() +
+                            ". Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.");
             return "redirect:/?success=true";
-            
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại hoặc liên hệ hotline.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại hoặc liên hệ hotline.");
             return "redirect:/request";
         }
     }
@@ -252,11 +258,7 @@ public class WebController {
     // ==========================================
     // TRANG DÙNG CHUNG
     // ==========================================
-    @GetMapping("/tracking")
-    public String trackingPage() {
-        return "common/tracking";
-    }
-
+    // /tracking đã được chuyển sang PublicTrackingController
     @GetMapping("/order-detail")
     public String orderDetailPage() {
         return "common/order-detail";

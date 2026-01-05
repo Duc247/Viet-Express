@@ -7,6 +7,7 @@ import vn.DucBackend.DTO.PaymentDTO;
 import vn.DucBackend.DTO.PaymentTransactionDTO;
 import vn.DucBackend.Entities.Payment;
 import vn.DucBackend.Entities.PaymentTransaction;
+import vn.DucBackend.Entities.User;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.PaymentService;
 
@@ -94,6 +95,47 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(id).orElseThrow(() -> new RuntimeException("Payment not found"));
         payment.setStatus(Payment.PaymentStatus.valueOf(status));
         return toPaymentDTO(paymentRepository.save(payment));
+    }
+
+    @Override
+    public Payment changePaymentStatus(Long paymentId, Payment.PaymentStatus newStatus,
+            User actor, String actorType, String note) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        Payment.PaymentStatus oldStatus = payment.getStatus();
+
+        // Chỉ ghi lịch sử nếu status thực sự thay đổi
+        if (oldStatus != newStatus) {
+            // Tạo transaction ghi lịch sử thay đổi status
+            PaymentTransaction txn = new PaymentTransaction();
+            txn.setPayment(payment);
+            txn.setTransactionType(PaymentTransaction.TransactionType.STATUS_CHANGE);
+            txn.setOldPaymentStatus(oldStatus);
+            txn.setNewPaymentStatus(newStatus);
+            txn.setPerformedBy(actor);
+            txn.setActorType(actorType != null ? actorType : "SYSTEM");
+            txn.setGatewayResponse(note); // Dùng field gatewayResponse để lưu ghi chú
+            txn.setStatus(PaymentTransaction.TransactionStatus.SUCCESS);
+            txn.setTransactionAt(java.time.LocalDateTime.now());
+            transactionRepository.save(txn);
+
+            // Cập nhật status của payment
+            payment.setStatus(newStatus);
+            paymentRepository.save(payment);
+        }
+
+        return payment;
+    }
+
+    @Override
+    public java.util.List<PaymentTransaction> getStatusHistory(Long paymentId) {
+        return transactionRepository.findStatusHistoryByPaymentId(paymentId);
+    }
+
+    @Override
+    public java.util.List<PaymentTransaction> getStatusHistoryAsc(Long paymentId) {
+        return transactionRepository.findStatusHistoryByPaymentIdAsc(paymentId);
     }
 
     @Override
@@ -215,12 +257,21 @@ public class PaymentServiceImpl implements PaymentService {
     private void updatePaymentPaidAmount(Payment payment) {
         BigDecimal paidAmount = getSuccessfulPaymentTotal(payment.getId());
         payment.setPaidAmount(paidAmount);
+
+        // Xác định status mới dựa trên số tiền đã thanh toán
+        Payment.PaymentStatus newStatus = payment.getStatus();
         if (paidAmount.compareTo(payment.getExpectedAmount()) >= 0) {
-            payment.setStatus(Payment.PaymentStatus.PAID);
+            newStatus = Payment.PaymentStatus.PAID;
         } else if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
-            payment.setStatus(Payment.PaymentStatus.PARTIALLY_PAID);
+            newStatus = Payment.PaymentStatus.PARTIALLY_PAID;
         }
-        paymentRepository.save(payment);
+
+        // Gọi changePaymentStatus để ghi lịch sử (actor = SYSTEM vì là tự động)
+        if (newStatus != payment.getStatus()) {
+            changePaymentStatus(payment.getId(), newStatus, null, "SYSTEM", "Tự động cập nhật khi nhận thanh toán");
+        } else {
+            paymentRepository.save(payment);
+        }
     }
 
     private PaymentDTO toPaymentDTO(Payment payment) {
@@ -346,21 +397,21 @@ public class PaymentServiceImpl implements PaymentService {
     public java.util.List<vn.DucBackend.Entities.Payment> findPaymentsByCustomerIdEntities(Long customerId) {
         // Lấy payments từ tất cả requests mà customer là sender hoặc receiver
         java.util.List<vn.DucBackend.Entities.Payment> allPayments = new java.util.ArrayList<>();
-        
+
         // Lấy requests theo sender
-        java.util.List<vn.DucBackend.Entities.CustomerRequest> senderRequests = 
-            requestRepository.findBySenderId(customerId);
+        java.util.List<vn.DucBackend.Entities.CustomerRequest> senderRequests = requestRepository
+                .findBySenderId(customerId);
         for (vn.DucBackend.Entities.CustomerRequest req : senderRequests) {
             allPayments.addAll(paymentRepository.findByRequestId(req.getId()));
         }
-        
+
         // Lấy requests theo receiver (chỉ thêm nếu chưa có)
-        java.util.List<vn.DucBackend.Entities.CustomerRequest> receiverRequests = 
-            requestRepository.findByReceiverId(customerId);
+        java.util.List<vn.DucBackend.Entities.CustomerRequest> receiverRequests = requestRepository
+                .findByReceiverId(customerId);
         java.util.Set<Long> existingPaymentIds = allPayments.stream()
-            .map(vn.DucBackend.Entities.Payment::getId)
-            .collect(java.util.stream.Collectors.toSet());
-            
+                .map(vn.DucBackend.Entities.Payment::getId)
+                .collect(java.util.stream.Collectors.toSet());
+
         for (vn.DucBackend.Entities.CustomerRequest req : receiverRequests) {
             java.util.List<vn.DucBackend.Entities.Payment> payments = paymentRepository.findByRequestId(req.getId());
             for (vn.DucBackend.Entities.Payment p : payments) {
@@ -369,7 +420,7 @@ public class PaymentServiceImpl implements PaymentService {
                 }
             }
         }
-        
+
         return allPayments;
     }
 
@@ -379,23 +430,25 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndStatusEntities(Long requestId, String status) {
-        vn.DucBackend.Entities.Payment.PaymentStatus paymentStatus = 
-            vn.DucBackend.Entities.Payment.PaymentStatus.valueOf(status);
+    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndStatusEntities(Long requestId,
+            String status) {
+        vn.DucBackend.Entities.Payment.PaymentStatus paymentStatus = vn.DucBackend.Entities.Payment.PaymentStatus
+                .valueOf(status);
         return paymentRepository.findByRequestIdAndStatus(requestId, paymentStatus);
     }
 
     @Override
     public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndTypeEntities(Long requestId, String type) {
-        vn.DucBackend.Entities.Payment.PaymentType paymentType = 
-            vn.DucBackend.Entities.Payment.PaymentType.valueOf(type);
+        vn.DucBackend.Entities.Payment.PaymentType paymentType = vn.DucBackend.Entities.Payment.PaymentType
+                .valueOf(type);
         return paymentRepository.findByRequestIdAndPaymentType(requestId, paymentType);
     }
 
     @Override
-    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndScopeEntities(Long requestId, String scope) {
-        vn.DucBackend.Entities.Payment.PaymentScope paymentScope = 
-            vn.DucBackend.Entities.Payment.PaymentScope.valueOf(scope);
+    public java.util.List<vn.DucBackend.Entities.Payment> findByRequestIdAndScopeEntities(Long requestId,
+            String scope) {
+        vn.DucBackend.Entities.Payment.PaymentScope paymentScope = vn.DucBackend.Entities.Payment.PaymentScope
+                .valueOf(scope);
         return paymentRepository.findByRequestIdAndScope(requestId, paymentScope);
     }
 }

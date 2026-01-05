@@ -51,6 +51,31 @@ public interface PaymentService {
     /** Repository: paymentRepository.findById(), paymentRepository.save() */
     PaymentDTO updatePaymentStatus(Long id, String status);
 
+    /**
+     * PHƯƠNG ÁN B: Method duy nhất để thay đổi status của Payment
+     * Tự động ghi lịch sử thay đổi vào PaymentTransaction với type = STATUS_CHANGE
+     * 
+     * @param paymentId ID của payment cần thay đổi status
+     * @param newStatus Trạng thái mới
+     * @param actor     Người thực hiện (null nếu SYSTEM)
+     * @param actorType Loại actor: MANAGER, SHIPPER, CUSTOMER, hoặc SYSTEM
+     * @param note      Ghi chú (có thể null)
+     * @return Payment entity đã được cập nhật
+     */
+    vn.DucBackend.Entities.Payment changePaymentStatus(Long paymentId,
+            vn.DucBackend.Entities.Payment.PaymentStatus newStatus,
+            vn.DucBackend.Entities.User actor, String actorType, String note);
+
+    /**
+     * Lấy lịch sử thay đổi status của một payment
+     */
+    java.util.List<vn.DucBackend.Entities.PaymentTransaction> getStatusHistory(Long paymentId);
+
+    /**
+     * Lấy lịch sử thay đổi status, sắp xếp cũ nhất trước
+     */
+    java.util.List<vn.DucBackend.Entities.PaymentTransaction> getStatusHistoryAsc(Long paymentId);
+
     /** Repository: paymentRepository.deleteById() */
     void deletePayment(Long id);
 

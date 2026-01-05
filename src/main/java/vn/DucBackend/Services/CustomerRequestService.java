@@ -141,12 +141,15 @@ public interface CustomerRequestService {
     /** Tìm request theo code - trả về entity */
     vn.DucBackend.Entities.CustomerRequest findByRequestCodeEntity(String requestCode);
 
-    /** Tìm request theo tracking code - trả về entity */
-    vn.DucBackend.Entities.CustomerRequest findByTrackingCodeEntity(String trackingCode);
-
     /** Lấy parcel actions theo request id - trả về entities */
     java.util.List<vn.DucBackend.Entities.ParcelAction> findParcelActionsByRequestIdEntities(Long requestId);
 
-    /** Lấy tracking codes theo request id - trả về entities */
-    java.util.List<vn.DucBackend.Entities.TrackingCode> findTrackingCodesByRequestIdEntities(Long requestId);
+    // ==========================================
+    // Route-Based Shipping Fee
+    // ==========================================
+
+    /**
+     * Cập nhật phí vận chuyển cho tất cả đơn hàng có cùng route khi tạo Route mới
+     */
+    int updateShippingFeeForRoute(Long fromLocationId, Long toLocationId, java.math.BigDecimal distanceKm);
 }

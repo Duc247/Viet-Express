@@ -44,18 +44,30 @@
                                         th:text="${r.requestCode}">REQ-XXX</code></td>
                                 <td>
                                     <span th:text="${r.sender?.fullName ?: r.sender?.name ?: 'N/A'}">Người gửi</span>
-                                    <br><small class="text-muted" th:text="${r.senderLocation?.addressText ?: '-'}">-</small>
+                                    <br><small class="text-muted"
+                                        th:text="${r.senderLocation?.addressText ?: '-'}">-</small>
                                 </td>
                                 <td>
-                                    <span th:text="${r.receiver?.fullName ?: r.receiver?.name ?: 'N/A'}">Người nhận</span>
-                                    <br><small class="text-muted" th:text="${r.receiverLocation?.addressText ?: '-'}">-</small>
+                                    <span th:text="${r.receiver?.fullName ?: r.receiver?.name ?: 'N/A'}">Người
+                                        nhận</span>
+                                    <br><small class="text-muted"
+                                        th:text="${r.receiverLocation?.addressText ?: '-'}">-</small>
                                 </td>
                                 <td>
                                     <span th:text="${#strings.abbreviate(r.parcelDescription ?: '-', 30)}">Mô tả</span>
                                 </td>
                                 <td>
-                                    <span
-                                        th:text="${#numbers.formatDecimal(r.shippingFee ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span>₫
+                                    <th:block th:if="${r.shippingFee != null}">
+                                        <span
+                                            th:text="${#numbers.formatDecimal(r.shippingFee, 0, 'COMMA', 0, 'POINT')}">0</span>₫
+                                    </th:block>
+                                    <th:block th:if="${r.shippingFee == null}">
+                                        <a th:href="@{/manager/routes/create}"
+                                            class="badge bg-warning text-dark text-decoration-none"
+                                            title="Tạo tuyến đường để tính phí">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Cần cập nhật tuyến đường
+                                        </a>
+                                    </th:block>
                                 </td>
                                 <td>
                                     <!-- PENDING = Chờ receiver xác nhận -->

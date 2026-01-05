@@ -417,39 +417,30 @@
             </div>
         </div>
 
-        <!-- Transaction History Modal -->
+        <!-- Transaction History Modal (Combined: Status changes + Money transactions) -->
         <div class="modal fade" id="transactionHistoryModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header bg-info text-white">
                         <h5 class="modal-title">
-                            <i class="fas fa-history me-2"></i>Lịch sử giao dịch: <span id="history-payment-code"
+                            <i class="fas fa-history me-2"></i>Lịch sử: <span id="history-payment-code"
                                 class="fw-bold">...</span>
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6 ms-auto">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" id="transaction-search" class="form-control"
-                                        placeholder="Tìm theo mã tham chiếu...">
-                                </div>
-                            </div>
-                        </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
-                                        <th>Loại</th>
-                                        <th>Phương thức</th>
-                                        <th>Mã tham chiếu</th>
-                                        <th class="text-end">Số tiền</th>
                                         <th>Thời gian</th>
-                                        <th>Trạng thái</th>
+                                        <th>Loại</th>
+                                        <th>Chi tiết</th>
+                                        <th class="text-end">Số tiền</th>
+                                        <th>Người thực hiện</th>
+                                        <th>Ghi chú</th>
                                     </tr>
                                 </thead>
                                 <tbody id="transaction-history-body">
@@ -549,14 +540,6 @@
                             showTransactionHistory(paymentId, paymentCode);
                         });
                     });
-
-                    // Search delay for transactions
-                    const searchInput = document.getElementById('transaction-search');
-                    if (searchInput) {
-                        searchInput.addEventListener('input', debounce(function () {
-                            loadTransactions(historyPaymentId, this.value);
-                        }, 300));
-                    }
                 });
 
                 function showVNPayModal(button) {
@@ -720,46 +703,76 @@
                 function showTransactionHistory(paymentId, paymentCode) {
                     historyPaymentId = paymentId;
                     document.getElementById('history-payment-code').textContent = paymentCode;
-                    document.getElementById('transaction-search').value = '';
                     loadTransactions(paymentId);
                     if (transactionModal) {
                         transactionModal.show();
                     }
                 }
 
-                function loadTransactions(paymentId, search = '') {
+                function loadTransactions(paymentId) {
                     const tbody = document.getElementById('transaction-history-body');
                     if (!tbody) return;
 
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Đang tải...</td></tr>';
 
-                    let url = `/customer/payments/${paymentId}/transactions`;
-                    if (search) url += `?search=${encodeURIComponent(search)}`;
-
-                    fetch(url)
+                    fetch(`/customer/payments/${paymentId}/transactions`)
                         .then(res => res.json())
                         .then(data => {
                             if (data.length === 0) {
-                                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Không có giao dịch nào khớp với tìm kiếm.</td></tr>';
+                                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Chưa có lịch sử.</td></tr>';
                                 return;
                             }
 
-                            tbody.innerHTML = data.map((txn, index) => {
-                                const badgeClass = txn.status === 'SUCCESS' ? 'bg-success' : (txn.status === 'FAILED' ? 'bg-danger' : 'bg-warning text-dark');
-                                const typeLabel = txn.type === 'IN' ? 'Thu' : 'Chi';
-                                const typeClass = txn.type === 'IN' ? 'text-success' : 'text-danger';
+                            const statusLabels = {
+                                'UNPAID': 'Chưa TT',
+                                'PARTIALLY_PAID': 'Một phần',
+                                'PAID': 'Đã TT',
+                                'COLLECTED_FROM_RECEIVER': 'Đã thu COD',
+                                'PAID_TO_SENDER': 'Đã trả COD',
+                                'REFUNDED': 'Hoàn tiền'
+                            };
 
-                                return `
-                                    <tr>
-                                        <td>${index + 1}</td>
-                                        <td class="${typeClass} fw-bold">${typeLabel}</td>
-                                        <td><small>${txn.method}</small></td>
-                                        <td><code>${txn.ref || '-'}</code></td>
-                                        <td class="text-end fw-bold">${new Intl.NumberFormat('vi-VN').format(txn.amount)}đ</td>
-                                        <td><small>${txn.time ? txn.time.replace('T', ' ').substring(0, 19) : '-'}</small></td>
-                                        <td><span class="badge ${badgeClass}">${txn.status}</span></td>
-                                    </tr>
-                                `;
+                            tbody.innerHTML = data.map((txn, index) => {
+                                const timeStr = txn.time ? txn.time.replace('T', ' ').substring(0, 19) : '-';
+
+                                // Check transaction type
+                                if (txn.type === 'STATUS_CHANGE') {
+                                    // Status change row
+                                    const oldLabel = txn.oldStatus ? (statusLabels[txn.oldStatus] || txn.oldStatus) : '-';
+                                    const newLabel = statusLabels[txn.newStatus] || txn.newStatus;
+                                    const actorLabel = txn.actorType === 'SYSTEM' ? 'Hệ thống' : (txn.performedBy || txn.actorType);
+
+                                    return `
+                                        <tr class="table-warning">
+                                            <td>${index + 1}</td>
+                                            <td><small>${timeStr}</small></td>
+                                            <td><span class="badge bg-warning text-dark">Đổi TT</span></td>
+                                            <td><span class="badge bg-secondary">${oldLabel}</span> → <span class="badge bg-success">${newLabel}</span></td>
+                                            <td class="text-end">-</td>
+                                            <td><small>${actorLabel}</small></td>
+                                            <td><small class="text-muted">${txn.note || '-'}</small></td>
+                                        </tr>
+                                    `;
+                                } else {
+                                    // Money transaction row (IN/OUT)
+                                    const typeLabel = txn.type === 'IN' ? 'Thu tiền' : 'Chi tiền';
+                                    const typeClass = txn.type === 'IN' ? 'bg-success' : 'bg-danger';
+                                    const amountClass = txn.type === 'IN' ? 'text-success' : 'text-danger';
+                                    const amountPrefix = txn.type === 'IN' ? '+' : '-';
+                                    const actorLabel = txn.performedBy || 'N/A';
+
+                                    return `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td><small>${timeStr}</small></td>
+                                            <td><span class="badge ${typeClass}">${typeLabel}</span></td>
+                                            <td><small>${txn.method || '-'}</small></td>
+                                            <td class="text-end fw-bold ${amountClass}">${amountPrefix}${new Intl.NumberFormat('vi-VN').format(txn.amount || 0)}đ</td>
+                                            <td><small>${actorLabel}</small></td>
+                                            <td><small class="text-muted">${txn.note || '-'}</small></td>
+                                        </tr>
+                                    `;
+                                }
                             }).join('');
                         })
                         .catch(err => {

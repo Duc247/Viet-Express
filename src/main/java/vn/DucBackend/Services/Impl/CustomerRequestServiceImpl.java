@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.DucBackend.DTO.CustomerRequestDTO;
 import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Entities.ParcelAction;
-import vn.DucBackend.Entities.TrackingCode;
+import vn.DucBackend.Entities.Route;
 import vn.DucBackend.Entities.ServiceType;
 import vn.DucBackend.Entities.User;
 import vn.DucBackend.Repositories.*;
@@ -30,8 +30,8 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
     private final LocationRepository locationRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final UserRepository userRepository;
-    private final TrackingCodeRepository trackingCodeRepository;
     private final ParcelActionRepository parcelActionRepository;
+    private final RouteRepository routeRepository;
 
     @Override
     public List<CustomerRequestDTO> findAllRequests() {
@@ -105,13 +105,26 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
                 .orElseThrow(() -> new RuntimeException("Receiver location not found")));
         request.setServiceType(serviceTypeRepository.findById(dto.getServiceTypeId())
                 .orElseThrow(() -> new RuntimeException("Service type not found")));
-        request.setDistanceKm(dto.getDistanceKm());
+
+        // Check Route để tính phí - nếu không có Route thì fee=null
+        Optional<Route> routeOpt = routeRepository.findByFromLocationIdAndToLocationId(
+                dto.getSenderLocationId(), dto.getReceiverLocationId());
+
+        if (routeOpt.isPresent()) {
+            Route route = routeOpt.get();
+            request.setDistanceKm(route.getDistanceKm());
+            request.setShippingFee(calculateShippingFee(dto.getServiceTypeId(), route.getDistanceKm()));
+            request.setEstimatedDeliveryTime(
+                    calculateEstimatedDeliveryTime(dto.getServiceTypeId(), route.getDistanceKm()));
+        } else {
+            // Không có Route → fee=null, chờ Manager tạo Route
+            request.setDistanceKm(null);
+            request.setShippingFee(null);
+            request.setEstimatedDeliveryTime(null);
+        }
+
         request.setParcelDescription(dto.getParcelDescription());
-        request.setShippingFee(dto.getShippingFee() != null ? dto.getShippingFee()
-                : calculateShippingFee(dto.getServiceTypeId(), dto.getDistanceKm()));
         request.setCodAmount(dto.getCodAmount());
-        request.setEstimatedDeliveryTime(dto.getEstimatedDeliveryTime() != null ? dto.getEstimatedDeliveryTime()
-                : calculateEstimatedDeliveryTime(dto.getServiceTypeId(), dto.getDistanceKm()));
         request.setNote(dto.getNote());
         request.setStatus(CustomerRequest.RequestStatus.PENDING);
         return toDTO(requestRepository.save(request));
@@ -335,18 +348,32 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
     }
 
     @Override
-    public CustomerRequest findByTrackingCodeEntity(String trackingCode) {
-        Optional<TrackingCode> tracking = trackingCodeRepository.findByCode(trackingCode);
-        return tracking.map(TrackingCode::getRequest).orElse(null);
-    }
-
-    @Override
     public java.util.List<ParcelAction> findParcelActionsByRequestIdEntities(Long requestId) {
         return parcelActionRepository.findByRequestIdOrderByCreatedAtDesc(requestId);
     }
 
+    // ==========================================
+    // Route-Based Shipping Fee
+    // ==========================================
+
     @Override
-    public java.util.List<TrackingCode> findTrackingCodesByRequestIdEntities(Long requestId) {
-        return trackingCodeRepository.findAllByRequestId(requestId);
+    public int updateShippingFeeForRoute(Long fromLocationId, Long toLocationId, BigDecimal distanceKm) {
+        // Tìm tất cả đơn hàng có senderLocation và receiverLocation khớp, nhưng fee =
+        // null
+        List<CustomerRequest> requests = requestRepository.findByLocationAndFeeIsNull(fromLocationId, toLocationId);
+
+        int count = 0;
+        for (CustomerRequest request : requests) {
+            if (request.getServiceType() != null && request.getServiceType().getPricePerKm() != null) {
+                BigDecimal newFee = request.getServiceType().getPricePerKm().multiply(distanceKm);
+                request.setDistanceKm(distanceKm);
+                request.setShippingFee(newFee);
+                request.setEstimatedDeliveryTime(calculateEstimatedDeliveryTime(
+                        request.getServiceType().getId(), distanceKm));
+                requestRepository.save(request);
+                count++;
+            }
+        }
+        return count;
     }
 }

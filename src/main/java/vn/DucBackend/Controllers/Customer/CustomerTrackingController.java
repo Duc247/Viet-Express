@@ -52,7 +52,7 @@ public class CustomerTrackingController {
             Model model,
             HttpServletRequest request,
             HttpSession session) {
-        
+
         addCommonAttributes(model, request);
 
         Long customerId = getCustomerIdFromSession(session);
@@ -60,25 +60,21 @@ public class CustomerTrackingController {
             return "redirect:/auth/login";
         }
 
-        // Nếu có code, tìm kiếm (có thể là tracking code TRK-xxx hoặc request code REQ-xxx)
+        // Nếu có code, tìm kiếm theo request code REQ-xxx hoặc parcel code PCL-xxx
+        // TRK-xxx (TrackingCode) đã được loại bỏ
         if (requestCode != null && !requestCode.trim().isEmpty()) {
             String code = requestCode.trim();
             CustomerRequest order = null;
-            
-            // Kiểm tra xem là tracking code (TRK-xxx) hay request code (REQ-xxx)
-            if (code.startsWith("TRK-")) {
-                // Tìm theo tracking code
-                order = customerRequestService.findByTrackingCodeEntity(code);
-            } else {
-                // Tìm theo request code (REQ-xxx)
-                order = customerRequestService.findByRequestCodeEntity(code);
-            }
-            
+
+            // Redirect sang trang tra cứu công khai nếu không muốn kiểm tra quyền
+            // Hoặc tìm theo request code (REQ-xxx)
+            order = customerRequestService.findByRequestCodeEntity(code);
+
             if (order != null) {
                 // Kiểm tra quyền xem - phải là sender hoặc receiver
                 boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
                 boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
-                
+
                 if (isSender || isReceiver) {
                     // Fetch các relationships để tránh lazy loading exception
                     // Access các lazy-loaded properties trong transaction
@@ -98,24 +94,26 @@ public class CustomerTrackingController {
                         order.getReceiverLocation().getName();
                         order.getReceiverLocation().getAddressText();
                     }
-                    
+
                     model.addAttribute("order", order);
                     model.addAttribute("found", true);
                     model.addAttribute("isSender", isSender);
                     model.addAttribute("isReceiver", isReceiver);
-                    
+
                     // Lấy các trips
                     model.addAttribute("trips", tripService.findTripsByRequestIdEntities(order.getId()));
-                    
+
                     // Lấy các parcels
                     model.addAttribute("parcels", parcelService.findByRequestIdEntities(order.getId()));
-                    
+
                     // Lấy lịch sử hành động (parcel actions) - fetch relationships
                     var actions = customerRequestService.findParcelActionsByRequestIdEntities(order.getId());
                     // Pre-fetch các relationships của parcel actions
                     actions.forEach(action -> {
-                        if (action.getActionType() != null) action.getActionType().getName();
-                        if (action.getToLocation() != null) action.getToLocation().getName();
+                        if (action.getActionType() != null)
+                            action.getActionType().getName();
+                        if (action.getToLocation() != null)
+                            action.getToLocation().getName();
                     });
                     model.addAttribute("parcelActions", actions);
                 } else {
@@ -126,7 +124,7 @@ public class CustomerTrackingController {
                 model.addAttribute("errorMessage", "Không tìm thấy đơn hàng với mã: " + code);
                 model.addAttribute("found", false);
             }
-            
+
             model.addAttribute("searchCode", code);
         }
 

@@ -1,16 +1,21 @@
 package vn.DucBackend.Controllers.Manager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import vn.DucBackend.Entities.*;
+import vn.DucBackend.Repositories.UserRepository;
 import vn.DucBackend.Services.*;
 import vn.DucBackend.Utils.PaginationUtil;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -28,9 +33,21 @@ public class ManagerPaymentController {
     private CustomerRequestService customerRequestService;
     @Autowired
     private TripService tripService;
+    @Autowired
+    private UserRepository userRepository;
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("currentPath", request.getRequestURI());
+    }
+
+    /**
+     * Lấy User từ session (Manager đang đăng nhập)
+     */
+    private User getCurrentUser(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null)
+            return null;
+        return userRepository.findById(userId).orElse(null);
     }
 
     // ==========================================
@@ -167,10 +184,8 @@ public class ManagerPaymentController {
             @PathVariable("id") Long id,
             @RequestParam("paidAmount") BigDecimal paidAmount,
             @RequestParam("newStatus") String newStatus,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
-
-        // Sử dụng Service cho update status
-        paymentService.updatePaymentStatus(id, newStatus);
 
         Payment payment = paymentService.getPaymentEntityById(id);
         if (payment == null) {
@@ -178,10 +193,51 @@ public class ManagerPaymentController {
             return "redirect:/manager/payments";
         }
 
+        // Cập nhật paidAmount
         payment.setPaidAmount(paidAmount);
         paymentService.savePaymentEntity(payment);
 
+        // Gọi changePaymentStatus để ghi lịch sử (actor = Manager hiện tại)
+        User currentUser = getCurrentUser(session);
+        Payment.PaymentStatus newStatusEnum = Payment.PaymentStatus.valueOf(newStatus);
+        paymentService.changePaymentStatus(id, newStatusEnum, currentUser, "MANAGER", "Manager cập nhật thủ công");
+
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật thanh toán!");
         return "redirect:/manager/payments/" + id;
+    }
+
+    /**
+     * API endpoint để lấy lịch sử thay đổi status của một payment
+     */
+    @GetMapping("/payments/{id}/status-history")
+    @ResponseBody
+    public ResponseEntity<?> getPaymentStatusHistory(
+            @PathVariable Long id,
+            @RequestParam(value = "sort", defaultValue = "desc") String sort) {
+
+        Payment payment = paymentService.getPaymentEntityById(id);
+        if (payment == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Lấy lịch sử
+        java.util.List<PaymentTransaction> history = "asc".equalsIgnoreCase(sort)
+                ? paymentService.getStatusHistoryAsc(id)
+                : paymentService.getStatusHistory(id);
+
+        // Chuyển sang Map để tránh lazy loading khi JSON
+        java.util.List<Map<String, Object>> result = history.stream().map(txn -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", txn.getId());
+            map.put("oldStatus", txn.getOldPaymentStatus() != null ? txn.getOldPaymentStatus().name() : null);
+            map.put("newStatus", txn.getNewPaymentStatus() != null ? txn.getNewPaymentStatus().name() : null);
+            map.put("actorType", txn.getActorType());
+            map.put("performedBy", txn.getPerformedBy() != null ? txn.getPerformedBy().getUsername() : null);
+            map.put("note", txn.getGatewayResponse()); // note được lưu trong gatewayResponse
+            map.put("time", txn.getTransactionAt() != null ? txn.getTransactionAt().toString() : "");
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(result);
     }
 }

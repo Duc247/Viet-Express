@@ -77,8 +77,10 @@ public class CustomerPaymentsController {
         allPayments.forEach(p -> {
             if (p.getRequest() != null) {
                 p.getRequest().getRequestCode();
-                if (p.getRequest().getSender() != null) p.getRequest().getSender().getName();
-                if (p.getRequest().getReceiver() != null) p.getRequest().getReceiver().getName();
+                if (p.getRequest().getSender() != null)
+                    p.getRequest().getSender().getName();
+                if (p.getRequest().getReceiver() != null)
+                    p.getRequest().getReceiver().getName();
             }
         });
 
@@ -86,12 +88,11 @@ public class CustomerPaymentsController {
         if (search != null && !search.trim().isEmpty()) {
             String keyword = search.trim().toLowerCase();
             allPayments = allPayments.stream()
-                    .filter(p -> 
-                        (p.getPaymentCode() != null && p.getPaymentCode().toLowerCase().contains(keyword)) ||
-                        (p.getRequest() != null && p.getRequest().getRequestCode() != null && 
-                         p.getRequest().getRequestCode().toLowerCase().contains(keyword)) ||
-                        (p.getDescription() != null && p.getDescription().toLowerCase().contains(keyword))
-                    )
+                    .filter(p -> (p.getPaymentCode() != null && p.getPaymentCode().toLowerCase().contains(keyword)) ||
+                            (p.getRequest() != null && p.getRequest().getRequestCode() != null &&
+                                    p.getRequest().getRequestCode().toLowerCase().contains(keyword))
+                            ||
+                            (p.getDescription() != null && p.getDescription().toLowerCase().contains(keyword)))
                     .collect(java.util.stream.Collectors.toList());
             model.addAttribute("search", search);
         }
@@ -105,18 +106,20 @@ public class CustomerPaymentsController {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalUnpaid = allPayments.stream()
-                .filter(p -> p.getStatus() == Payment.PaymentStatus.UNPAID || 
-                            p.getStatus() == Payment.PaymentStatus.PARTIALLY_PAID)
+                .filter(p -> p.getStatus() == Payment.PaymentStatus.UNPAID ||
+                        p.getStatus() == Payment.PaymentStatus.PARTIALLY_PAID)
                 .filter(p -> p.getExpectedAmount() != null)
-                .map(p -> p.getExpectedAmount().subtract(p.getPaidAmount() != null ? p.getPaidAmount() : BigDecimal.ZERO))
+                .map(p -> p.getExpectedAmount()
+                        .subtract(p.getPaidAmount() != null ? p.getPaidAmount() : BigDecimal.ZERO))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalCod = allPayments.stream()
                 .filter(p -> p.getPaymentType() == Payment.PaymentType.COD)
-                .filter(p -> p.getStatus() != Payment.PaymentStatus.COLLECTED_FROM_RECEIVER && 
-                            p.getStatus() != Payment.PaymentStatus.PAID_TO_SENDER)
+                .filter(p -> p.getStatus() != Payment.PaymentStatus.COLLECTED_FROM_RECEIVER &&
+                        p.getStatus() != Payment.PaymentStatus.PAID_TO_SENDER)
                 .filter(p -> p.getExpectedAmount() != null)
-                .map(p -> p.getExpectedAmount().subtract(p.getPaidAmount() != null ? p.getPaidAmount() : BigDecimal.ZERO))
+                .map(p -> p.getExpectedAmount()
+                        .subtract(p.getPaidAmount() != null ? p.getPaidAmount() : BigDecimal.ZERO))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("totalPaid", totalPaid);
@@ -234,7 +237,6 @@ public class CustomerPaymentsController {
         return "customer/order/payments-detail";
     }
 
-
     /**
      * API lấy lịch sử giao dịch của một khoản thanh toán
      */
@@ -285,6 +287,16 @@ public class CustomerPaymentsController {
             map.put("ref", pt.getTransactionRef());
             map.put("status", pt.getStatus().name());
             map.put("time", pt.getTransactionAt() != null ? pt.getTransactionAt().toString() : "");
+
+            // Thêm các fields cho STATUS_CHANGE
+            if (pt.getTransactionType() == PaymentTransaction.TransactionType.STATUS_CHANGE) {
+                map.put("oldStatus", pt.getOldPaymentStatus() != null ? pt.getOldPaymentStatus().name() : null);
+                map.put("newStatus", pt.getNewPaymentStatus() != null ? pt.getNewPaymentStatus().name() : null);
+                map.put("actorType", pt.getActorType());
+                map.put("note", pt.getGatewayResponse()); // note được lưu trong gatewayResponse
+            }
+            map.put("performedBy", pt.getPerformedBy() != null ? pt.getPerformedBy().getUsername() : null);
+
             return map;
         }).toList();
 
@@ -319,11 +331,14 @@ public class CustomerPaymentsController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Cập nhật payment
+            // Cập nhật paidAmount
             payment.setPaidAmount(payment.getExpectedAmount());
-            payment.setStatus(Payment.PaymentStatus.PAID);
-
             paymentService.savePaymentEntity(payment);
+
+            // Gọi changePaymentStatus để ghi lịch sử (actor = SYSTEM vì là thanh toán
+            // online)
+            paymentService.changePaymentStatus(paymentId, Payment.PaymentStatus.PAID,
+                    null, "SYSTEM", "Thanh toán qua VNPay");
 
             response.put("success", true);
             response.put("message", "Thanh toán thành công!");
@@ -337,5 +352,55 @@ public class CustomerPaymentsController {
             response.put("message", "Lỗi xử lý thanh toán: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    /**
+     * API endpoint để lấy lịch sử thay đổi status của một payment
+     */
+    @GetMapping("/payments/{paymentId}/status-history")
+    @ResponseBody
+    public ResponseEntity<?> getPaymentStatusHistory(
+            @PathVariable Long paymentId,
+            @RequestParam(value = "sort", defaultValue = "desc") String sort,
+            HttpSession session) {
+
+        Long customerId = getCustomerIdFromSession(session);
+        if (customerId == null) {
+            return ResponseEntity.status(401).body("Vui lòng đăng nhập");
+        }
+
+        Payment payment = paymentService.getPaymentEntityById(paymentId);
+        if (payment == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Kiểm tra quyền - phải là sender hoặc receiver
+        CustomerRequest order = payment.getRequest();
+        boolean isSender = order.getSender() != null && order.getSender().getId().equals(customerId);
+        boolean isReceiver = order.getReceiver() != null && order.getReceiver().getId().equals(customerId);
+
+        if (!isSender && !isReceiver) {
+            return ResponseEntity.status(403).body("Bạn không có quyền xem thông tin này");
+        }
+
+        // Lấy lịch sử
+        java.util.List<PaymentTransaction> history = "asc".equalsIgnoreCase(sort)
+                ? paymentService.getStatusHistoryAsc(paymentId)
+                : paymentService.getStatusHistory(paymentId);
+
+        // Chuyển sang Map để tránh lazy loading khi JSON
+        java.util.List<Map<String, Object>> result = history.stream().map(txn -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", txn.getId());
+            map.put("oldStatus", txn.getOldPaymentStatus() != null ? txn.getOldPaymentStatus().name() : null);
+            map.put("newStatus", txn.getNewPaymentStatus() != null ? txn.getNewPaymentStatus().name() : null);
+            map.put("actorType", txn.getActorType());
+            map.put("performedBy", txn.getPerformedBy() != null ? txn.getPerformedBy().getUsername() : null);
+            map.put("note", txn.getGatewayResponse()); // note được lưu trong gatewayResponse
+            map.put("time", txn.getTransactionAt() != null ? txn.getTransactionAt().toString() : "");
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(result);
     }
 }

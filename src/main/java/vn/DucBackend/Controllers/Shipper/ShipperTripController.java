@@ -65,12 +65,12 @@ public class ShipperTripController extends ShipperBaseController {
         if (tripOpt.isPresent()) {
             TripDTO trip = tripOpt.get();
             model.addAttribute("trip", trip);
-            
+
             // Thêm thông tin parcels trong chuyến
             if (trip.getId() != null) {
                 model.addAttribute("parcels", parcelService.findParcelsByTripId(trip.getId()));
             }
-            
+
             return "shipper/trip/detail";
         } else {
             return "redirect:/shipper/trips";
