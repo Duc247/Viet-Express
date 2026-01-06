@@ -62,16 +62,14 @@ public class ManagerTripController {
                 .toList();
         model.addAttribute("availableTrips", availableTrips);
 
-        // Nếu có chọn chuyến, load chi tiết chuyến đó
+        Trip selectedTrip = null;
         if (tripId != null) {
-            tripRepository.findById(tripId).ifPresent(trip -> {
-                model.addAttribute("selectedTrip", trip);
-                // Lấy danh sách kiện đã gán vào chuyến này
-                java.util.List<Parcel> loadedParcels = parcelRepository.findAll().stream()
-                        .filter(p -> p.getCurrentTrip() != null && p.getCurrentTrip().getId().equals(tripId))
-                        .toList();
-                model.addAttribute("loadedParcels", loadedParcels);
-            });
+            Optional<Trip> selectedTripOpt = tripRepository.findById(tripId);
+            if (selectedTripOpt.isPresent()) {
+                selectedTrip = selectedTripOpt.get();
+                model.addAttribute("selectedTrip", selectedTrip);
+                model.addAttribute("loadedParcels", parcelRepository.findByCurrentTripId(tripId));
+            }
         }
 
         // Danh sách kiện chưa được gán chuyến và phù hợp với điểm đi của chuyến
@@ -82,14 +80,11 @@ public class ManagerTripController {
             // - Đang ở kho xuất phát (startLocation)
             // - Trạng thái IN_WAREHOUSE (đang trong kho, sẵn sàng xếp)
             // - Chưa được gán vào chuyến nào (currentTrip == null)
-            Trip selectedTrip = (Trip) model.getAttribute("selectedTrip");
             if (selectedTrip != null && selectedTrip.getStartLocation() != null) {
                 Long startLocationId = selectedTrip.getStartLocation().getId();
-                unassignedParcels = parcelRepository.findAll().stream()
-                        .filter(p -> p.getCurrentTrip() == null &&
-                                p.getStatus() == Parcel.ParcelStatus.IN_WAREHOUSE &&
-                                p.getCurrentLocation() != null &&
-                                p.getCurrentLocation().getId().equals(startLocationId))
+                unassignedParcels = parcelRepository
+                        .findByCurrentLocationIdAndStatus(startLocationId, Parcel.ParcelStatus.IN_WAREHOUSE).stream()
+                        .filter(p -> p.getCurrentTrip() == null)
                         .toList();
             } else {
                 unassignedParcels = java.util.List.of();
@@ -124,12 +119,24 @@ public class ManagerTripController {
         Trip trip = tripOpt.get();
         int loadedCount = 0;
         for (Long parcelId : parcelIds) {
-            parcelRepository.findById(parcelId).ifPresent(parcel -> {
+            boolean loaded = parcelRepository.findById(parcelId).map(parcel -> {
+                if (parcel.getCurrentTrip() != null) {
+                    return false;
+                }
+                if (trip.getStartLocation() != null) {
+                    if (parcel.getCurrentLocation() == null || !parcel.getCurrentLocation().getId().equals(trip.getStartLocation().getId())) {
+                        return false;
+                    }
+                }
                 parcel.setCurrentTrip(trip);
+                parcel.setCurrentLocation(null);
                 parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
                 parcelRepository.save(parcel);
-            });
-            loadedCount++;
+                return true;
+            }).orElse(false);
+            if (loaded) {
+                loadedCount++;
+            }
         }
 
         // Cập nhật trạng thái xe nếu còn trống
@@ -163,8 +170,12 @@ public class ManagerTripController {
             @RequestParam("tripId") Long tripId,
             RedirectAttributes redirectAttributes) {
 
+        Optional<Trip> tripOpt = tripRepository.findById(tripId);
         parcelRepository.findById(parcelId).ifPresent(parcel -> {
             parcel.setCurrentTrip(null);
+            if (tripOpt.isPresent() && tripOpt.get().getStartLocation() != null) {
+                parcel.setCurrentLocation(tripOpt.get().getStartLocation());
+            }
             parcel.setStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
             parcelRepository.save(parcel);
         });

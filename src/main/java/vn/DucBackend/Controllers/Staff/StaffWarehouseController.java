@@ -59,8 +59,8 @@ public class StaffWarehouseController {
         List<ParcelDTO> parcels;
 
         if (staff != null && staff.getLocation() != null) {
-            // Lấy kiện hàng IN_WAREHOUSE trong kho của staff - Sử dụng Service
-            parcels = parcelService.findByLocationIdAndStatus(staff.getLocation().getId(), "IN_WAREHOUSE");
+            // Lấy kiện hàng đang có currentLocation = kho của staff (không phụ thuộc status)
+            parcels = parcelService.findParcelsByLocationId(staff.getLocation().getId());
             model.addAttribute("warehouseName", staff.getLocation().getName());
         } else {
             // Fallback: lấy tất cả IN_WAREHOUSE

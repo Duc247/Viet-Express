@@ -112,6 +112,25 @@
                         <div id="multipleParcelForm">
                             <form th:action="@{/staff/requests/{id}/create-parcels(id=${customerRequest.id})}"
                                 method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Current location</label>
+                                    <select name="currentLocationId" class="form-select">
+                                        <option th:if="${staffWarehouse != null}" th:value="${staffWarehouse.id}"
+                                            th:text="'Kho của bạn: ' + ${staffWarehouse.name}" selected>
+                                            Kho của bạn
+                                        </option>
+                                        <option th:if="${customerRequest.senderLocation != null}"
+                                            th:value="${customerRequest.senderLocation.id}"
+                                            th:text="'Điểm gửi: ' + (${customerRequest.senderLocation.addressText ?: customerRequest.senderLocation.name ?: '-'})">
+                                            Điểm gửi
+                                        </option>
+                                        <option th:if="${customerRequest.receiverLocation != null}"
+                                            th:value="${customerRequest.receiverLocation.id}"
+                                            th:text="'Điểm nhận: ' + (${customerRequest.receiverLocation.addressText ?: customerRequest.receiverLocation.name ?: '-'})">
+                                            Điểm nhận
+                                        </option>
+                                    </select>
+                                </div>
                                 <div id="parcel-container">
                                     <!-- Kiện hàng 1 -->
                                     <div class="parcel-row border rounded p-3 mb-3 bg-light" data-index="0">
@@ -173,6 +192,25 @@
                         <div id="bulkParcelForm" style="display: none;">
                             <form th:action="@{/staff/requests/{id}/create-bulk-parcels(id=${customerRequest.id})}"
                                 method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Current location</label>
+                                    <select name="currentLocationId" class="form-select">
+                                        <option th:if="${staffWarehouse != null}" th:value="${staffWarehouse.id}"
+                                            th:text="'Kho của bạn: ' + ${staffWarehouse.name}" selected>
+                                            Kho của bạn
+                                        </option>
+                                        <option th:if="${customerRequest.senderLocation != null}"
+                                            th:value="${customerRequest.senderLocation.id}"
+                                            th:text="'Điểm gửi: ' + (${customerRequest.senderLocation.addressText ?: customerRequest.senderLocation.name ?: '-'})">
+                                            Điểm gửi
+                                        </option>
+                                        <option th:if="${customerRequest.receiverLocation != null}"
+                                            th:value="${customerRequest.receiverLocation.id}"
+                                            th:text="'Điểm nhận: ' + (${customerRequest.receiverLocation.addressText ?: customerRequest.receiverLocation.name ?: '-'})">
+                                            Điểm nhận
+                                        </option>
+                                    </select>
+                                </div>
                                 <div class="border rounded p-3 mb-3 bg-light">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Mô tả kiện hàng <span

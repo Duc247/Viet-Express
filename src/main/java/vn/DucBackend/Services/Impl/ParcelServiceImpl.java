@@ -311,6 +311,9 @@ public class ParcelServiceImpl implements ParcelService {
 
         Location fromLocation = parcel.getCurrentLocation();
         parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
+        // Xuất kho / rời vị trí hiện tại
+        parcel.setCurrentLocation(null);
+        parcel.setCurrentTrip(null);
         parcelRepository.save(parcel);
 
         // Tạo parcel action
@@ -340,20 +343,29 @@ public class ParcelServiceImpl implements ParcelService {
         parcel.setLengthCm(dto.getLengthCm());
         parcel.setWidthCm(dto.getWidthCm());
         parcel.setHeightCm(dto.getHeightCm());
-        parcel.setStatus(Parcel.ParcelStatus.CREATED);
-
-        // Luôn khởi tạo currentLocation là vị trí người gửi (fallback về locationId nếu senderLocation thiếu)
-        Location location = request.getSenderLocation();
-        if (location == null && locationId != null) {
+        // currentLocation: ưu tiên locationId được chọn (staff kho / sender / receiver)
+        Location location = null;
+        if (locationId != null) {
             location = locationRepository.findById(locationId).orElse(null);
+        }
+        if (location == null) {
+            location = request.getSenderLocation();
         }
         parcel.setCurrentLocation(location);
 
+        // Status khi tạo: nếu tạo tại kho thì là IN_WAREHOUSE, còn lại giữ CREATED
+        if (location != null && location.getLocationType() == Location.LocationType.WAREHOUSE) {
+            parcel.setStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
+        } else {
+            parcel.setStatus(Parcel.ParcelStatus.CREATED);
+        }
+
         Parcel saved = parcelRepository.save(parcel);
 
-        // Tạo parcel action - CREATED
-        createParcelAction(saved, "CREATED", null, location, null,
-            "Staff tạo kiện hàng tại vị trí người gửi: " + dto.getDescription());
+        // Tạo parcel action
+        String actionCode = (saved.getStatus() == Parcel.ParcelStatus.IN_WAREHOUSE) ? "IN_WAREHOUSE" : "CREATED";
+        createParcelAction(saved, actionCode, null, location, null,
+            "Staff tạo kiện hàng: " + dto.getDescription());
 
         return toDTO(saved);
     }
@@ -559,13 +571,18 @@ public class ParcelServiceImpl implements ParcelService {
             parcel.setLengthCm(lengthCm);
             parcel.setWidthCm(widthCm);
             parcel.setHeightCm(heightCm);
-            parcel.setStatus(Parcel.ParcelStatus.CREATED);
+            if (location != null && location.getLocationType() == Location.LocationType.WAREHOUSE) {
+                parcel.setStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
+            } else {
+                parcel.setStatus(Parcel.ParcelStatus.CREATED);
+            }
             parcel.setCurrentLocation(location);
 
             Parcel saved = parcelRepository.save(parcel);
 
-            // Tạo parcel action
-            createParcelAction(saved, "CREATED", null, location, null,
+                // Tạo parcel action
+                String actionCode = (saved.getStatus() == Parcel.ParcelStatus.IN_WAREHOUSE) ? "IN_WAREHOUSE" : "CREATED";
+                createParcelAction(saved, actionCode, null, location, null,
                     "Staff tạo kiện hàng (bulk): " + numberedDescription);
 
             createdParcels.add(toDTO(saved));

@@ -63,8 +63,8 @@ public class StaffRequestController {
     // CHI TIẾT REQUEST - Form tạo kiện hàng
     // ==========================================
     @GetMapping("/requests/{id}")
-    public String requestDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request,
-            RedirectAttributes redirectAttributes) {
+        public String requestDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request,
+            HttpSession session, RedirectAttributes redirectAttributes) {
         addCommonAttributes(model, request);
 
         // Sử dụng Service để lấy request entity (cần cho template)
@@ -75,6 +75,13 @@ public class StaffRequestController {
         }
 
         model.addAttribute("customerRequest", customerRequest);
+
+        // Staff warehouse (để staff chọn current location khi tạo kiện)
+        Long staffId = getStaffIdFromSession(session);
+        Staff staff = staffId != null ? staffService.getStaffEntityById(staffId) : null;
+        if (staff != null && staff.getLocation() != null) {
+            model.addAttribute("staffWarehouse", staff.getLocation());
+        }
 
         // Lấy danh sách kiện hàng đã tạo cho request này - Sử dụng Service
         List<ParcelDTO> existingParcels = parcelService.findParcelsByRequestId(id);
@@ -89,6 +96,7 @@ public class StaffRequestController {
     @PostMapping("/requests/{id}/create-parcels")
     public String createParcels(@PathVariable("id") Long requestId,
             @RequestParam("descriptions") List<String> descriptions,
+            @RequestParam(value = "currentLocationId", required = false) Long currentLocationId,
             @RequestParam(value = "codAmounts", required = false) List<BigDecimal> codAmounts,
             @RequestParam(value = "weightKgs", required = false) List<BigDecimal> weightKgs,
             @RequestParam(value = "lengthCms", required = false) List<BigDecimal> lengthCms,
@@ -108,7 +116,18 @@ public class StaffRequestController {
         }
 
         Staff staff = staffService.getStaffEntityById(staffId);
-        Long locationId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+        Long staffWarehouseId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+
+        // Chỉ cho phép chọn 1 trong 3 location: kho staff / sender / receiver
+        Long senderLocationId = reqOpt.get().getSenderLocationId();
+        Long receiverLocationId = reqOpt.get().getReceiverLocationId();
+        Long locationId = currentLocationId;
+        boolean allowed = locationId != null && (locationId.equals(staffWarehouseId)
+            || locationId.equals(senderLocationId)
+            || locationId.equals(receiverLocationId));
+        if (!allowed) {
+            locationId = staffWarehouseId;
+        }
 
         // Tạo nhiều parcels
         int createdCount = 0;
@@ -168,6 +187,7 @@ public class StaffRequestController {
     @PostMapping("/requests/{id}/create-parcel")
     public String createParcel(@PathVariable("id") Long requestId,
             @RequestParam("description") String description,
+            @RequestParam(value = "currentLocationId", required = false) Long currentLocationId,
             @RequestParam(value = "codAmount", defaultValue = "0") BigDecimal codAmount,
             @RequestParam(value = "weightKg", required = false) BigDecimal weightKg,
             @RequestParam(value = "lengthCm", required = false) BigDecimal lengthCm,
@@ -187,7 +207,17 @@ public class StaffRequestController {
         }
 
         Staff staff = staffService.getStaffEntityById(staffId);
-        Long locationId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+        Long staffWarehouseId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+
+        Long senderLocationId = reqOpt.get().getSenderLocationId();
+        Long receiverLocationId = reqOpt.get().getReceiverLocationId();
+        Long locationId = currentLocationId;
+        boolean allowed = locationId != null && (locationId.equals(staffWarehouseId)
+            || locationId.equals(senderLocationId)
+            || locationId.equals(receiverLocationId));
+        if (!allowed) {
+            locationId = staffWarehouseId;
+        }
 
         // Tạo parcel DTO
         ParcelDTO parcelDTO = new ParcelDTO();
@@ -213,6 +243,7 @@ public class StaffRequestController {
     @PostMapping("/requests/{id}/create-bulk-parcels")
     public String createBulkParcels(@PathVariable("id") Long requestId,
             @RequestParam("description") String description,
+            @RequestParam(value = "currentLocationId", required = false) Long currentLocationId,
             @RequestParam(value = "codAmount", defaultValue = "0") BigDecimal codAmount,
             @RequestParam(value = "weightKg", required = false) BigDecimal weightKg,
             @RequestParam(value = "lengthCm", required = false) BigDecimal lengthCm,
@@ -240,7 +271,17 @@ public class StaffRequestController {
 
         // Lấy location của staff
         vn.DucBackend.Entities.Staff staff = staffService.getStaffEntityById(staffId);
-        Long locationId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+        Long staffWarehouseId = (staff != null && staff.getLocation() != null) ? staff.getLocation().getId() : null;
+
+        Long senderLocationId = reqOpt.get().getSenderLocationId();
+        Long receiverLocationId = reqOpt.get().getReceiverLocationId();
+        Long locationId = currentLocationId;
+        boolean allowed = locationId != null && (locationId.equals(staffWarehouseId)
+            || locationId.equals(senderLocationId)
+            || locationId.equals(receiverLocationId));
+        if (!allowed) {
+            locationId = staffWarehouseId;
+        }
 
         // Gọi service để tạo bulk parcels
         List<vn.DucBackend.DTO.ParcelDTO> createdParcels = parcelService.createBulkParcels(

@@ -187,13 +187,21 @@ public class ShipperTripController extends ShipperBaseController {
                 }
                 tripService.saveTripEntity(trip);
 
-                // Cập nhật trạng thái các kiện hàng (theo loại chuyến)
+                // Cập nhật parcels: status + currentLocation=endLocation + currentTrip=null
+                Parcel.ParcelStatus newStatus;
                 if (trip.getTripType() == Trip.TripType.DELIVERY) {
-                    updateParcelsStatus(id, "DELIVERED");
+                    newStatus = Parcel.ParcelStatus.DELIVERED;
                 } else if (trip.getTripType() == Trip.TripType.PICKUP) {
-                    updateParcelsStatus(id, "PICKED_UP");
+                    newStatus = Parcel.ParcelStatus.PICKED_UP;
                 } else {
-                    updateParcelsStatus(id, "IN_WAREHOUSE");
+                    newStatus = Parcel.ParcelStatus.IN_WAREHOUSE;
+                }
+
+                for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    parcel.setStatus(newStatus);
+                    parcel.setCurrentLocation(trip.getEndLocation());
+                    parcel.setCurrentTrip(null);
+                    parcelService.saveParcelEntity(parcel);
                 }
 
                 // Ghi log
@@ -217,18 +225,77 @@ public class ShipperTripController extends ShipperBaseController {
         ShipperDTO shipper = getCurrentShipper(principal);
 
         try {
-            tripService.updateTripStatus(id, status);
-
-            // Ghi log cập nhật trạng thái
-            if (shipper != null) {
-                if ("IN_PROGRESS".equals(status)) {
-                    loggingHelper.logTripStarted(shipper.getId(), id, request);
-                } else if ("COMPLETED".equals(status)) {
-                    loggingHelper.logTripEnded(shipper.getId(), id, request);
-                }
+            Trip trip = tripService.getTripEntityById(id);
+            if (trip == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy chuyến xe!");
+                return "redirect:/shipper/trips";
             }
 
-            redirectAttributes.addFlashAttribute("success", "Đã cập nhật trạng thái chuyến xe!");
+            // Kiểm tra quyền (chỉ shipper được gán)
+            if (shipper != null && trip.getShipper() != null && !shipper.getId().equals(trip.getShipper().getId())) {
+                redirectAttributes.addFlashAttribute("error", "Bạn không có quyền với chuyến này!");
+                return "redirect:/shipper/trips";
+            }
+
+            if ("IN_PROGRESS".equals(status)) {
+                trip.setStatus(Trip.TripStatus.IN_PROGRESS);
+                if (trip.getStartedAt() == null) {
+                    trip.setStartedAt(LocalDateTime.now());
+                }
+                tripService.saveTripEntity(trip);
+
+                for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
+                    parcel.setCurrentLocation(null);
+                    parcel.setCurrentShipper(trip.getShipper());
+                    parcelService.saveParcelEntity(parcel);
+                }
+
+                if (shipper != null) {
+                    loggingHelper.logTripStarted(shipper.getId(), id, request);
+                }
+                redirectAttributes.addFlashAttribute("success", "Đã cập nhật trạng thái chuyến xe!");
+            } else if ("COMPLETED".equals(status)) {
+                trip.setStatus(Trip.TripStatus.COMPLETED);
+                if (trip.getEndedAt() == null) {
+                    trip.setEndedAt(LocalDateTime.now());
+                }
+                tripService.saveTripEntity(trip);
+
+                Parcel.ParcelStatus newStatus;
+                if (trip.getTripType() == Trip.TripType.DELIVERY) {
+                    newStatus = Parcel.ParcelStatus.DELIVERED;
+                } else if (trip.getTripType() == Trip.TripType.PICKUP) {
+                    newStatus = Parcel.ParcelStatus.PICKED_UP;
+                } else {
+                    newStatus = Parcel.ParcelStatus.IN_WAREHOUSE;
+                }
+
+                for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    parcel.setStatus(newStatus);
+                    // Ưu tiên endLocation của trip; nếu null, fallback theo loại chuyến
+                    if (trip.getEndLocation() != null) {
+                        parcel.setCurrentLocation(trip.getEndLocation());
+                    } else if (trip.getTripType() == Trip.TripType.DELIVERY
+                            && parcel.getRequest() != null
+                            && parcel.getRequest().getReceiverLocation() != null) {
+                        parcel.setCurrentLocation(parcel.getRequest().getReceiverLocation());
+                    }
+                    parcel.setCurrentTrip(null);
+                    parcelService.saveParcelEntity(parcel);
+                }
+
+                if (shipper != null) {
+                    loggingHelper.logTripEnded(shipper.getId(), id, request);
+                }
+                redirectAttributes.addFlashAttribute("success", "Đã cập nhật trạng thái chuyến xe!");
+            } else if ("CANCELLED".equals(status)) {
+                trip.setStatus(Trip.TripStatus.CANCELLED);
+                tripService.saveTripEntity(trip);
+                redirectAttributes.addFlashAttribute("success", "Đã cập nhật trạng thái chuyến xe!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Trạng thái không hợp lệ!");
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
@@ -281,7 +348,36 @@ public class ShipperTripController extends ShipperBaseController {
         try {
             Parcel parcel = parcelService.getParcelEntityById(parcelId);
             if (parcel != null) {
-                parcel.setStatus(Parcel.ParcelStatus.valueOf(status));
+                Parcel.ParcelStatus newStatus = Parcel.ParcelStatus.valueOf(status);
+                Trip trip = parcel.getCurrentTrip();
+                if (trip == null || trip.getId() == null || !trip.getId().equals(tripId)) {
+                    redirectAttributes.addFlashAttribute("error", "Kiện hàng không thuộc chuyến này!");
+                    return "redirect:/shipper/trip/" + tripId;
+                }
+
+                parcel.setStatus(newStatus);
+                parcel.setCurrentShipper(trip.getShipper());
+
+                // Đồng bộ location/trip theo status (tránh UI bị lệch)
+                if (newStatus == Parcel.ParcelStatus.IN_TRANSIT || newStatus == Parcel.ParcelStatus.PICKED_UP) {
+                    parcel.setCurrentLocation(null);
+                }
+                if (newStatus == Parcel.ParcelStatus.DELIVERED) {
+                    // Giao xong: set đến điểm nhận và tách khỏi chuyến
+                    if (parcel.getRequest() != null && parcel.getRequest().getReceiverLocation() != null) {
+                        parcel.setCurrentLocation(parcel.getRequest().getReceiverLocation());
+                    } else if (trip.getEndLocation() != null) {
+                        parcel.setCurrentLocation(trip.getEndLocation());
+                    }
+                    parcel.setCurrentTrip(null);
+                }
+                if (newStatus == Parcel.ParcelStatus.RETURNED) {
+                    if (trip.getEndLocation() != null) {
+                        parcel.setCurrentLocation(trip.getEndLocation());
+                    }
+                    parcel.setCurrentTrip(null);
+                }
+
                 parcelService.saveParcelEntity(parcel);
                 redirectAttributes.addFlashAttribute("success",
                         "Đã cập nhật trạng thái kiện " + parcel.getParcelCode() + "!");
