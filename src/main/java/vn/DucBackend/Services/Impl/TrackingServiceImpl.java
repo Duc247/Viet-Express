@@ -43,6 +43,14 @@ public class TrackingServiceImpl implements TrackingService {
     public ParcelActionDTO logAction(Long parcelId, Long requestId, String actionCode,
             Long fromLocationId, Long toLocationId,
             Long actorUserId, String note) {
+
+        // Kiểm tra ActionType tồn tại trước, nếu không thì skip (không throw exception)
+        var actionTypeOpt = actionTypeRepository.findByActionCode(actionCode);
+        if (actionTypeOpt.isEmpty()) {
+            // ActionType không tồn tại - skip logging, không throw exception
+            return null;
+        }
+
         ParcelAction action = new ParcelAction();
         if (parcelId != null) {
             action.setParcel(parcelRepository.findById(parcelId).orElse(null));
@@ -50,8 +58,7 @@ public class TrackingServiceImpl implements TrackingService {
         if (requestId != null) {
             action.setRequest(requestRepository.findById(requestId).orElse(null));
         }
-        action.setActionType(actionTypeRepository.findByActionCode(actionCode)
-                .orElseThrow(() -> new RuntimeException("ActionType not found: " + actionCode)));
+        action.setActionType(actionTypeOpt.get());
         if (fromLocationId != null) {
             action.setFromLocation(locationRepository.findById(fromLocationId).orElse(null));
         }

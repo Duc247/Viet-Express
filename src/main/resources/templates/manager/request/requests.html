@@ -61,12 +61,19 @@
                                         <span
                                             th:text="${#numbers.formatDecimal(r.shippingFee, 0, 'COMMA', 0, 'POINT')}">0</span>₫
                                     </th:block>
-                                    <th:block th:if="${r.shippingFee == null}">
+                                    <!-- Chỉ hiển thị cảnh báo nếu shippingFee null VÀ đơn chưa được chốt -->
+                                    <th:block
+                                        th:if="${r.shippingFee == null && (r.status.name() == 'PENDING' || r.status.name() == 'RECEIVER_CONFIRMED')}">
                                         <a th:href="@{/manager/routes/create}"
                                             class="badge bg-warning text-dark text-decoration-none"
                                             title="Tạo tuyến đường để tính phí">
                                             <i class="fas fa-exclamation-triangle me-1"></i>Cần cập nhật tuyến đường
                                         </a>
+                                    </th:block>
+                                    <!-- Nếu đã chốt đơn mà shippingFee null thì hiển thị dấu - -->
+                                    <th:block
+                                        th:if="${r.shippingFee == null && r.status.name() != 'PENDING' && r.status.name() != 'RECEIVER_CONFIRMED'}">
+                                        <span class="text-muted">-</span>
                                     </th:block>
                                 </td>
                                 <td>
@@ -79,10 +86,24 @@
                                     </span>
                                     <span class="badge bg-success" th:if="${r.status.name() == 'CONFIRMED'}">Đã chốt
                                         đơn</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${r.status.name() == 'PICKUP_ASSIGNED'}">Đã gán shipper lấy hàng</span>
+                                    <span class="badge bg-info" th:if="${r.status.name() == 'PICKED_UP'}">Đã lấy
+                                        hàng</span>
+                                    <span class="badge bg-secondary" th:if="${r.status.name() == 'IN_WAREHOUSE'}">Trong
+                                        kho</span>
                                     <span class="badge bg-primary" th:if="${r.status.name() == 'IN_TRANSIT'}">Đang vận
                                         chuyển</span>
+                                    <span class="badge bg-warning text-dark"
+                                        th:if="${r.status.name() == 'OUT_FOR_DELIVERY'}">Đang giao</span>
                                     <span class="badge bg-success" th:if="${r.status.name() == 'DELIVERED'}">Đã
                                         giao</span>
+                                    <span class="badge bg-dark" th:if="${r.status.name() == 'COMPLETED'}">
+                                        <i class="fas fa-check-circle me-1"></i>Hoàn thành
+                                    </span>
+                                    <span class="badge bg-danger" th:if="${r.status.name() == 'FAILED'}">Thất bại</span>
+                                    <span class="badge bg-warning text-dark" th:if="${r.status.name() == 'RETURNED'}">Đã
+                                        hoàn trả</span>
                                     <span class="badge bg-danger" th:if="${r.status.name() == 'CANCELLED'}">Đã
                                         hủy</span>
                                 </td>

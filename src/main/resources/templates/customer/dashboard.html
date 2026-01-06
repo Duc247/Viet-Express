@@ -703,14 +703,30 @@
                                 <td>
                                     <span th:if="${order.status.name() == 'PENDING'}"
                                         class="status-label status-pending">Chờ xác nhận</span>
+                                    <span th:if="${order.status.name() == 'RECEIVER_CONFIRMED'}"
+                                        class="status-label status-confirmed">Người nhận đã XN</span>
                                     <span th:if="${order.status.name() == 'CONFIRMED'}"
-                                        class="status-label status-confirmed">Đã xác nhận</span>
+                                        class="status-label status-confirmed">Đã chốt đơn</span>
+                                    <span th:if="${order.status.name() == 'PICKUP_ASSIGNED'}"
+                                        class="status-label status-pending">Đã gán shipper</span>
+                                    <span th:if="${order.status.name() == 'PICKED_UP'}"
+                                        class="status-label status-in-transit">Đã lấy hàng</span>
+                                    <span th:if="${order.status.name() == 'IN_WAREHOUSE'}"
+                                        class="status-label status-confirmed">Trong kho</span>
                                     <span th:if="${order.status.name() == 'IN_TRANSIT'}"
                                         class="status-label status-in-transit">Đang vận chuyển</span>
+                                    <span th:if="${order.status.name() == 'OUT_FOR_DELIVERY'}"
+                                        class="status-label status-in-transit">Đang giao</span>
                                     <span th:if="${order.status.name() == 'DELIVERED'}"
-                                        class="status-label status-delivered">Thành công</span>
+                                        class="status-label status-delivered">Đã giao</span>
+                                    <span th:if="${order.status.name() == 'COMPLETED'}"
+                                        class="status-label status-delivered">Hoàn thành</span>
+                                    <span th:if="${order.status.name() == 'FAILED'}"
+                                        class="status-label status-returned">Thất bại</span>
                                     <span th:if="${order.status.name() == 'RETURNED'}"
                                         class="status-label status-returned">Hoàn trả</span>
+                                    <span th:if="${order.status.name() == 'CANCELLED'}"
+                                        class="status-label status-returned">Đã hủy</span>
                                 </td>
                                 <td style="text-align: right;">
                                     <a th:href="@{'/customer/orders/' + ${order.id} + '/payments'}" class="btn-pay">

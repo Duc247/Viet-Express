@@ -86,6 +86,12 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO createCustomer(CustomerDTO dto) {
         Customer customer = new Customer();
         if (dto.getUserId() != null) {
+            // Kiểm tra xem userId đã được liên kết với Customer khác chưa
+            Optional<Customer> existingCustomer = customerRepository.findByUserId(dto.getUserId());
+            if (existingCustomer.isPresent()) {
+                throw new RuntimeException("User ID " + dto.getUserId() + " đã được liên kết với khách hàng khác (ID: "
+                        + existingCustomer.get().getId() + ")");
+            }
             customer.setUser(userRepository.findById(dto.getUserId()).orElse(null));
         }
         customer.setName(dto.getName());

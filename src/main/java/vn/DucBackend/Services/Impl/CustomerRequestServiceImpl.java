@@ -12,6 +12,7 @@ import vn.DucBackend.Entities.Staff;
 import vn.DucBackend.Entities.User;
 import vn.DucBackend.Repositories.*;
 import vn.DucBackend.Services.CustomerRequestService;
+import vn.DucBackend.Services.TrackingService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
     private final StaffRepository staffRepository;
     private final ParcelActionRepository parcelActionRepository;
     private final RouteRepository routeRepository;
+    private final TrackingService trackingService;
 
     @Override
     public List<CustomerRequestDTO> findAllRequests() {
@@ -129,7 +131,19 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         request.setCodAmount(dto.getCodAmount());
         request.setNote(dto.getNote());
         request.setStatus(CustomerRequest.RequestStatus.PENDING);
-        return toDTO(requestRepository.save(request));
+
+        CustomerRequest savedRequest = requestRepository.save(request);
+
+        // Ghi tracking action - Đơn hàng được tạo
+        try {
+            trackingService.logAction(null, savedRequest.getId(), "CREATED",
+                    dto.getSenderLocationId(), dto.getReceiverLocationId(), null,
+                    "Đơn hàng mới được tạo: " + savedRequest.getRequestCode());
+        } catch (Exception e) {
+            // Log but don't fail the request creation
+        }
+
+        return toDTO(savedRequest);
     }
 
     @Override
@@ -150,7 +164,29 @@ public class CustomerRequestServiceImpl implements CustomerRequestService {
         CustomerRequest request = requestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
         request.setStatus(CustomerRequest.RequestStatus.valueOf(status));
-        return toDTO(requestRepository.save(request));
+        CustomerRequest saved = requestRepository.save(request);
+
+        // Ghi tracking action cho thay đổi trạng thái
+        try {
+            String note = switch (status) {
+                case "RECEIVER_CONFIRMED" -> "Người nhận đã xác nhận đơn hàng";
+                case "CONFIRMED" -> "Manager đã chốt đơn hàng";
+                case "CANCELLED" -> "Đơn hàng đã bị hủy";
+                case "COMPLETED" -> "Đơn hàng hoàn thành";
+                case "DELIVERED" -> "Đơn hàng đã được giao";
+                case "FAILED" -> "Giao hàng thất bại";
+                case "RETURNED" -> "Đơn hàng đã hoàn trả";
+                default -> "Cập nhật trạng thái: " + status;
+            };
+            Long senderLocationId = request.getSenderLocation() != null ? request.getSenderLocation().getId() : null;
+            Long receiverLocationId = request.getReceiverLocation() != null ? request.getReceiverLocation().getId()
+                    : null;
+            trackingService.logAction(null, saved.getId(), status, senderLocationId, receiverLocationId, null, note);
+        } catch (Exception e) {
+            // Log but don't fail
+        }
+
+        return toDTO(saved);
     }
 
     @Override

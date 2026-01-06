@@ -140,8 +140,32 @@ public class ShipperTripController extends ShipperBaseController {
                 trip.setStartedAt(LocalDateTime.now());
                 tripService.saveTripEntity(trip);
 
-                // Cập nhật trạng thái các kiện hàng thành IN_TRANSIT
-                updateParcelsStatus(id, "IN_TRANSIT");
+                // Cập nhật trạng thái các kiện hàng thành IN_TRANSIT và ghi tracking
+                Long endLocationId = trip.getEndLocation() != null ? trip.getEndLocation().getId() : null;
+                String startLocationName = trip.getStartLocation() != null ? trip.getStartLocation().getName() : "N/A";
+                String endLocationName = trip.getEndLocation() != null ? trip.getEndLocation().getName() : "N/A";
+                Long shipperUserId = trip.getShipper() != null && trip.getShipper().getUser() != null
+                        ? trip.getShipper().getUser().getId()
+                        : null;
+
+                for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    Long fromLocationId = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getId()
+                            : null;
+                    String fromLocationName = parcel.getCurrentLocation() != null
+                            ? parcel.getCurrentLocation().getName()
+                            : startLocationName;
+
+                    parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
+                    parcel.setCurrentLocation(null); // Đang trên đường
+                    parcel.setCurrentShipper(trip.getShipper());
+                    parcelService.saveParcelEntity(parcel);
+
+                    // Ghi tracking action IN_TRANSIT với tên địa điểm
+                    Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+                    String trackingNote = "Đang vận chuyển từ " + fromLocationName + " đến " + endLocationName;
+                    trackingService.logAction(parcel.getId(), requestId, "IN_TRANSIT",
+                            fromLocationId, endLocationId, shipperUserId, trackingNote);
+                }
 
                 // Ghi log
                 loggingHelper.logTripStarted(shipper.getId(), id, request);
@@ -189,19 +213,46 @@ public class ShipperTripController extends ShipperBaseController {
 
                 // Cập nhật parcels: status + currentLocation=endLocation + currentTrip=null
                 Parcel.ParcelStatus newStatus;
+                String actionCode;
                 if (trip.getTripType() == Trip.TripType.DELIVERY) {
                     newStatus = Parcel.ParcelStatus.DELIVERED;
+                    actionCode = "DELIVERED";
                 } else if (trip.getTripType() == Trip.TripType.PICKUP) {
                     newStatus = Parcel.ParcelStatus.PICKED_UP;
+                    actionCode = "PICKED_UP";
                 } else {
                     newStatus = Parcel.ParcelStatus.IN_WAREHOUSE;
+                    actionCode = "IN_WAREHOUSE";
                 }
 
+                Long endLocationId = trip.getEndLocation() != null ? trip.getEndLocation().getId() : null;
+                String endLocationName = trip.getEndLocation() != null ? trip.getEndLocation().getName() : "N/A";
+                Long shipperUserId = trip.getShipper() != null && trip.getShipper().getUser() != null
+                        ? trip.getShipper().getUser().getId()
+                        : null;
+
                 for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    Long fromLocationId = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getId()
+                            : null;
+                    String fromLocationName = parcel.getCurrentLocation() != null
+                            ? parcel.getCurrentLocation().getName()
+                            : "Đang vận chuyển";
+
                     parcel.setStatus(newStatus);
                     parcel.setCurrentLocation(trip.getEndLocation());
                     parcel.setCurrentTrip(null);
                     parcelService.saveParcelEntity(parcel);
+
+                    // Ghi tracking action cho parcel với tên địa điểm
+                    Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+                    String trackingNote = switch (actionCode) {
+                        case "DELIVERED" -> "Đã giao hàng tại " + endLocationName;
+                        case "PICKED_UP" -> "Đã lấy hàng từ " + fromLocationName + ", đến " + endLocationName;
+                        case "IN_WAREHOUSE" -> "Đã nhập kho " + endLocationName;
+                        default -> "Hoàn thành chuyến tại " + endLocationName;
+                    };
+                    trackingService.logAction(parcel.getId(), requestId, actionCode,
+                            fromLocationId, endLocationId, shipperUserId, trackingNote);
                 }
 
                 // Ghi log
@@ -244,11 +295,24 @@ public class ShipperTripController extends ShipperBaseController {
                 }
                 tripService.saveTripEntity(trip);
 
+                Long endLocationId = trip.getEndLocation() != null ? trip.getEndLocation().getId() : null;
+                Long shipperUserId = trip.getShipper() != null && trip.getShipper().getUser() != null
+                        ? trip.getShipper().getUser().getId()
+                        : null;
+
                 for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    Long fromLocationId = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getId()
+                            : null;
+
                     parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
                     parcel.setCurrentLocation(null);
                     parcel.setCurrentShipper(trip.getShipper());
                     parcelService.saveParcelEntity(parcel);
+
+                    // Ghi tracking
+                    Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+                    trackingService.logAction(parcel.getId(), requestId, "IN_TRANSIT",
+                            fromLocationId, endLocationId, shipperUserId, "Bắt đầu vận chuyển");
                 }
 
                 if (shipper != null) {
@@ -263,26 +327,45 @@ public class ShipperTripController extends ShipperBaseController {
                 tripService.saveTripEntity(trip);
 
                 Parcel.ParcelStatus newStatus;
+                String actionCode;
                 if (trip.getTripType() == Trip.TripType.DELIVERY) {
                     newStatus = Parcel.ParcelStatus.DELIVERED;
+                    actionCode = "DELIVERED";
                 } else if (trip.getTripType() == Trip.TripType.PICKUP) {
                     newStatus = Parcel.ParcelStatus.PICKED_UP;
+                    actionCode = "PICKED_UP";
                 } else {
                     newStatus = Parcel.ParcelStatus.IN_WAREHOUSE;
+                    actionCode = "IN_WAREHOUSE";
                 }
 
+                Long endLocationId = trip.getEndLocation() != null ? trip.getEndLocation().getId() : null;
+                Long shipperUserId = trip.getShipper() != null && trip.getShipper().getUser() != null
+                        ? trip.getShipper().getUser().getId()
+                        : null;
+
                 for (Parcel parcel : parcelService.findByTripIdEntities(id)) {
+                    Long fromLocationId = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getId()
+                            : null;
+
                     parcel.setStatus(newStatus);
                     // Ưu tiên endLocation của trip; nếu null, fallback theo loại chuyến
+                    Long toLocationId = endLocationId;
                     if (trip.getEndLocation() != null) {
                         parcel.setCurrentLocation(trip.getEndLocation());
                     } else if (trip.getTripType() == Trip.TripType.DELIVERY
                             && parcel.getRequest() != null
                             && parcel.getRequest().getReceiverLocation() != null) {
                         parcel.setCurrentLocation(parcel.getRequest().getReceiverLocation());
+                        toLocationId = parcel.getRequest().getReceiverLocation().getId();
                     }
                     parcel.setCurrentTrip(null);
                     parcelService.saveParcelEntity(parcel);
+
+                    // Ghi tracking
+                    Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+                    trackingService.logAction(parcel.getId(), requestId, actionCode,
+                            fromLocationId, toLocationId, shipperUserId, "Hoàn thành chuyến");
                 }
 
                 if (shipper != null) {
@@ -355,8 +438,12 @@ public class ShipperTripController extends ShipperBaseController {
                     return "redirect:/shipper/trip/" + tripId;
                 }
 
+                Long fromLocationId = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getId() : null;
+
                 parcel.setStatus(newStatus);
                 parcel.setCurrentShipper(trip.getShipper());
+
+                Long toLocationId = null;
 
                 // Đồng bộ location/trip theo status (tránh UI bị lệch)
                 if (newStatus == Parcel.ParcelStatus.IN_TRANSIT || newStatus == Parcel.ParcelStatus.PICKED_UP) {
@@ -366,19 +453,35 @@ public class ShipperTripController extends ShipperBaseController {
                     // Giao xong: set đến điểm nhận và tách khỏi chuyến
                     if (parcel.getRequest() != null && parcel.getRequest().getReceiverLocation() != null) {
                         parcel.setCurrentLocation(parcel.getRequest().getReceiverLocation());
+                        toLocationId = parcel.getRequest().getReceiverLocation().getId();
                     } else if (trip.getEndLocation() != null) {
                         parcel.setCurrentLocation(trip.getEndLocation());
+                        toLocationId = trip.getEndLocation().getId();
                     }
                     parcel.setCurrentTrip(null);
                 }
                 if (newStatus == Parcel.ParcelStatus.RETURNED) {
                     if (trip.getEndLocation() != null) {
                         parcel.setCurrentLocation(trip.getEndLocation());
+                        toLocationId = trip.getEndLocation().getId();
                     }
                     parcel.setCurrentTrip(null);
                 }
+                if (newStatus == Parcel.ParcelStatus.FAILED) {
+                    // Giao thất bại - giữ nguyên vị trí
+                }
 
                 parcelService.saveParcelEntity(parcel);
+
+                // Ghi tracking action
+                Long shipperUserId = trip.getShipper() != null && trip.getShipper().getUser() != null
+                        ? trip.getShipper().getUser().getId()
+                        : null;
+                Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+                trackingService.logAction(parcel.getId(), requestId, status,
+                        fromLocationId, toLocationId, shipperUserId,
+                        "Shipper cập nhật trạng thái: " + status);
+
                 redirectAttributes.addFlashAttribute("success",
                         "Đã cập nhật trạng thái kiện " + parcel.getParcelCode() + "!");
             }
@@ -386,24 +489,5 @@ public class ShipperTripController extends ShipperBaseController {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/shipper/trip/" + tripId;
-    }
-
-    /**
-     * Helper: Cập nhật trạng thái tất cả kiện hàng trong chuyến
-     */
-    private void updateParcelsStatus(Long tripId, String status) {
-        try {
-            List<ParcelDTO> parcels = parcelService.findParcelsByTripId(tripId);
-            for (ParcelDTO parcelDTO : parcels) {
-                Parcel parcel = parcelService.getParcelEntityById(parcelDTO.getId());
-                if (parcel != null) {
-                    parcel.setStatus(Parcel.ParcelStatus.valueOf(status));
-                    parcelService.saveParcelEntity(parcel);
-                }
-            }
-        } catch (Exception e) {
-            // Log error but don't throw
-            e.printStackTrace();
-        }
     }
 }

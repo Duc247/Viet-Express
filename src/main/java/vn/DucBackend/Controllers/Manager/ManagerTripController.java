@@ -26,6 +26,9 @@ public class ManagerTripController {
     @Autowired
     private TripService tripService;
 
+    @Autowired
+    private TrackingService trackingService;
+
     // Repositories cho template data
     @Autowired
     private TripRepository tripRepository;
@@ -117,26 +120,42 @@ public class ManagerTripController {
         }
 
         Trip trip = tripOpt.get();
+        Long endLocationId = trip.getEndLocation() != null ? trip.getEndLocation().getId() : null;
+        String startLocationName = trip.getStartLocation() != null ? trip.getStartLocation().getName() : "N/A";
+        String endLocationName = trip.getEndLocation() != null ? trip.getEndLocation().getName() : "N/A";
+
         int loadedCount = 0;
         for (Long parcelId : parcelIds) {
-            boolean loaded = parcelRepository.findById(parcelId).map(parcel -> {
-                if (parcel.getCurrentTrip() != null) {
-                    return false;
-                }
-                if (trip.getStartLocation() != null) {
-                    if (parcel.getCurrentLocation() == null || !parcel.getCurrentLocation().getId().equals(trip.getStartLocation().getId())) {
-                        return false;
-                    }
-                }
-                parcel.setCurrentTrip(trip);
-                parcel.setCurrentLocation(null);
-                parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
-                parcelRepository.save(parcel);
-                return true;
-            }).orElse(false);
-            if (loaded) {
-                loadedCount++;
+            Parcel parcel = parcelRepository.findById(parcelId).orElse(null);
+            if (parcel == null)
+                continue;
+
+            if (parcel.getCurrentTrip() != null) {
+                continue;
             }
+            Long fromLocationId = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getId() : null;
+            String fromLocationName = parcel.getCurrentLocation() != null ? parcel.getCurrentLocation().getName()
+                    : startLocationName;
+
+            if (trip.getStartLocation() != null) {
+                if (parcel.getCurrentLocation() == null
+                        || !parcel.getCurrentLocation().getId().equals(trip.getStartLocation().getId())) {
+                    continue;
+                }
+            }
+
+            parcel.setCurrentTrip(trip);
+            parcel.setCurrentLocation(null);
+            parcel.setStatus(Parcel.ParcelStatus.IN_TRANSIT);
+            parcelRepository.save(parcel);
+
+            // Ghi tracking: Xếp hàng lên chuyến với tên địa điểm
+            Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+            String trackingNote = "Xuất từ " + fromLocationName + ", đang chuyển đến " + endLocationName;
+            trackingService.logAction(parcel.getId(), requestId, "IN_TRANSIT",
+                    fromLocationId, endLocationId, null, trackingNote);
+
+            loadedCount++;
         }
 
         // Cập nhật trạng thái xe nếu còn trống
@@ -172,12 +191,22 @@ public class ManagerTripController {
 
         Optional<Trip> tripOpt = tripRepository.findById(tripId);
         parcelRepository.findById(parcelId).ifPresent(parcel -> {
+            Long toLocationId = null;
+            String toLocationName = "N/A";
             parcel.setCurrentTrip(null);
             if (tripOpt.isPresent() && tripOpt.get().getStartLocation() != null) {
                 parcel.setCurrentLocation(tripOpt.get().getStartLocation());
+                toLocationId = tripOpt.get().getStartLocation().getId();
+                toLocationName = tripOpt.get().getStartLocation().getName();
             }
             parcel.setStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
             parcelRepository.save(parcel);
+
+            // Ghi tracking: Dỡ hàng khỏi chuyến với tên địa điểm
+            Long requestId = parcel.getRequest() != null ? parcel.getRequest().getId() : null;
+            String trackingNote = "Đã nhập kho " + toLocationName;
+            trackingService.logAction(parcel.getId(), requestId, "IN_WAREHOUSE",
+                    null, toLocationId, null, trackingNote);
         });
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã dỡ kiện ra khỏi chuyến!");

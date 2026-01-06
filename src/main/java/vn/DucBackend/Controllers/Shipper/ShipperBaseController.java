@@ -14,6 +14,7 @@ import vn.DucBackend.Services.ParcelService;
 import vn.DucBackend.Services.ShipperService;
 import vn.DucBackend.Services.TripService;
 import vn.DucBackend.Services.UserService;
+import vn.DucBackend.Services.TrackingService;
 import vn.DucBackend.Utils.LoggingHelper;
 
 /**
@@ -39,6 +40,9 @@ public abstract class ShipperBaseController {
 
     @Autowired
     protected LoggingHelper loggingHelper;
+
+    @Autowired
+    protected TrackingService trackingService;
 
     /**
      * Thêm các attributes chung vào Model

@@ -250,6 +250,7 @@ public class DataInitializer implements CommandLineRunner {
                 { "IN_TRANSIT", "Đang vận chuyển", "Hàng đang trên đường vận chuyển" },
                 { "OUT_FOR_DELIVERY", "Đang giao", "Shipper đang giao hàng" },
                 { "DELIVERED", "Đã giao", "Giao hàng thành công" },
+                { "COMPLETED", "Hoàn thành", "Đơn hàng hoàn thành toàn bộ quy trình" },
                 { "FAILED", "Giao thất bại", "Giao hàng không thành công" },
                 { "RETURNED", "Hoàn hàng", "Hàng đã hoàn trả về người gửi" },
                 { "CANCELLED", "Đã hủy", "Đơn hàng đã bị hủy" },
