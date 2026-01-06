@@ -262,8 +262,13 @@ public class ManagerTripController {
     @PostMapping("/trips/{id}/assign-shipper")
     public String assignShipperToTrip(
             @PathVariable("id") Long id,
-            @RequestParam("shipperId") Long shipperId,
+            @RequestParam(value = "shipperId", required = false) Long shipperId,
             RedirectAttributes redirectAttributes) {
+
+        if (shipperId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn tài xế trước khi gán!");
+            return "redirect:/manager/trips/" + id;
+        }
 
         Optional<Trip> tripOpt = tripRepository.findById(id);
         if (tripOpt.isEmpty()) {

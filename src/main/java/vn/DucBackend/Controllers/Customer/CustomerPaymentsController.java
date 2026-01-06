@@ -339,19 +339,19 @@ public class CustomerPaymentsController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Cập nhật paidAmount
+            // Cập nhật paidAmount và status trong cùng một transaction
             payment.setPaidAmount(payment.getExpectedAmount());
-            paymentService.savePaymentEntity(payment);
+            payment.setStatus(Payment.PaymentStatus.PAID);
+            Payment savedPayment = paymentService.savePaymentEntity(payment);
 
-            // Gọi changePaymentStatus để ghi lịch sử (actor = SYSTEM vì là thanh toán
-            // online)
-            paymentService.changePaymentStatus(paymentId, Payment.PaymentStatus.PAID,
-                    null, "SYSTEM", "Thanh toán qua VNPay");
+            // Ghi lịch sử thay đổi status (tạo PaymentTransaction record)
+            paymentService.logPaymentStatusChange(paymentId, Payment.PaymentStatus.UNPAID, 
+                    Payment.PaymentStatus.PAID, null, "SYSTEM", "Thanh toán mô phỏng qua VNPay");
 
             response.put("success", true);
             response.put("message", "Thanh toán thành công!");
-            response.put("paymentCode", payment.getPaymentCode());
-            response.put("amount", payment.getPaidAmount());
+            response.put("paymentCode", savedPayment.getPaymentCode());
+            response.put("amount", savedPayment.getPaidAmount());
 
             return ResponseEntity.ok(response);
 

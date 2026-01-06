@@ -222,7 +222,6 @@
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/seasonal-theme/update}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="role" value="DEFAULT">
                             <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='DEFAULT', current=${themeDefault})}"></div>
                             <div class="mt-4 text-center">
@@ -243,7 +242,6 @@
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/seasonal-theme/update}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="role" value="ADMIN">
                             <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='ADMIN', current=${themeAdmin})}"></div>
                             <div class="mt-4 text-center">
@@ -264,7 +262,6 @@
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/seasonal-theme/update}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="role" value="MANAGER">
                             <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='MANAGER', current=${themeManager})}"></div>
                             <div class="mt-4 text-center">
@@ -285,7 +282,6 @@
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/seasonal-theme/update}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="role" value="STAFF">
                             <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='STAFF', current=${themeStaff})}"></div>
                             <div class="mt-4 text-center">
@@ -306,7 +302,6 @@
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/seasonal-theme/update}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="role" value="SHIPPER">
                             <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='SHIPPER', current=${themeShipper})}"></div>
                             <div class="mt-4 text-center">
@@ -327,7 +322,6 @@
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/seasonal-theme/update}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="role" value="CUSTOMER">
                             <div th:replace="~{admin/seasonal-theme/theme-cards :: themeCards(role='CUSTOMER', current=${themeCustomer})}"></div>
                             <div class="mt-4 text-center">

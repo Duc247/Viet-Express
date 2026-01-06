@@ -115,6 +115,16 @@ public interface ParcelService {
     /** Cập nhật location và status cho parcel */
     ParcelDTO updateParcelLocation(Long parcelId, Long locationId, String newStatus);
 
+    /** 
+     * Di chuyển kiện hàng qua kho với tracking người thực hiện
+     * @param parcelId ID kiện hàng
+     * @param toLocationId ID vị trí đích
+     * @param userId ID người thực hiện (staff/shipper)
+     * @param note Ghi chú
+     * @return ParcelDTO đã cập nhật
+     */
+    ParcelDTO moveParcelToLocation(Long parcelId, Long toLocationId, Long userId, String note);
+
     /** Tìm parcels theo request ID - trả về entities */
     java.util.List<vn.DucBackend.Entities.Parcel> findByRequestIdEntities(Long requestId);
 

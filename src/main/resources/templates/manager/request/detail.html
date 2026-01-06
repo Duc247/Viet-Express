@@ -194,26 +194,11 @@
                                             XN</option>
                                         <option value="CONFIRMED" th:selected="${order.status.name() == 'CONFIRMED'}">📋
                                             Đã chốt đơn</option>
-                                        <option value="PICKUP_ASSIGNED"
-                                            th:selected="${order.status.name() == 'PICKUP_ASSIGNED'}">🚚 Đã gán shipper
-                                            lấy hàng</option>
-                                        <option value="PICKED_UP" th:selected="${order.status.name() == 'PICKED_UP'}">📦
-                                            Đã lấy hàng</option>
-                                        <option value="IN_WAREHOUSE"
-                                            th:selected="${order.status.name() == 'IN_WAREHOUSE'}">🏢 Trong kho</option>
-                                        <option value="IN_TRANSIT" th:selected="${order.status.name() == 'IN_TRANSIT'}">
-                                            🚛 Đang vận chuyển</option>
                                         <option value="OUT_FOR_DELIVERY"
                                             th:selected="${order.status.name() == 'OUT_FOR_DELIVERY'}">🛵 Đang giao hàng
                                         </option>
-                                        <option value="DELIVERED" th:selected="${order.status.name() == 'DELIVERED'}">✔️
-                                            Đã giao hàng</option>
                                         <option value="COMPLETED" th:selected="${order.status.name() == 'COMPLETED'}">🎉
                                             Hoàn thành</option>
-                                        <option value="FAILED" th:selected="${order.status.name() == 'FAILED'}">❌ Thất
-                                            bại</option>
-                                        <option value="RETURNED" th:selected="${order.status.name() == 'RETURNED'}">↩️
-                                            Đã hoàn hàng</option>
                                         <option value="CANCELLED" th:selected="${order.status.name() == 'CANCELLED'}">🚫
                                             Đã hủy</option>
                                     </select>

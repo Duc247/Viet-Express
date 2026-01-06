@@ -91,7 +91,8 @@ INSERT INTO action_types (action_code, name, description, created_at, updated_at
 ('OUT_FOR_DELIVERY', 'Đang giao', 'Tài xế đang giao hàng', NOW(), NOW()),
 ('DELIVERED', 'Đã giao', 'Giao hàng thành công', NOW(), NOW()),
 ('FAILED', 'Giao thất bại', 'Giao hàng không thành công', NOW(), NOW()),
-('RETURNED', 'Hoàn hàng', 'Hàng đã được hoàn trả', NOW(), NOW());
+('RETURNED', 'Hoàn hàng', 'Hàng đã được hoàn trả', NOW(), NOW()),
+('LOCATION_CHANGE', 'Thay đổi vị trí', 'Kiện hàng được di chuyển đến vị trí mới', NOW(), NOW());
 
 -- 11. CUSTOMER_REQUESTS (Đơn hàng)
 -- FK: sender_id, receiver_id, sender_location_id, receiver_location_id, service_type_id

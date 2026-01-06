@@ -97,8 +97,9 @@ public class ParcelServiceImpl implements ParcelService {
     @Override
     public ParcelDTO createParcel(ParcelDTO dto) {
         Parcel parcel = new Parcel();
-        parcel.setRequest(requestRepository.findById(dto.getRequestId())
-                .orElseThrow(() -> new RuntimeException("Request not found")));
+        CustomerRequest request = requestRepository.findById(dto.getRequestId())
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+        parcel.setRequest(request);
         parcel.setParcelCode(
                 dto.getParcelCode() != null ? dto.getParcelCode() : generateParcelCode(dto.getRequestId()));
         parcel.setDescription(dto.getDescription());
@@ -108,7 +109,19 @@ public class ParcelServiceImpl implements ParcelService {
         parcel.setWidthCm(dto.getWidthCm());
         parcel.setHeightCm(dto.getHeightCm());
         parcel.setStatus(Parcel.ParcelStatus.CREATED);
-        return toDTO(parcelRepository.save(parcel));
+        
+        // Khởi tạo current location là vị trí người gửi hàng
+        if (request.getSenderLocation() != null) {
+            parcel.setCurrentLocation(request.getSenderLocation());
+        }
+        
+        Parcel saved = parcelRepository.save(parcel);
+        
+        // Tạo parcel action - CREATED với location ban đầu là vị trí người gửi
+        createParcelAction(saved, "CREATED", null, request.getSenderLocation(), null,
+                "Tạo kiện hàng tại vị trí người gửi");
+        
+        return toDTO(saved);
     }
 
     @Override
@@ -155,9 +168,27 @@ public class ParcelServiceImpl implements ParcelService {
     @Override
     public ParcelDTO updateParcelLocation(Long parcelId, Long locationId) {
         Parcel parcel = parcelRepository.findById(parcelId).orElseThrow(() -> new RuntimeException("Parcel not found"));
-        parcel.setCurrentLocation(
-                locationRepository.findById(locationId).orElseThrow(() -> new RuntimeException("Location not found")));
-        return toDTO(parcelRepository.save(parcel));
+        Location fromLocation = parcel.getCurrentLocation();
+        Location toLocation = locationRepository.findById(locationId).orElseThrow(() -> new RuntimeException("Location not found"));
+        
+        parcel.setCurrentLocation(toLocation);
+        parcelRepository.save(parcel);
+        
+        // Ghi lịch sử di chuyển kiện hàng
+        String actionCode = "LOCATION_CHANGE";
+        // Nếu vị trí mới là kho thì đánh dấu là IN_WAREHOUSE
+        if (toLocation.getLocationType() == Location.LocationType.WAREHOUSE) {
+            actionCode = "IN_WAREHOUSE";
+            parcel.setStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
+            parcelRepository.save(parcel);
+        }
+        
+        String note = String.format("Cập nhật vị trí: %s -> %s",
+                fromLocation != null ? fromLocation.getName() : "N/A",
+                toLocation.getName());
+        createParcelAction(parcel, actionCode, fromLocation, toLocation, null, note);
+        
+        return toDTO(parcel);
     }
 
     @Override
@@ -298,8 +329,9 @@ public class ParcelServiceImpl implements ParcelService {
     @Override
     public ParcelDTO createParcelWithLocation(ParcelDTO dto, Long locationId) {
         Parcel parcel = new Parcel();
-        parcel.setRequest(requestRepository.findById(dto.getRequestId())
-                .orElseThrow(() -> new RuntimeException("Request not found")));
+        CustomerRequest request = requestRepository.findById(dto.getRequestId())
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+        parcel.setRequest(request);
         parcel.setParcelCode(
                 dto.getParcelCode() != null ? dto.getParcelCode() : generateParcelCode(dto.getRequestId()));
         parcel.setDescription(dto.getDescription());
@@ -310,17 +342,18 @@ public class ParcelServiceImpl implements ParcelService {
         parcel.setHeightCm(dto.getHeightCm());
         parcel.setStatus(Parcel.ParcelStatus.CREATED);
 
-        if (locationId != null) {
-            Location location = locationRepository.findById(locationId).orElse(null);
-            parcel.setCurrentLocation(location);
+        // Luôn khởi tạo currentLocation là vị trí người gửi (fallback về locationId nếu senderLocation thiếu)
+        Location location = request.getSenderLocation();
+        if (location == null && locationId != null) {
+            location = locationRepository.findById(locationId).orElse(null);
         }
+        parcel.setCurrentLocation(location);
 
         Parcel saved = parcelRepository.save(parcel);
 
         // Tạo parcel action - CREATED
-        Location toLocation = parcel.getCurrentLocation();
-        createParcelAction(saved, "CREATED", null, toLocation, null,
-                "Staff tạo kiện hàng: " + dto.getDescription());
+        createParcelAction(saved, "CREATED", null, location, null,
+            "Staff tạo kiện hàng tại vị trí người gửi: " + dto.getDescription());
 
         return toDTO(saved);
     }
@@ -367,6 +400,8 @@ public class ParcelServiceImpl implements ParcelService {
         if (parcel == null) {
             return null;
         }
+        
+        Location fromLocation = parcel.getCurrentLocation();
 
         // Update status
         if (newStatus != null && !newStatus.isEmpty()) {
@@ -374,15 +409,61 @@ public class ParcelServiceImpl implements ParcelService {
         }
 
         // Update location
+        Location toLocation = null;
         if (locationId != null) {
-            Location location = locationRepository.findById(locationId).orElse(null);
-            if (location != null) {
-                parcel.setCurrentLocation(location);
+            toLocation = locationRepository.findById(locationId).orElse(null);
+            if (toLocation != null) {
+                parcel.setCurrentLocation(toLocation);
             }
         }
 
         Parcel saved = parcelRepository.save(parcel);
+        
+        // Ghi lịch sử di chuyển
+        if (toLocation != null) {
+            String actionCode = (toLocation.getLocationType() == Location.LocationType.WAREHOUSE) 
+                    ? "IN_WAREHOUSE" : "LOCATION_CHANGE";
+            String note = String.format("Cập nhật vị trí: %s -> %s",
+                    fromLocation != null ? fromLocation.getName() : "N/A",
+                    toLocation.getName());
+            createParcelAction(saved, actionCode, fromLocation, toLocation, null, note);
+        }
+        
         return toDTO(saved);
+    }
+
+    @Override
+    public ParcelDTO moveParcelToLocation(Long parcelId, Long toLocationId, Long userId, String note) {
+        Parcel parcel = parcelRepository.findById(parcelId)
+                .orElseThrow(() -> new RuntimeException("Parcel not found"));
+        Location fromLocation = parcel.getCurrentLocation();
+        Location toLocation = locationRepository.findById(toLocationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+        
+        parcel.setCurrentLocation(toLocation);
+        
+        // Tự động cập nhật status dựa trên loại địa điểm
+        String actionCode;
+        if (toLocation.getLocationType() == Location.LocationType.WAREHOUSE) {
+            parcel.setStatus(Parcel.ParcelStatus.IN_WAREHOUSE);
+            actionCode = "IN_WAREHOUSE";
+        } else if (toLocation.getLocationType() == Location.LocationType.RECEIVER) {
+            // Đã đến điểm giao hàng
+            parcel.setStatus(Parcel.ParcelStatus.OUT_FOR_DELIVERY);
+            actionCode = "OUT_FOR_DELIVERY";
+        } else {
+            actionCode = "LOCATION_CHANGE";
+        }
+        
+        parcelRepository.save(parcel);
+        
+        // Ghi lịch sử di chuyển với người thực hiện
+        String actionNote = note != null ? note : String.format("Di chuyển: %s -> %s",
+                fromLocation != null ? fromLocation.getName() : "Vị trí ban đầu",
+                toLocation.getName());
+        createParcelAction(parcel, actionCode, fromLocation, toLocation, userId, actionNote);
+        
+        return toDTO(parcel);
     }
 
     @Override
@@ -448,10 +529,13 @@ public class ParcelServiceImpl implements ParcelService {
         var request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        // Lấy location nếu có
+        // Lấy location: ưu tiên locationId truyền vào, fallback về sender location
         Location location = null;
         if (locationId != null) {
             location = locationRepository.findById(locationId).orElse(null);
+        }
+        if (location == null && request.getSenderLocation() != null) {
+            location = request.getSenderLocation();
         }
 
         // Tạo N parcels

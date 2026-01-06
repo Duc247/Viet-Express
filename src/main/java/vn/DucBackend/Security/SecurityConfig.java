@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,7 +25,7 @@ import java.util.List;
  * Spring Security Configuration
  * - Session-based authentication cho Thymeleaf web UI
  * - JWT-based authentication cho REST API
- * - CSRF protection enabled cho web, disabled cho API
+ * - CSRF protection disabled
  * - Role-based access control
  */
 @Configuration
@@ -127,11 +126,8 @@ public class SecurityConfig {
         @Order(2)
         public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
                 http
-                                // CSRF protection - enabled cho forms
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                                // Disable CSRF cho H2 console (dev only)
-                                                .ignoringRequestMatchers("/h2-console/**"))
+                                // CSRF disabled (project-wide)
+                                .csrf(csrf -> csrf.disable())
 
                                 // Authorization rules
                                 .authorizeHttpRequests(auth -> auth

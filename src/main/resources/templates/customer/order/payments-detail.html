@@ -641,17 +641,9 @@
                         btnSimulate.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang xử lý...';
                     }
 
-                    // Get CSRF token from meta tags
-                    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
-                    // Build headers with CSRF token
                     const headers = {
                         'Content-Type': 'application/json'
                     };
-                    if (csrfToken && csrfHeader) {
-                        headers[csrfHeader] = csrfToken;
-                    }
 
                     // Call API to update payment status
                     fetch('/customer/api/payments/' + currentPaymentId + '/simulate-pay', {
@@ -659,7 +651,26 @@
                         headers: headers
                     })
                         .then(function (response) {
-                            return response.json();
+                            const contentType = response.headers.get('content-type') || '';
+
+                            if (!response.ok) {
+                                return response.text().then(function (text) {
+                                    const message = text || ('HTTP ' + response.status);
+                                    throw new Error(message);
+                                });
+                            }
+
+                            if (contentType.includes('application/json')) {
+                                return response.json();
+                            }
+
+                            return response.text().then(function (text) {
+                                try {
+                                    return JSON.parse(text);
+                                } catch (e) {
+                                    throw new Error(text || 'Invalid response from server');
+                                }
+                            });
                         })
                         .then(function (data) {
                             console.log('API Response:', data);
@@ -691,7 +702,12 @@
                         })
                         .catch(function (error) {
                             console.error('Error:', error);
-                            alert('Lỗi kết nối! Vui lòng thử lại.');
+                            const rawMsg = (error && error.message) ? String(error.message) : '';
+                            const isHtml = rawMsg.includes('<!DOCTYPE') || rawMsg.includes('<html') || rawMsg.includes('<HTML');
+                            const msg = isHtml
+                                ? 'Phiên đăng nhập không hợp lệ. Hãy tải lại trang và thử lại.'
+                                : (rawMsg ? rawMsg.slice(0, 300) : 'Không thể kết nối tới server.');
+                            alert('Lỗi: ' + msg);
                             // Re-enable button
                             if (btnSimulate) {
                                 btnSimulate.disabled = false;

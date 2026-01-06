@@ -23,7 +23,6 @@
                         <form
                             th:action="${customerRequest.id != null ? '/admin/request/' + customerRequest.id + '/update' : '/admin/request/create'}"
                             method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" th:if="${customerRequest.id != null}" th:value="${customerRequest.id}"
                                 name="id">
 

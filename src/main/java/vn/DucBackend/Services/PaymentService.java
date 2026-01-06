@@ -67,6 +67,15 @@ public interface PaymentService {
             vn.DucBackend.Entities.User actor, String actorType, String note);
 
     /**
+     * Ghi log thay đổi status payment (không thay đổi status, chỉ ghi log)
+     * Dùng khi đã cập nhật status rồi nhưng cần ghi lại lịch sử
+     */
+    void logPaymentStatusChange(Long paymentId,
+            vn.DucBackend.Entities.Payment.PaymentStatus oldStatus,
+            vn.DucBackend.Entities.Payment.PaymentStatus newStatus,
+            vn.DucBackend.Entities.User actor, String actorType, String note);
+
+    /**
      * Lấy lịch sử thay đổi status của một payment
      */
     java.util.List<vn.DucBackend.Entities.PaymentTransaction> getStatusHistory(Long paymentId);

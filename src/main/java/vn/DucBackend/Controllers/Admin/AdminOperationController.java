@@ -90,8 +90,12 @@ public class AdminOperationController {
      */
     @PostMapping("/request/{id}/assign-manager")
     public String assignManager(@PathVariable Long id,
-            @RequestParam Long managerId,
+            @RequestParam(value = "managerId", required = false) Long managerId,
             RedirectAttributes redirectAttributes) {
+        if (managerId == null) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn Manager trước khi giao việc!");
+            return "redirect:/admin/request/" + id;
+        }
         try {
             customerRequestService.assignManager(id, managerId);
             redirectAttributes.addFlashAttribute("success", "Đã giao đơn hàng cho Manager thành công!");

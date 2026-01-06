@@ -338,8 +338,13 @@ public class ManagerRequestController {
     @PostMapping("/requests/{id}/assign-staff")
     public String assignStaffToRequest(
             @PathVariable("id") Long id,
-            @RequestParam("staffId") Long staffId,
+            @RequestParam(value = "staffId", required = false) Long staffId,
             RedirectAttributes redirectAttributes) {
+
+        if (staffId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn nhân viên trước khi giao việc!");
+            return "redirect:/manager/requests/" + id;
+        }
 
         Optional<CustomerRequest> requestOpt = customerRequestRepository.findById(id);
         if (requestOpt.isEmpty()) {

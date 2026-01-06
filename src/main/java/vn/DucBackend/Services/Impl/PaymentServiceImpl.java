@@ -129,6 +129,26 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    public void logPaymentStatusChange(Long paymentId, Payment.PaymentStatus oldStatus,
+            Payment.PaymentStatus newStatus, User actor, String actorType, String note) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        // Tạo transaction ghi lịch sử thay đổi status
+        PaymentTransaction txn = new PaymentTransaction();
+        txn.setPayment(payment);
+        txn.setTransactionType(PaymentTransaction.TransactionType.STATUS_CHANGE);
+        txn.setOldPaymentStatus(oldStatus);
+        txn.setNewPaymentStatus(newStatus);
+        txn.setPerformedBy(actor);
+        txn.setActorType(actorType != null ? actorType : "SYSTEM");
+        txn.setGatewayResponse(note);
+        txn.setStatus(PaymentTransaction.TransactionStatus.SUCCESS);
+        txn.setTransactionAt(java.time.LocalDateTime.now());
+        transactionRepository.save(txn);
+    }
+
+    @Override
     public java.util.List<PaymentTransaction> getStatusHistory(Long paymentId) {
         return transactionRepository.findStatusHistoryByPaymentId(paymentId);
     }
