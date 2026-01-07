@@ -21,21 +21,58 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller xử lý chi tiết thanh toán cho Customer
- * Sử dụng Service layer cho business logic
+ * =============================================================================
+ * CUSTOMER PAYMENTS CONTROLLER
+ * =============================================================================
+ * 
+ * Controller xử lý thanh toán cho Customer (Khách hàng)
+ * 
+ * URLS:
+ * - GET /customer/payments : Danh sách tất cả thanh toán
+ * - GET /customer/orders/{id}/payments : Thanh toán của đơn hàng cụ thể
+ * - GET /customer/api/payments/{id}/transactions : Lấy giao dịch (API)
+ * - POST /customer/api/payments/{id}/simulate-pay: Mô phỏng thanh toán VNPay
+ * - GET /customer/api/payments/{id}/status-history: Lịch sử thay đổi status
+ * 
+ * LOẠI THANH TOÁN:
+ * - SHIPPING_FEE: Phí vận chuyển (Sender trả)
+ * - COD: Tiền thu hộ (Receiver trả)
+ * - DEPOSIT: Đặt cọc
+ * 
+ * PHÂN QUYỀN:
+ * - Sender: Xem/thanh toán SHIPPING_FEE, DEPOSIT
+ * - Receiver: Xem/thanh toán COD
+ * 
+ * SERVICES SỬ DỤNG:
+ * - PaymentService: CRUD payments, thay đổi status
+ * - CustomerRequestService: Lấy thông tin đơn hàng
+ * - PaymentTransactionRepository: Lấy giao dịch
+ * 
+ * =============================================================================
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerPaymentsController {
 
+    // =========================================================================
+    // DEPENDENCY INJECTION
+    // =========================================================================
+
+    /** Service xử lý đơn hàng */
     @Autowired
     private CustomerRequestService customerRequestService;
 
+    /** Service xử lý thanh toán - CRUD, change status */
     @Autowired
     private PaymentService paymentService;
 
+    /** Repository giao dịch thanh toán */
     @Autowired
     private PaymentTransactionRepository paymentTransactionRepository;
+
+    // =========================================================================
+    // HELPER METHODS
+    // =========================================================================
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -49,9 +86,22 @@ public class CustomerPaymentsController {
         return null;
     }
 
+    // =========================================================================
+    // ENDPOINT: DANH SÁCH THANH TOÁN
+    // =========================================================================
+
     /**
-     * Hiển thị trang tổng hợp thanh toán của customer
-     * Lấy tất cả payments từ các requests mà customer là sender hoặc receiver
+     * DANH SÁCH TẤT CẢ THANH TOÁN CỦA CUSTOMER
+     * 
+     * URL: GET /customer/payments
+     * 
+     * Lấy tất cả payments từ các đơn hàng mà customer là sender hoặc receiver.
+     * Tính toán thống kê: đã trả, chưa trả, tổng COD, tổng phí ship.
+     * 
+     * @param search  Từ khóa tìm kiếm (optional)
+     * @param model   Model để truyền dữ liệu
+     * @param session Session chứa customerId
+     * @return Template "customer/payments"
      */
     @GetMapping("/payments")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
@@ -345,7 +395,7 @@ public class CustomerPaymentsController {
             Payment savedPayment = paymentService.savePaymentEntity(payment);
 
             // Ghi lịch sử thay đổi status (tạo PaymentTransaction record)
-            paymentService.logPaymentStatusChange(paymentId, Payment.PaymentStatus.UNPAID, 
+            paymentService.logPaymentStatusChange(paymentId, Payment.PaymentStatus.UNPAID,
                     Payment.PaymentStatus.PAID, null, "SYSTEM", "Thanh toán mô phỏng qua VNPay");
 
             response.put("success", true);

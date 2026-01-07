@@ -15,19 +15,64 @@ import vn.DucBackend.Services.PaymentService;
 import java.util.List;
 
 /**
- * Controller xử lý Dashboard cho Customer
- * Sử dụng Service layer cho business logic
+ * =============================================================================
+ * CUSTOMER DASHBOARD CONTROLLER
+ * =============================================================================
+ * 
+ * Controller xử lý trang Dashboard cho Customer (Khách hàng)
+ * 
+ * URL: /customer/dashboard
+ * 
+ * CHỨC NĂNG:
+ * - Hiển thị thống kê tổng quan đơn hàng
+ * - Hiển thị danh sách đơn hàng gần đây
+ * - Tính toán tổng tiền còn nợ
+ * 
+ * ANNOTATIONS:
+ * - @Controller: Đánh dấu đây là Spring MVC Controller
+ * - @RequestMapping("/customer"): Tất cả URL bắt đầu bằng /customer
+ * 
+ * SERVICES SỬ DỤNG:
+ * - CustomerRequestService: Lấy danh sách đơn hàng
+ * - PaymentService: Tính toán tiền thanh toán
+ * 
+ * =============================================================================
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerDashboardController {
 
+    // =========================================================================
+    // DEPENDENCY INJECTION - Tiêm các Service cần thiết
+    // =========================================================================
+
+    /**
+     * Service xử lý đơn hàng (CustomerRequest)
+     * Dùng để: Lấy danh sách đơn hàng của customer
+     */
     @Autowired
     private CustomerRequestService customerRequestService;
 
+    /**
+     * Service xử lý thanh toán (Payment)
+     * Dùng để: Tính toán tổng tiền còn nợ
+     */
     @Autowired
     private PaymentService paymentService;
 
+    // =========================================================================
+    // HELPER METHODS - Các hàm hỗ trợ
+    // =========================================================================
+
+    /**
+     * Lấy Customer ID từ Session
+     * 
+     * Session là nơi lưu trữ thông tin đăng nhập của user trên server.
+     * Khi user đăng nhập, customerId được lưu vào session.
+     * 
+     * @param session HttpSession chứa thông tin phiên làm việc
+     * @return Customer ID nếu đã đăng nhập, null nếu chưa
+     */
     private Long getCustomerIdFromSession(HttpSession session) {
         Object customerId = session.getAttribute("customerId");
         if (customerId != null) {
@@ -36,8 +81,33 @@ public class CustomerDashboardController {
         return null;
     }
 
+    // =========================================================================
+    // ENDPOINTS - Các điểm cuối API
+    // =========================================================================
+
+    /**
+     * TRANG DASHBOARD - Hiển thị tổng quan cho Customer
+     * 
+     * URL: GET /customer/dashboard
+     * 
+     * LUỒNG XỬ LÝ:
+     * 1. Kiểm tra đăng nhập (customerId trong session)
+     * 2. Lấy danh sách đơn hàng của customer
+     * 3. Tính thống kê: tổng đơn, đơn chờ, đang giao, đã giao
+     * 4. Tính tổng tiền còn nợ
+     * 5. Đưa dữ liệu vào Model để Thymeleaf render
+     * 
+     * @param model   Model để truyền dữ liệu sang View (Thymeleaf)
+     * @param session Session chứa thông tin đăng nhập
+     * @return Tên template: "customer/dashboard" hoặc redirect về login
+     * 
+     *         ANNOTATIONS:
+     *         - @GetMapping: Xử lý HTTP GET request
+     *         - @Transactional(readOnly = true): Mở transaction read-only để tránh
+     *         LazyInitializationException khi truy cập lazy-loaded properties
+     */
     @GetMapping("/dashboard")
-    @Transactional(readOnly = true)  // Đảm bảo transaction mở trong suốt method
+    @Transactional(readOnly = true)
     public String dashboard(Model model, HttpSession session) {
         Long customerId = getCustomerIdFromSession(session);
         if (customerId == null) {

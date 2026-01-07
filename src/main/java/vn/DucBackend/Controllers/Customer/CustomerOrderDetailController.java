@@ -17,29 +17,81 @@ import vn.DucBackend.Services.*;
 import java.math.BigDecimal;
 
 /**
- * Controller xử lý chi tiết đơn hàng cho Customer
- * Sử dụng Service layer cho business logic
+ * =============================================================================
+ * CUSTOMER ORDER DETAIL CONTROLLER
+ * =============================================================================
+ * 
+ * Controller xử lý chi tiết đơn hàng cho Customer (Khách hàng)
+ * 
+ * URLS:
+ * - GET /customer/orders/{id} : Xem chi tiết đơn hàng
+ * - POST /customer/orders/{id}/confirm: Receiver xác nhận đơn
+ * - POST /customer/orders/{id}/reject : Receiver từ chối đơn
+ * - GET /customer/orders/{id}/edit : Form sửa đơn (Sender)
+ * - POST /customer/orders/{id}/update : Cập nhật đơn (Sender)
+ * - POST /customer/orders/{id}/cancel : Hủy đơn (Sender)
+ * 
+ * PHÂN QUYỀN:
+ * - Sender (Người gửi): Xem, Sửa, Hủy đơn
+ * - Receiver (Người nhận): Xem, Xác nhận, Từ chối đơn
+ * 
+ * SERVICES SỬ DỤNG:
+ * - CustomerRequestService: Xử lý đơn hàng
+ * - ParcelService: Lấy danh sách kiện hàng
+ * - PaymentService: Lấy thông tin thanh toán
+ * - TripService: Lấy danh sách chuyến xe
+ * - TrackingService: Ghi log các action (RECEIVER_CONFIRMED, etc.)
+ * 
+ * =============================================================================
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerOrderDetailController {
 
-    // Services cho business logic
+    // =========================================================================
+    // DEPENDENCY INJECTION - Tiêm các Service cần thiết
+    // =========================================================================
+
+    /** Service xử lý đơn hàng - CRUD operations */
     @Autowired
     private CustomerRequestService customerRequestService;
+
+    /** Service xử lý kiện hàng - đếm, lấy danh sách */
     @Autowired
     private ParcelService parcelService;
+
+    /** Service xử lý thanh toán - tính tổng, đếm theo loại */
     @Autowired
     private PaymentService paymentService;
+
+    /** Service xử lý chuyến xe - lấy danh sách trips */
     @Autowired
     private TripService tripService;
+
+    /** Service ghi log tracking - ghi lại các action */
     @Autowired
     private TrackingService trackingService;
 
+    // =========================================================================
+    // HELPER METHODS - Các hàm hỗ trợ
+    // =========================================================================
+
+    /**
+     * Thêm các thuộc tính chung vào Model
+     * 
+     * @param model   Model để truyền dữ liệu
+     * @param request HttpRequest để lấy URI hiện tại
+     */
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
     }
 
+    /**
+     * Lấy Customer ID từ Session
+     * 
+     * @param session HttpSession chứa thông tin phiên làm việc
+     * @return Customer ID hoặc null nếu chưa đăng nhập
+     */
     private Long getCustomerIdFromSession(HttpSession session) {
         Object customerId = session.getAttribute("customerId");
         if (customerId != null) {
@@ -48,6 +100,29 @@ public class CustomerOrderDetailController {
         return null;
     }
 
+    // =========================================================================
+    // ENDPOINT: XEM CHI TIẾT ĐƠN HÀNG
+    // =========================================================================
+
+    /**
+     * XEM CHI TIẾT ĐƠN HÀNG
+     * 
+     * URL: GET /customer/orders/{id}
+     * 
+     * LUỒNG XỬ LÝ:
+     * 1. Kiểm tra đăng nhập
+     * 2. Lấy đơn hàng theo ID
+     * 3. Kiểm tra quyền xem (phải là sender hoặc receiver)
+     * 4. Lấy các thông tin liên quan: parcels, payments, trips, actions
+     * 5. Tính toán thống kê và phần trăm hoàn thành
+     * 6. Trả về template chi tiết
+     * 
+     * @param id      ID đơn hàng (từ URL path: /orders/123)
+     * @param model   Model để truyền dữ liệu sang View
+     * @param request HttpRequest
+     * @param session Session chứa thông tin đăng nhập
+     * @return Template "customer/order/detail" hoặc redirect
+     */
     @GetMapping("/orders/{id}")
     public String orderDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request,
             HttpSession session) {

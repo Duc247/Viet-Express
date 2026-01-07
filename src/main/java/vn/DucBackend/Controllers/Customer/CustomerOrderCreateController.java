@@ -25,29 +25,70 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
- * Controller xử lý tạo đơn hàng mới cho Customer
+ * =============================================================================
+ * CUSTOMER ORDER CREATE CONTROLLER
+ * =============================================================================
+ * 
+ * Controller xử lý tạo đơn hàng mới cho Customer (Khách hàng)
+ * 
+ * URLS:
+ * - GET /customer/create-order : Hiển thị form tạo đơn
+ * - POST /customer/create-order : Xử lý tạo đơn hàng
+ * 
+ * LUỒNG TẠO ĐƠN HÀNG:
+ * 1. Customer điền form (senderPhone, receiverPhone, địa chỉ, mô tả hàng...)
+ * 2. Validate các trường bắt buộc
+ * 3. Tìm Customer sender và receiver theo số điện thoại
+ * 4. Tạo Location cho sender và receiver
+ * 5. Tạo CustomerRequest với status = PENDING
+ * 6. Ghi tracking log (CREATED)
+ * 7. Redirect về danh sách đơn hàng
+ * 
+ * SERVICES & REPOSITORIES SỬ DỤNG:
+ * - CustomerRequestService: Tạo đơn hàng
+ * - LocationRepository: Lưu địa chỉ gửi/nhận
+ * - CustomerRepository: Tìm khách hàng theo SĐT
+ * - ServiceTypeRepository: Lấy danh sách loại dịch vụ
+ * - TrackingService: Ghi log action CREATED
+ * - LoggingHelper: Ghi log hệ thống
+ * 
+ * =============================================================================
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerOrderCreateController {
 
+    // =========================================================================
+    // DEPENDENCY INJECTION
+    // =========================================================================
+
+    /** Service xử lý đơn hàng - tạo mới, tính phí ship */
     @Autowired
     private CustomerRequestService customerRequestService;
 
+    /** Repository địa điểm - lưu địa chỉ sender/receiver */
     @Autowired
     private LocationRepository locationRepository;
 
+    /** Repository loại dịch vụ - lấy danh sách để chọn */
     @Autowired
     private ServiceTypeRepository serviceTypeRepository;
 
+    /** Repository khách hàng - tìm theo SĐT */
     @Autowired
     private CustomerRepository customerRepository;
 
+    /** Helper ghi log hệ thống */
     @Autowired
     private LoggingHelper loggingHelper;
 
+    /** Service tracking - ghi action CREATED */
     @Autowired
     private TrackingService trackingService;
+
+    // =========================================================================
+    // HELPER METHODS
+    // =========================================================================
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -61,6 +102,20 @@ public class CustomerOrderCreateController {
         return null;
     }
 
+    // =========================================================================
+    // ENDPOINT: HIỂN THỊ FORM TẠO ĐƠN
+    // =========================================================================
+
+    /**
+     * HIỂN THỊ FORM TẠO ĐƠN HÀNG
+     * 
+     * URL: GET /customer/create-order
+     * 
+     * @param model   Model để truyền dữ liệu
+     * @param request HttpRequest
+     * @param session Session chứa customerId
+     * @return Template form tạo đơn
+     */
     @GetMapping("/create-order")
     public String showCreateOrderForm(Model model, HttpServletRequest request, HttpSession session) {
         // Kiểm tra session - phải đăng nhập mới được tạo đơn
@@ -73,7 +128,7 @@ public class CustomerOrderCreateController {
         model.addAttribute("serviceTypes", serviceTypeRepository.findAll());
         model.addAttribute("customerId", customerId);
 
-        // Lấy thông tin customer để pre-fill form
+        // Lấy thông tin customer để pre-fill form (tự động điền SĐT, tên)
         customerRepository.findById(customerId).ifPresent(customer -> {
             model.addAttribute("currentCustomer", customer);
         });
@@ -81,6 +136,39 @@ public class CustomerOrderCreateController {
         return "customer/order/create-order";
     }
 
+    // =========================================================================
+    // ENDPOINT: XỬ LÝ TẠO ĐƠN HÀNG
+    // =========================================================================
+
+    /**
+     * XỬ LÝ TẠO ĐƠN HÀNG MỚI
+     * 
+     * URL: POST /customer/create-order
+     * 
+     * LUỒNG XỬ LÝ:
+     * 1. Validate các trường bắt buộc (SĐT, địa chỉ, mô tả)
+     * 2. Tìm Customer sender theo senderPhone
+     * 3. Tìm Customer receiver theo receiverPhone
+     * 4. Tạo Location entity cho sender và receiver
+     * 5. Tạo CustomerRequestDTO và gọi service tạo đơn
+     * 6. Ghi tracking log với action = CREATED
+     * 7. Redirect với thông báo thành công
+     * 
+     * @param senderName         Tên người gửi
+     * @param senderPhone        SĐT người gửi (BẮT BUỘC - dùng để tìm Customer)
+     * @param senderAddress      Địa chỉ lấy hàng (BẮT BUỘC)
+     * @param receiverName       Tên người nhận
+     * @param receiverPhone      SĐT người nhận (BẮT BUỘC - dùng để tìm Customer)
+     * @param receiverAddress    Địa chỉ giao hàng (BẮT BUỘC)
+     * @param productDescription Mô tả hàng hóa (BẮT BUỘC)
+     * @param serviceTypeId      ID loại dịch vụ (Express, Standard...)
+     * @param codAmount          Tiền thu hộ COD (mặc định 0)
+     * @param distanceKm         Khoảng cách (dùng tính phí ship)
+     * @param note               Ghi chú
+     * @param weight             Trọng lượng
+     * @param redirectAttributes Để gửi flash message
+     * @return Redirect về /customer/orders
+     */
     @PostMapping("/create-order")
     public String createOrder(
             @RequestParam(value = "senderName", required = false) String senderName,

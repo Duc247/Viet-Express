@@ -14,21 +14,54 @@ import vn.DucBackend.Entities.CustomerRequest;
 import vn.DucBackend.Services.*;
 
 /**
+ * =============================================================================
+ * CUSTOMER TRACKING CONTROLLER
+ * =============================================================================
+ * 
  * Controller xử lý tracking (theo dõi đơn hàng) cho Customer
- * Sử dụng Service layer cho business logic
+ * 
+ * URL: GET /customer/tracking?code=REQ-xxxxxx
+ * 
+ * CHỨC NĂNG:
+ * - Tra cứu đơn hàng theo mã (REQ-xxx)
+ * - Hiển thị trạng thái hiện tại
+ * - Hiển thị lịch sử vận chuyển (ParcelAction)
+ * - Hiển thị danh sách kiện hàng và chuyến xe
+ * 
+ * PHÂN QUYỀN:
+ * - Chỉ sender hoặc receiver của đơn hàng mới được xem
+ * - Nếu không có quyền → thông báo lỗi
+ * 
+ * SERVICES SỬ DỤNG:
+ * - CustomerRequestService: Tìm đơn hàng theo mã
+ * - TripService: Lấy danh sách chuyến xe
+ * - ParcelService: Lấy danh sách kiện hàng
+ * 
+ * =============================================================================
  */
 @Controller
 @RequestMapping("/customer")
 public class CustomerTrackingController {
 
+    // =========================================================================
+    // DEPENDENCY INJECTION
+    // =========================================================================
+
+    /** Service xử lý đơn hàng - tìm theo mã, lấy parcel actions */
     @Autowired
     private CustomerRequestService customerRequestService;
 
+    /** Service chuyến xe - lấy danh sách trips */
     @Autowired
     private TripService tripService;
 
+    /** Service kiện hàng - lấy danh sách parcels */
     @Autowired
     private ParcelService parcelService;
+
+    // =========================================================================
+    // HELPER METHODS
+    // =========================================================================
 
     private void addCommonAttributes(Model model, HttpServletRequest request) {
         model.addAttribute("requestURI", request.getRequestURI());
@@ -42,8 +75,31 @@ public class CustomerTrackingController {
         return null;
     }
 
+    // =========================================================================
+    // ENDPOINT: TRA CỨU VẬN ĐƠN
+    // =========================================================================
+
     /**
-     * Hiển thị trang tracking và xử lý tìm kiếm
+     * TRA CỨU VẬN ĐƠN
+     * 
+     * URL: GET /customer/tracking?code=REQ-xxxxxx
+     * 
+     * LUỒNG XỬ LÝ:
+     * 1. Kiểm tra đăng nhập
+     * 2. Nếu có mã code → tìm đơn hàng
+     * 3. Kiểm tra quyền xem (phải là sender hoặc receiver)
+     * 4. Pre-fetch các lazy-loaded relationships
+     * 5. Lấy thông tin trips, parcels, parcel actions
+     * 6. Trả về template tracking
+     * 
+     * @param requestCode Mã đơn hàng (REQ-xxx) để tra cứu
+     * @param model       Model để truyền dữ liệu
+     * @param session     Session chứa customerId
+     * @return Template "customer/tracking"
+     * 
+     *         LƯU Ý:
+     *         - @Transactional(readOnly = true) để giữ transaction mở,
+     *         tránh LazyInitializationException khi truy cập lazy-loaded properties
      */
     @GetMapping("/tracking")
     @Transactional(readOnly = true)
